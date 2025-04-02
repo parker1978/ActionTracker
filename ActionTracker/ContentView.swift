@@ -7,30 +7,23 @@
 
 import SwiftUI
 
-// A simple model for an action
-struct ActionItem: Identifiable {
-    var id: UUID
-    var label: String
-    var isUsed: Bool
-
-    // Returns the default three actions
-    static func defaultActions() -> [ActionItem] {
-        return [
-            ActionItem(id: UUID(), label: "Action 1", isUsed: false),
-            ActionItem(id: UUID(), label: "Action 2", isUsed: false),
-            ActionItem(id: UUID(), label: "Action 3", isUsed: false)
-        ]
-    }
-}
-
 struct ContentView: View {
     // The list of actions; starts with three default actions
-    @State private var actions: [ActionItem] = ActionItem.defaultActions()
-    @State private var showResetConfirmation = false
+    @State private var actionItems: [ActionItem] = ActionItem.defaultActions()
+    @State private var config: DrawerConfig = .init()
+    @State private var showActions: Bool = false
+    @State private var trayContinuation: CheckedContinuation<ActionItem?, Never>? = nil
     
     // Computes how many actions are still available (i.e. not used)
     var availableActions: Int {
-        actions.filter { !$0.isUsed }.count
+        actionItems.filter { !$0.isUsed }.count
+    }
+
+    func waitForTraySelection() async -> ActionItem? {
+        await withCheckedContinuation { continuation in
+            trayContinuation = continuation
+            showActions = true
+        }
     }
 
     var body: some View {
@@ -39,38 +32,27 @@ struct ContentView: View {
             HStack {
                 Text("Actions Available: \(availableActions)")
                     .font(.headline)
+                
                 Spacer()
                 
-                Button("Reset") {
-                    showResetConfirmation = true
-                }
-                .padding(.horizontal)
-                .alert("Reset Game?", isPresented: $showResetConfirmation) {
-                    Button("Cancel", role: .cancel) { }
-                    Button("Reset", role: .destructive) {
-                        // Reset the game: clear extra actions and mark all as unused
-                        actions = ActionItem.defaultActions()
-                    }
-                } message: {
-                    Text("Are you sure you want to reset your actions? This will remove any extra actions and mark all actions as unused.")
-                }
+                DrawerButton(title: "Reset", config: $config)
             }
             .padding()
             
             // List showing each action as an HStack with a toggle and a text field
             List {
-                ForEach(actions.indices, id: \.self) { index in
+                ForEach(actionItems.indices, id: \.self) { index in
                     HStack {
-                        Toggle("", isOn: $actions[index].isUsed)
+                        Toggle("", isOn: $actionItems[index].isUsed)
                             .labelsHidden()
-                        TextField("Action \(index + 1)", text: $actions[index].label)
+                        TextField("Action \(index + 1)", text: $actionItems[index].label)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .overlay(
                                 HStack {
                                     Spacer()
-                                    if !actions[index].label.isEmpty {
+                                    if !actionItems[index].label.isEmpty {
                                         Button(action: {
-                                            actions[index].label = ""
+                                            actionItems[index].label = ""
                                         }) {
                                             Image(systemName: "xmark.circle.fill")
                                                 .foregroundColor(.secondary)
@@ -88,7 +70,7 @@ struct ContentView: View {
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         if index >= 3 {
                             Button(role: .destructive) {
-                                actions.remove(at: index)
+                                actionItems.remove(at: index)
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
@@ -103,8 +85,11 @@ struct ContentView: View {
                 Spacer()
                 
                 Button("Add Action") {
-                    let newActionNumber = actions.count + 1
-                    actions.append(ActionItem(id: UUID(), label: "Action \(newActionNumber)", isUsed: false))
+                    Task {
+                        if let newAction = await waitForTraySelection() {
+                            actionItems.append(newAction)
+                        }
+                    }
                 }
                 .padding()
                 
@@ -112,8 +97,8 @@ struct ContentView: View {
                 
                 Button("End Turn") {
                     // Reset all toggles (mark all actions as unused) without changing the number of actions
-                    for index in actions.indices {
-                        actions[index].isUsed = false
+                    for index in actionItems.indices {
+                        actionItems[index].isUsed = false
                     }
                 }
                 .padding(.horizontal)
@@ -122,6 +107,36 @@ struct ContentView: View {
             }
         }
         .padding()
+        .systemTrayView($showActions) {
+            TrayView { selectedAction in
+                trayContinuation?.resume(returning: selectedAction)
+                trayContinuation = nil
+                showActions = false
+            }
+            //TrayView()
+        }
+        .alertDrawer(config: $config, primaryTitle: "Reset", secondaryTitle: "Cancel") {
+            actionItems = ActionItem.defaultActions()
+            return true
+        } onSecondaryClick: {
+            return true
+        } content: {
+            /// Dummy Content
+            VStack(alignment: .leading, spacing: 15) {
+                Image(systemName: "exclamationmark.circle")
+                    .font(.largeTitle)
+                    .foregroundStyle(.red)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                Text("Are you sure?")
+                    .font(.title2.bold())
+                
+                Text("This will remove any extra actions and mark all actions as unused.")
+                    .foregroundStyle(.gray)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(width: 300)
+            }
+        }
     }
 }
 
