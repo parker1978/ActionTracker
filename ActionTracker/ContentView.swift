@@ -9,7 +9,7 @@ import SwiftUI
 import TipKit
 
 struct ContentView: View {
-    // The list of actions; starts with three default actions
+    @AppStorage("keepScreenAwake") private var keepScreenAwake: Bool = false
     @State private var actionItems: [ActionItem] = ActionItem.defaultActions()
     @State private var config: DrawerConfig = .init()
     @State private var showActions: Bool = false
@@ -37,6 +37,30 @@ struct ContentView: View {
             // Header with available actions counter and control buttons
             HStack {
                 DrawerButton(title: "Reset", config: $config)
+                
+                Spacer()
+                
+                Button {
+                    keepScreenAwake.toggle()
+                    UIApplication.shared.isIdleTimerDisabled = keepScreenAwake
+                } label: {
+                    Image(systemName: keepScreenAwake ? "eye" : "eye.slash")
+                        .font(.title3)
+                        .frame(width: 44, height: 44)
+                        .background {
+                            ZStack {
+                                Rectangle()
+                                    .fill(.ultraThinMaterial)
+                                
+                                Rectangle()
+                                    .fill(Color.primary.opacity(0.03))
+                            }
+                            .clipShape(Circle())
+                        }
+                }
+                .onAppear {
+                    UIApplication.shared.isIdleTimerDisabled = keepScreenAwake
+                }
                 
                 Spacer()
                 
