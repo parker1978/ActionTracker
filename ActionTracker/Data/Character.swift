@@ -10,9 +10,11 @@ import SwiftData
 
 @Model
 class Character {
-    @Attribute(.unique) var name: String
+    // Remove unique constraint as it's not supported with CloudKit
+    var name: String = ""
     var set: String?
-    var allSkills: [String]
+    // Add default empty array for non-optional array property
+    var allSkills: [String] = []
     var notes: String?
     
     init(name: String, set: String? = nil, allSkills: [String], notes: String? = nil) {

@@ -10,14 +10,19 @@ import SwiftData
 
 class CustomContext: NSObject, UIDocumentPickerDelegate {
     static let shared = CustomContext()
-    static var modelContext: ModelContext?
+    private var modelContext: ModelContext?
+    private var importCompletionHandler: (() -> Void)?
 
-    static func configure(with context: ModelContext) {
-        modelContext = context
+    func configure(with context: ModelContext, completion: (() -> Void)? = nil) {
+        self.modelContext = context
+        self.importCompletionHandler = completion
     }
 
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        guard let url = urls.first, let context = CustomContext.modelContext else { return }
+        guard let url = urls.first, let context = self.modelContext else { 
+            print("ModelContext not available")
+            return 
+        }
 
         guard url.startAccessingSecurityScopedResource() else {
             print("Failed to access security-scoped resource.")
@@ -27,12 +32,15 @@ class CustomContext: NSObject, UIDocumentPickerDelegate {
         defer { url.stopAccessingSecurityScopedResource() } // 🧹 Clean up after
 
         do {
+            // Delete existing characters first
             for character in try context.fetch(FetchDescriptor<Character>()) {
                 context.delete(character)
             }
 
             let content = try String(contentsOf: url, encoding: .utf8)
             let rows = content.components(separatedBy: CharacterSet.newlines).dropFirst()
+            
+            // Parse and insert new characters
             for line in rows {
                 guard !line.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
                 let columns = parseCSVLine(line)
@@ -46,6 +54,16 @@ class CustomContext: NSObject, UIDocumentPickerDelegate {
                 let newChar = Character(name: name, set: set, allSkills: skills, notes: notes)
                 context.insert(newChar)
             }
+            
+            // Save changes immediately
+            try context.save()
+            
+            // Call completion handler if provided
+            DispatchQueue.main.async {
+                self.importCompletionHandler?()
+            }
+            
+            print("Import successful: \(rows.count) characters")
         } catch {
             print("Import failed: \(error)")
         }

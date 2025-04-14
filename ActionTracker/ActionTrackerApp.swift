@@ -20,7 +20,11 @@ struct ActionTrackerApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .modelContainer(for: Character.self, isAutosaveEnabled: true)
+                .modelContainer(for: Character.self, isAutosaveEnabled: true, configurations: [
+                    // Configure the model container with proper settings for CloudKit
+                    ModelConfiguration(isStoredInMemoryOnly: false, 
+                                      cloudKitDatabase: .private)
+                ])
                 .onAppear {
                     // Reset the persistent store if there was an error with migrations
                     if UserDefaults.standard.bool(forKey: "swiftdata_reset_needed") {
@@ -31,6 +35,7 @@ struct ActionTrackerApp: App {
                 .onReceive(NotificationCenter.default.publisher(for: .modelContainerError)) { notification in
                     if let error = notification.userInfo?["error"] as? Error {
                         logger.error("SwiftData error: \(error.localizedDescription)")
+                        logger.error("Error details: \(String(describing: error))")
                         
                         // Set flag to reset store on next launch
                         UserDefaults.standard.set(true, forKey: "swiftdata_reset_needed")

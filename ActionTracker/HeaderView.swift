@@ -121,7 +121,12 @@ struct HeaderView: View {
     }
 
     private func importCharacters() {
-        CustomContext.configure(with: context)
+        // Configure with context and completion handler
+        CustomContext.shared.configure(with: context) {
+            // This will be called after successful import
+            print("Import completed, refreshing view...")
+            try? context.save()
+        }
         
         let alert = UIAlertController(
             title: "Import Format",
