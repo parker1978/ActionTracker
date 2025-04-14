@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ActionItem: Identifiable {
+struct ActionItem: Identifiable, Codable, Equatable {
     var id: UUID
     var label: String
     var isUsed: Bool
@@ -19,6 +19,13 @@ struct ActionItem: Identifiable {
             ActionItem(id: UUID(), label: "Action 2", isUsed: false),
             ActionItem(id: UUID(), label: "Action 3", isUsed: false)
         ]
+    }
+    
+    // Codable conformance is auto-synthesized since all properties are Codable
+    
+    // Equatable to detect changes for persistence
+    static func == (lhs: ActionItem, rhs: ActionItem) -> Bool {
+        return lhs.id == rhs.id && lhs.label == rhs.label && lhs.isUsed == rhs.isUsed
     }
 }
 

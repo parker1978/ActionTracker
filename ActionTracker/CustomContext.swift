@@ -8,8 +8,8 @@
 import SwiftUI
 import SwiftData
 
-class Context: NSObject, UIDocumentPickerDelegate {
-    static let shared = Context()
+class CustomContext: NSObject, UIDocumentPickerDelegate {
+    static let shared = CustomContext()
     static var modelContext: ModelContext?
 
     static func configure(with context: ModelContext) {
@@ -17,7 +17,7 @@ class Context: NSObject, UIDocumentPickerDelegate {
     }
 
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        guard let url = urls.first, let context = Context.modelContext else { return }
+        guard let url = urls.first, let context = CustomContext.modelContext else { return }
 
         guard url.startAccessingSecurityScopedResource() else {
             print("Failed to access security-scoped resource.")
