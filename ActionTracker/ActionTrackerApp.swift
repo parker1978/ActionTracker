@@ -20,11 +20,7 @@ struct ActionTrackerApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .modelContainer(for: Character.self, isAutosaveEnabled: true, configurations: [
-                    // Configure the model container with proper settings for CloudKit
-                    ModelConfiguration(isStoredInMemoryOnly: false, 
-                                      cloudKitDatabase: .private)
-                ])
+                .modelContainer(for: Character.self, isAutosaveEnabled: true)
                 .onAppear {
                     // Reset the persistent store if there was an error with migrations
                     if UserDefaults.standard.bool(forKey: "swiftdata_reset_needed") {
