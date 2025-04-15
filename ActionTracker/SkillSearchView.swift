@@ -17,16 +17,23 @@ struct SkillSearchView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
 
-    // Returns filtered characters matching ALL selected skills
+    // Returns filtered characters matching ALL selected skills, including group skills
     var filteredCharacters: [Character] {
         allCharacters.filter { character in
             selectedSkills.allSatisfy { skill in
-                character.allSkills.contains(skill)
+                if isGroupSkill(skill) {
+                    // For a group skill, check if character has ANY of the skills in the group
+                    let groupSkills = skillsInGroup(skill)
+                    return !Set(character.allSkills).isDisjoint(with: groupSkills)
+                } else {
+                    // For a regular skill, character must have the exact skill
+                    return character.allSkills.contains(skill)
+                }
             }
         }
     }
 
-    // Return skills available for the dropdown at given index position
+    // Return skills available for the dropdown at given index position, including custom group skills
     func availableSkills(for index: Int) -> [String] {
         // For first dropdown show all skills, for subsequent dropdowns filter by current matches
         let characters = index == 0 ? allCharacters : filteredCharacters
@@ -37,9 +44,68 @@ struct SkillSearchView: View {
         // Get all skills from relevant characters
         let remainingSkills = characters.flatMap { $0.allSkills }
         
-        // Remove duplicates and already selected skills, then sort alphabetically
+        // Remove duplicates and already selected skills
         let uniqueRemaining = Set(remainingSkills).subtracting(usedSkills)
-        return Array(uniqueRemaining).sorted()
+        
+        // Create a dictionary to group skills by their prefix (up to the colon)
+        var skillGroups: [String: [String]] = [:]
+        
+        // Process each skill to find common prefixes
+        for skill in uniqueRemaining {
+            if let colonIndex = skill.firstIndex(of: ":") {
+                let prefix = String(skill[..<colonIndex]).trimmingCharacters(in: .whitespaces)
+                if prefix.isEmpty { continue }
+                
+                if skillGroups[prefix] == nil {
+                    skillGroups[prefix] = [skill]
+                } else {
+                    skillGroups[prefix]!.append(skill)
+                }
+            }
+        }
+        
+        // Create the final list with group headers and individual skills
+        var result: [String] = []
+        
+        // Add group skills to the top (only if they have more than one skill in the group)
+        let groupPrefixes = skillGroups.filter { $0.value.count > 1 }
+                                      .keys
+                                      .sorted()
+        
+        for prefix in groupPrefixes {
+            // Create a formatted group skill that's not actually a real skill but a group identifier
+            let groupSkill = prefix
+            result.append(groupSkill)
+        }
+        
+        // Add all individual skills, sorted alphabetically
+        let sortedSkills = Array(uniqueRemaining).sorted()
+        result.append(contentsOf: sortedSkills)
+        
+        return result
+    }
+    
+    // Get all skills that belong to a group prefix
+    private func skillsInGroup(_ prefix: String) -> [String] {
+        let allSkillsList = allCharacters.flatMap { $0.allSkills }
+        
+        return allSkillsList.filter { skill in
+            if let colonIndex = skill.firstIndex(of: ":") {
+                let skillPrefix = String(skill[..<colonIndex]).trimmingCharacters(in: .whitespaces)
+                return skillPrefix == prefix
+            }
+            return false
+        }
+    }
+    
+    // Check if a skill is a group header
+    private func isGroupSkill(_ skill: String) -> Bool {
+        // If it contains no colon but exists as a prefix for other skills
+        if !skill.contains(":") {
+            let grouped = skillsInGroup(skill)
+            return !grouped.isEmpty
+        }
+        return false
     }
 
     var body: some View {
@@ -90,7 +156,14 @@ struct SkillSearchView: View {
                                             })) {
                                             Text("Select a skill").tag("")
                                             ForEach(skills, id: \.self) { skill in
-                                                Text(skill).tag(skill)
+                                                if isGroupSkill(skill) {
+                                                    // Display group skills with bold text and an indicator
+                                                    Text("\(skill) (Group)")
+                                                        .bold()
+                                                        .tag(skill)
+                                                } else {
+                                                    Text(skill).tag(skill)
+                                                }
                                             }
                                         }
                                         .pickerStyle(MenuPickerStyle())
@@ -219,8 +292,11 @@ struct SkillsView: View {
         for (index, skill) in allSkills.enumerated() {
             var skillText = AttributedString(skill)
             
-            // Highlight matches
-            if highlightSkills.contains(skill) {
+            // Determine if this skill should be highlighted
+            let shouldHighlight = isSkillHighlighted(skill)
+            
+            // Apply highlighting
+            if shouldHighlight {
                 skillText.foregroundColor = .blue
                 skillText.font = .caption.bold()
             } else {
@@ -238,5 +314,23 @@ struct SkillsView: View {
         }
         
         return result
+    }
+    
+    // Determine if a skill should be highlighted based on direct matches or group matches
+    private func isSkillHighlighted(_ skill: String) -> Bool {
+        // Direct match
+        if highlightSkills.contains(skill) {
+            return true
+        }
+        
+        // Check if this skill matches any group
+        if let colonIndex = skill.firstIndex(of: ":") {
+            let prefix = String(skill[..<colonIndex]).trimmingCharacters(in: .whitespaces)
+            if highlightSkills.contains(prefix) {
+                return true
+            }
+        }
+        
+        return false
     }
 }
