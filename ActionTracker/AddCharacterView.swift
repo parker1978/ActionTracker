@@ -47,34 +47,37 @@ struct AddCharacterView: View {
         }
     }
     
+    // Swift compiler requires this workaround for proper preview
+    init() {
+        self.character = nil
+    }
+    
     var body: some View {
-        NavigationStack {
-            Form {
-                characterInfoSection
-                skillsSection
-            }
-            .navigationTitle(isEditing ? "Edit Character" : "Add Character")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                keyboardToolbar
-                cancelButton
-                saveButton
-            }
-            .alert("Missing Information", isPresented: $showingValidationAlert) {
-                Button("OK") {
-                    if errorMessage.contains("name") {
-                        focusField = .name
-                    } else {
-                        focusField = .skill(0)
-                    }
-                }
-            } message: {
-                Text(errorMessage)
-            }
-            .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        Form {
+            characterInfoSection
+            skillsSection
+        }
+        .navigationTitle(isEditing ? "Edit Character" : "Add Character")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            keyboardToolbar
+            cancelButton
+            saveButton
+        }
+        .alert("Missing Information", isPresented: $showingValidationAlert) {
+            Button("OK") {
+                if errorMessage.contains("name") {
                     focusField = .name
+                } else {
+                    focusField = .skill(0)
                 }
+            }
+        } message: {
+            Text(errorMessage)
+        }
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                focusField = .name
             }
         }
     }
@@ -235,5 +238,7 @@ struct AddCharacterView: View {
 }
 
 #Preview {
-    ContentView()
+    NavigationStack {
+        AddCharacterView()
+    }
 }

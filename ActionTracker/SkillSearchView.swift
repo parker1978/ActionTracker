@@ -159,10 +159,12 @@ struct SkillSearchView: View {
         }
         .sheet(isPresented: $isShowingEditCharacter) {
             if let character = selectedCharacter {
-                AddCharacterView(character: character)
-                    .onDisappear {
-                        selectedCharacter = nil
-                    }
+                NavigationStack {
+                    AddCharacterView(character: character)
+                }
+                .onDisappear {
+                    selectedCharacter = nil
+                }
             }
         }
     }

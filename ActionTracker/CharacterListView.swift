@@ -12,6 +12,7 @@ struct CharacterListView: View {
     @Query(sort: \Character.name) var characters: [Character]
     @State private var searchText = ""
     @Binding var isShowingAddCharacter: Bool
+    @State private var isShowingEditCharacter = false
     @State private var selectedCharacter: Character?
     @Environment(\.modelContext) private var context
 
@@ -37,7 +38,7 @@ struct CharacterListView: View {
                         Button {
                             // Navigate to edit character
                             selectedCharacter = character
-                            isShowingAddCharacter = true
+                            isShowingEditCharacter = true
                         } label: {
                             VStack(alignment: .leading) {
                                 Text(character.set?.isEmpty == false ? "\(character.name) (\(character.set!))" : character.name)
@@ -72,12 +73,23 @@ struct CharacterListView: View {
                 .toolbar(.hidden, for: .navigationBar)
             }
         }
+        // Sheet for adding a new character
         .sheet(isPresented: $isShowingAddCharacter) {
-            AddCharacterView(character: selectedCharacter)
+            NavigationStack {
+                AddCharacterView(character: nil)
+            }
+        }
+        // Sheet for editing an existing character
+        .sheet(isPresented: $isShowingEditCharacter) {
+            if let character = selectedCharacter {
+                NavigationStack {
+                    AddCharacterView(character: character)
+                }
                 .onDisappear {
                     // Reset selected character when sheet is dismissed
                     selectedCharacter = nil
                 }
+            }
         }
     }
 }
