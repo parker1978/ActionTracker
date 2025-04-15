@@ -54,6 +54,7 @@ struct AddCharacterView: View {
                 skillsSection
             }
             .navigationTitle(isEditing ? "Edit Character" : "Add Character")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 keyboardToolbar
                 cancelButton

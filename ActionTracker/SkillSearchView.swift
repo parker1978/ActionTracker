@@ -44,116 +44,118 @@ struct SkillSearchView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            VStack {
-                if allCharacters.isEmpty {
-                    ContentUnavailableView(
-                        "No Characters",
-                        systemImage: "person.fill.questionmark",
-                        description: Text("Add some characters first")
-                    )
-                    .padding(.top, 50)
-                } else {
-                    Form {
-                        Section("Select Skills") {
-                            ForEach(0..<dropdownCount(), id: \.self) { index in
-                                let skills = availableSkills(for: index)
-                                if !skills.isEmpty {
-                                    Picker("Skill \(index + 1)", selection: Binding(
-                                        get: {
-                                            if index < selectedSkills.count {
-                                                return selectedSkills[index]
-                                            } else {
-                                                return ""
-                                            }
-                                        },
-                                        set: { newValue in
-                                            withAnimation {
-                                                // If changing an existing selection
+        ZStack {
+            NavigationStack {
+                VStack {
+                    if allCharacters.isEmpty {
+                        ContentUnavailableView(
+                            "No Characters",
+                            systemImage: "person.fill.questionmark",
+                            description: Text("Add some characters first")
+                        )
+                        .padding(.top, 50)
+                    } else {
+                        Form {
+                            Section("Select Skills") {
+                                ForEach(0..<dropdownCount(), id: \.self) { index in
+                                    let skills = availableSkills(for: index)
+                                    if !skills.isEmpty {
+                                        Picker("Skill \(index + 1)", selection: Binding(
+                                            get: {
                                                 if index < selectedSkills.count {
-                                                    // If selection cleared, remove this and all subsequent selections
-                                                    if newValue.isEmpty {
-                                                        selectedSkills.removeSubrange(index...)
-                                                    } else {
-                                                        // Update with new selection, remove all subsequent selections
-                                                        selectedSkills[index] = newValue
-                                                        if selectedSkills.count > index + 1 {
-                                                            selectedSkills.removeSubrange((index + 1)...)
-                                                        }
-                                                    }
-                                                } else if !newValue.isEmpty {
-                                                    // Adding a new selection
-                                                    selectedSkills.append(newValue)
+                                                    return selectedSkills[index]
+                                                } else {
+                                                    return ""
                                                 }
-                                                performSearch()
+                                            },
+                                            set: { newValue in
+                                                withAnimation {
+                                                    // If changing an existing selection
+                                                    if index < selectedSkills.count {
+                                                        // If selection cleared, remove this and all subsequent selections
+                                                        if newValue.isEmpty {
+                                                            selectedSkills.removeSubrange(index...)
+                                                        } else {
+                                                            // Update with new selection, remove all subsequent selections
+                                                            selectedSkills[index] = newValue
+                                                            if selectedSkills.count > index + 1 {
+                                                                selectedSkills.removeSubrange((index + 1)...)
+                                                            }
+                                                        }
+                                                    } else if !newValue.isEmpty {
+                                                        // Adding a new selection
+                                                        selectedSkills.append(newValue)
+                                                    }
+                                                    performSearch()
+                                                }
+                                            })) {
+                                            Text("Select a skill").tag("")
+                                            ForEach(skills, id: \.self) { skill in
+                                                Text(skill).tag(skill)
                                             }
-                                        })) {
-                                        Text("Select a skill").tag("")
-                                        ForEach(skills, id: \.self) { skill in
-                                            Text(skill).tag(skill)
+                                        }
+                                        .pickerStyle(MenuPickerStyle())
+                                    }
+                                }
+                                
+                                if !selectedSkills.isEmpty {
+                                    Button(role: .destructive) {
+                                        withAnimation {
+                                            selectedSkills.removeAll()
+                                            performSearch()
+                                        }
+                                    } label: {
+                                        Label("Clear All Selections", systemImage: "xmark.circle")
+                                    }
+                                }
+                            }
+
+                            if hasSearched {
+                                Section {
+                                    if searchResults.isEmpty {
+                                        Text("No characters found with all selected skills.")
+                                            .foregroundColor(.secondary)
+                                            .frame(maxWidth: .infinity, alignment: .center)
+                                            .padding()
+                                    } else {
+                                        Text("Found \(searchResults.count) character\(searchResults.count == 1 ? "" : "s")")
+                                            .foregroundColor(.secondary)
+                                            .font(.caption)
+                                    }
+                                }
+                                
+                                if !searchResults.isEmpty {
+                                    Section("Results") {
+                                        ForEach(searchResults) { character in
+                                            Button {
+                                                selectedCharacter = character
+                                                isShowingEditCharacter = true
+                                            } label: {
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    Text(character.set?.isEmpty == false ? "\(character.name) (\(character.set!))" : character.name)
+                                                        .font(.headline)
+                                                    
+                                                    // Highlight matched skills in the results
+                                                    SkillsView(allSkills: character.allSkills, highlightSkills: selectedSkills)
+                                                }
+                                                .padding(.vertical, 4)
+                                                .foregroundColor(.primary)
+                                            }
                                         }
                                     }
-                                    .pickerStyle(MenuPickerStyle())
                                 }
-                            }
-                            
-                            if !selectedSkills.isEmpty {
-                                Button(role: .destructive) {
-                                    withAnimation {
-                                        selectedSkills.removeAll()
-                                        performSearch()
-                                    }
-                                } label: {
-                                    Label("Clear All Selections", systemImage: "xmark.circle")
-                                }
-                            }
-                        }
-
-                        if hasSearched {
-                            Section {
-                                if searchResults.isEmpty {
-                                    Text("No characters found with all selected skills.")
-                                        .foregroundColor(.secondary)
-                                        .frame(maxWidth: .infinity, alignment: .center)
-                                        .padding()
-                                } else {
-                                    Text("Found \(searchResults.count) character\(searchResults.count == 1 ? "" : "s")")
+                            } else {
+                                Section {
+                                    Text("Found \(allCharacters.count) character\(searchResults.count == 1 ? "" : "s")")
                                         .foregroundColor(.secondary)
                                         .font(.caption)
                                 }
                             }
-                            
-                            if !searchResults.isEmpty {
-                                Section("Results") {
-                                    ForEach(searchResults) { character in
-                                        Button {
-                                            selectedCharacter = character
-                                            isShowingEditCharacter = true
-                                        } label: {
-                                            VStack(alignment: .leading, spacing: 4) {
-                                                Text(character.set?.isEmpty == false ? "\(character.name) (\(character.set!))" : character.name)
-                                                    .font(.headline)
-                                                
-                                                // Highlight matched skills in the results
-                                                SkillsView(allSkills: character.allSkills, highlightSkills: selectedSkills)
-                                            }
-                                            .padding(.vertical, 4)
-                                            .foregroundColor(.primary)
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            Section {
-                                Text("Found \(allCharacters.count) character\(searchResults.count == 1 ? "" : "s")")
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
-                            }
                         }
                     }
                 }
+                .navigationTitle("Search by Skills")
             }
-            .navigationTitle("Search by Skills")
         }
         .sheet(isPresented: $isShowingEditCharacter) {
             if let character = selectedCharacter {

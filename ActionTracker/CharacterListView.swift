@@ -24,52 +24,53 @@ struct CharacterListView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            List {
-                // Navigation link to skill search
-                NavigationLink(destination: SkillSearchView()) {
-                    Label("Search by Skills", systemImage: "magnifyingglass")
-                }
+        ZStack {
+            NavigationStack {
+                List {
+                    // Navigation link to skill search
+                    NavigationLink(destination: SkillSearchView()) {
+                        Label("Search by Skills", systemImage: "magnifyingglass")
+                    }
 
-                // Main list of characters
-                ForEach(filteredCharacters) { character in
-                    Button {
-                        // Navigate to edit character
-                        isShowingAddCharacter = true
-                        selectedCharacter = character
-                    } label: {
-                        VStack(alignment: .leading) {
-                            Text(character.set?.isEmpty == false ? "\(character.name) (\(character.set!))" : character.name)
-                                .font(.headline)
-                            Text(character.allSkills.joined(separator: ", ")).font(.caption)
-                        }
-                        .foregroundColor(.primary)
-                    }
-                    .contextMenu {
-                        Button(role: .destructive) {
-                            withAnimation {
-                                context.delete(character)
-                            }
+                    // Main list of characters
+                    ForEach(filteredCharacters) { character in
+                        Button {
+                            // Navigate to edit character
+                            selectedCharacter = character
+                            isShowingAddCharacter = true
                         } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
-                    }
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            withAnimation {
-                                context.delete(character)
+                            VStack(alignment: .leading) {
+                                Text(character.set?.isEmpty == false ? "\(character.name) (\(character.set!))" : character.name)
+                                    .font(.headline)
+                                Text(character.allSkills.joined(separator: ", ")).font(.caption)
                             }
-                        } label: {
-                            Label("Delete", systemImage: "trash")
+                            .foregroundColor(.primary)
+                        }
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                withAnimation {
+                                    context.delete(character)
+                                }
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                        .swipeActions(edge: .trailing) {
+                            Button(role: .destructive) {
+                                withAnimation {
+                                    context.delete(character)
+                                }
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
                         }
                     }
                 }
+                .searchable(text: $searchText)
+                .modifier(CharacterSeeder())
+                .listStyle(PlainListStyle())
+                .toolbar(.hidden, for: .navigationBar)
             }
-            .searchable(text: $searchText)
-            .modifier(CharacterSeeder())
-            .listStyle(PlainListStyle())
-            .toolbarBackground(.hidden, for: .navigationBar)
-            .toolbar(.hidden, for: .navigationBar)
         }
         .sheet(isPresented: $isShowingAddCharacter) {
             AddCharacterView(character: selectedCharacter)
