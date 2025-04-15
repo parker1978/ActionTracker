@@ -13,6 +13,8 @@ struct SkillSearchView: View {
     @State private var selectedSkills: [String] = []
     @State private var searchResults: [Character] = []
     @State private var hasSearched = false
+    @State private var isShowingEditCharacter = false
+    @State private var selectedCharacter: Character?
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
 
@@ -124,22 +126,42 @@ struct SkillSearchView: View {
                             if !searchResults.isEmpty {
                                 Section("Results") {
                                     ForEach(searchResults) { character in
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(character.set?.isEmpty == false ? "\(character.name) (\(character.set!))" : character.name)
-                                                .font(.headline)
-                                            
-                                            // Highlight matched skills in the results
-                                            SkillsView(allSkills: character.allSkills, highlightSkills: selectedSkills)
+                                        Button {
+                                            selectedCharacter = character
+                                            isShowingEditCharacter = true
+                                        } label: {
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(character.set?.isEmpty == false ? "\(character.name) (\(character.set!))" : character.name)
+                                                    .font(.headline)
+                                                
+                                                // Highlight matched skills in the results
+                                                SkillsView(allSkills: character.allSkills, highlightSkills: selectedSkills)
+                                            }
+                                            .padding(.vertical, 4)
+                                            .foregroundColor(.primary)
                                         }
-                                        .padding(.vertical, 4)
                                     }
                                 }
+                            }
+                        } else {
+                            Section {
+                                Text("Found \(allCharacters.count) character\(searchResults.count == 1 ? "" : "s")")
+                                    .foregroundColor(.secondary)
+                                    .font(.caption)
                             }
                         }
                     }
                 }
             }
             .navigationTitle("Search by Skills")
+        }
+        .sheet(isPresented: $isShowingEditCharacter) {
+            if let character = selectedCharacter {
+                AddCharacterView(character: character)
+                    .onDisappear {
+                        selectedCharacter = nil
+                    }
+            }
         }
     }
 

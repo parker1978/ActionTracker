@@ -12,6 +12,7 @@ struct CharacterListView: View {
     @Query(sort: \Character.name) var characters: [Character]
     @State private var searchText = ""
     @Binding var isShowingAddCharacter: Bool
+    @State private var selectedCharacter: Character?
     @Environment(\.modelContext) private var context
 
     var filteredCharacters: [Character] {
@@ -32,10 +33,17 @@ struct CharacterListView: View {
 
                 // Main list of characters
                 ForEach(filteredCharacters) { character in
-                    VStack(alignment: .leading) {
-                        Text(character.set?.isEmpty == false ? "\(character.name) (\(character.set!))" : character.name)
-                            .font(.headline)
-                        Text(character.allSkills.joined(separator: ", ")).font(.caption)
+                    Button {
+                        // Navigate to edit character
+                        isShowingAddCharacter = true
+                        selectedCharacter = character
+                    } label: {
+                        VStack(alignment: .leading) {
+                            Text(character.set?.isEmpty == false ? "\(character.name) (\(character.set!))" : character.name)
+                                .font(.headline)
+                            Text(character.allSkills.joined(separator: ", ")).font(.caption)
+                        }
+                        .foregroundColor(.primary)
                     }
                     .contextMenu {
                         Button(role: .destructive) {
@@ -64,7 +72,11 @@ struct CharacterListView: View {
             .toolbar(.hidden, for: .navigationBar)
         }
         .sheet(isPresented: $isShowingAddCharacter) {
-            AddCharacterView()
+            AddCharacterView(character: selectedCharacter)
+                .onDisappear {
+                    // Reset selected character when sheet is dismissed
+                    selectedCharacter = nil
+                }
         }
     }
 }

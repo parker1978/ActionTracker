@@ -20,6 +20,8 @@ struct AddCharacterView: View {
     @State private var errorMessage = ""
     @FocusState private var focusField: Field?
     
+    var character: Character?
+    
     enum Field: Hashable {
         case name
         case skill(Int)
@@ -30,13 +32,28 @@ struct AddCharacterView: View {
         !skillInputs.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }.isEmpty
     }
     
+    var isEditing: Bool {
+        character != nil
+    }
+    
+    init(character: Character? = nil) {
+        self.character = character
+        
+        if let character = character {
+            _name = State(initialValue: character.name)
+            _set = State(initialValue: character.set ?? "")
+            _notes = State(initialValue: character.notes ?? "")
+            _skillInputs = State(initialValue: character.allSkills.isEmpty ? [""] : character.allSkills)
+        }
+    }
+    
     var body: some View {
         NavigationStack {
             Form {
                 characterInfoSection
                 skillsSection
             }
-            .navigationTitle("Add Character")
+            .navigationTitle(isEditing ? "Edit Character" : "Add Character")
             .toolbar {
                 keyboardToolbar
                 cancelButton
@@ -192,13 +209,26 @@ struct AddCharacterView: View {
             return
         }
         
-        let newCharacter = Character(
-            name: trimmedName,
-            set: set.isEmpty ? nil : set.trimmingCharacters(in: .whitespacesAndNewlines),
-            allSkills: cleanedSkills,
-            notes: notes.isEmpty ? nil : notes.trimmingCharacters(in: .whitespacesAndNewlines)
-        )
-        context.insert(newCharacter)
+        let trimmedSet = set.isEmpty ? nil : set.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedNotes = notes.isEmpty ? nil : notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        if let existingCharacter = character {
+            // Update existing character
+            existingCharacter.name = trimmedName
+            existingCharacter.set = trimmedSet
+            existingCharacter.allSkills = cleanedSkills
+            existingCharacter.notes = trimmedNotes
+        } else {
+            // Create new character
+            let newCharacter = Character(
+                name: trimmedName,
+                set: trimmedSet,
+                allSkills: cleanedSkills,
+                notes: trimmedNotes
+            )
+            context.insert(newCharacter)
+        }
+        
         dismiss()
     }
 }
