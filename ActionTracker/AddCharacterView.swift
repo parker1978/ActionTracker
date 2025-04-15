@@ -152,9 +152,46 @@ struct AddCharacterView: View {
     }
     
     private var keyboardToolbar: some ToolbarContent {
-        ToolbarItem(placement: .keyboard) {
-            Button("Done") {
-                focusField = nil
+        Group {
+            // +1 button on the left
+            ToolbarItem(placement: .keyboard) {
+                Button("+1") {
+                    insertTextAtCursor("+1 ")
+                }
+            }
+            
+            // Colon button on the left center
+            ToolbarItem(placement: .keyboard) {
+                Button(":") {
+                    insertTextAtCursor(": ")
+                }
+            }
+            
+            // Spacer to push Done button to the right
+            ToolbarItem(placement: .keyboard) {
+                Spacer()
+            }
+            
+            // Done button on the right
+            ToolbarItem(placement: .keyboard) {
+                Button("Done") {
+                    focusField = nil
+                }
+            }
+        }
+    }
+    
+    // Helper method to insert text at the cursor position
+    private func insertTextAtCursor(_ text: String) {
+        // Determine which field has focus and insert text there
+        if let field = focusField {
+            switch field {
+            case .name:
+                name.append(text)
+            case .skill(let index):
+                if index < skillInputs.count {
+                    skillInputs[index].append(text)
+                }
             }
         }
     }
