@@ -13,7 +13,6 @@ struct SkillSearchView: View {
     @State private var selectedSkills: [String] = []
     @State private var searchResults: [Character] = []
     @State private var hasSearched = false
-    @State private var isShowingEditCharacter = false
     @State private var selectedCharacter: Character?
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
@@ -129,7 +128,6 @@ struct SkillSearchView: View {
                                         ForEach(searchResults) { character in
                                             Button {
                                                 selectedCharacter = character
-                                                isShowingEditCharacter = true
                                             } label: {
                                                 VStack(alignment: .leading, spacing: 4) {
                                                     Text(character.set?.isEmpty == false ? "\(character.name) (\(character.set!))" : character.name)
@@ -157,14 +155,10 @@ struct SkillSearchView: View {
                 .navigationTitle("Search by Skills")
             }
         }
-        .sheet(isPresented: $isShowingEditCharacter) {
-            if let character = selectedCharacter {
-                NavigationStack {
-                    AddCharacterView(character: character)
-                }
-                .onDisappear {
-                    selectedCharacter = nil
-                }
+        // Sheet for editing a character - using item presentation for reliability
+        .sheet(item: $selectedCharacter) { character in
+            NavigationStack {
+                AddCharacterView(character: character)
             }
         }
     }
