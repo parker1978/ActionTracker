@@ -24,6 +24,8 @@ struct AddCharacterView: View {
     
     enum Field: Hashable {
         case name
+        case set
+        case notes
         case skill(Int)
     }
     
@@ -91,14 +93,24 @@ struct AddCharacterView: View {
                 .focused($focusField, equals: .name)
                 .submitLabel(.next)
                 .onSubmit {
-                    focusField = .skill(0)
+                    focusField = .set
                 }
             
             TextField("Set (optional)", text: $set)
                 .textInputAutocapitalization(.words)
+                .focused($focusField, equals: .set)
+                .submitLabel(.next)
+                .onSubmit {
+                    focusField = .notes
+                }
             
             TextField("Notes (optional)", text: $notes)
                 .textInputAutocapitalization(.words)
+                .focused($focusField, equals: .notes)
+                .submitLabel(.done)
+                .onSubmit {
+                    focusField = nil
+                }
         }
     }
     
@@ -188,6 +200,10 @@ struct AddCharacterView: View {
             switch field {
             case .name:
                 name.append(text)
+            case .set:
+                set.append(text)
+            case .notes:
+                notes.append(text)
             case .skill(let index):
                 if index < skillInputs.count {
                     skillInputs[index].append(text)
