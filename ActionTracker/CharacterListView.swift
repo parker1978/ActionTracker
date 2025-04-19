@@ -57,9 +57,9 @@ struct CharacterListView: View {
                     
                     List {
                         // Debug section (collapsible)
-                        DisclosureGroup("Debug Info") {
+                        DisclosureGroup("Characters / Skills Info") {
                             Text("Characters: \(characters.count)")
-                            Button("Refresh Data Model") {
+                            Button("Refresh Data") {
                                 refreshDataModel()
                             }
                             Text(debugMessage)
