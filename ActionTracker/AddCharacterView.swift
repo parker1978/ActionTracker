@@ -333,8 +333,15 @@ struct AddCharacterView: View {
                         existingSkill.skillDescription = skillDescription
                     }
                 } else {
-                    // Check if the skill already exists in the database
-                    let skillDescriptor = FetchDescriptor<Skill>(predicate: #Predicate<Skill> { skill in skill.name == skillName })
+                    // Check if the skill already exists in the database (case-insensitive)
+                    // First normalize the name
+                    let normalizedSkillName = Skill.normalizeSkillName(skillName)
+                    
+                    // For predicate, we can only use exact matching without string functions
+                    var skillDescriptor = FetchDescriptor<Skill>()
+                    skillDescriptor.predicate = #Predicate<Skill> { skill in 
+                        skill.name == normalizedSkillName
+                    }
                     var skill: Skill
                     
                     do {
@@ -390,8 +397,15 @@ struct AddCharacterView: View {
                 let skillName = skillData.name
                 let skillDescription = skillData.skillDescription
                 
-                // Check if the skill already exists in the database
-                let skillDescriptor = FetchDescriptor<Skill>(predicate: #Predicate<Skill> { skill in skill.name == skillName })
+                // Check if the skill already exists in the database (case-insensitive)
+                // First normalize the name
+                let normalizedSkillName = Skill.normalizeSkillName(skillName)
+                
+                // For predicate, we can only use exact matching without string functions
+                var skillDescriptor = FetchDescriptor<Skill>()
+                skillDescriptor.predicate = #Predicate<Skill> { skill in 
+                    skill.name == normalizedSkillName
+                }
                 var skill: Skill
                 
                 do {

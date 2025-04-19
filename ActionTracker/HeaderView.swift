@@ -33,6 +33,11 @@ struct HeaderView: View {
             
             Spacer()
             
+            // Ensure skill names are always normalized when view appears
+            .onAppear {
+                normalizeSkillNamesIfNeeded()
+            }
+            
             Menu {
                 Button {
                     keepAwake.toggle()
@@ -138,19 +143,79 @@ struct HeaderView: View {
             }
         }
         .padding(.horizontal)
+        .onAppear {
+            normalizeSkillNamesIfNeeded()
+        }
         .sheet(isPresented: $showingSkillLibrary) {
             SkillView()
         }
     }
     
     private func exportCharacters() {
-        var csvString = "Name,Set,Notes,Skills\n"
+        // Dictionary to track processed characters by name+set to prevent duplicates
+        // Key format is "name|set" in lowercase
+        var processedCharacters: [String: Character] = [:]
+        
+        // First pass - collect unique characters by name+set combo
         for character in characters {
-            let name = character.name.replacingOccurrences(of: "\"", with: "\"\"") 
+            // Normalize the name and set
+            let normalizedName = character.name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            let normalizedSet = (character.set ?? "").lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            // Create a composite key for uniqueness
+            let key = "\(normalizedName)|\(normalizedSet)"
+            
+            // If this name/set combo exists, keep the one with more information
+            if let existingChar = processedCharacters[key] {
+                // Decide which to keep based on notes and skills
+                let existingSkillCount = existingChar.skills?.count ?? 0
+                let newSkillCount = character.skills?.count ?? 0
+                let existingNotesLength = existingChar.notes?.count ?? 0
+                let newNotesLength = character.notes?.count ?? 0
+                
+                // If the new character has more information, use it instead
+                if newSkillCount > existingSkillCount || 
+                   (newSkillCount == existingSkillCount && newNotesLength > existingNotesLength) {
+                    processedCharacters[key] = character
+                }
+            } else {
+                // First time seeing this name/set combo
+                processedCharacters[key] = character
+            }
+        }
+        
+        // Generate CSV content
+        var csvString = "Name,Set,Notes,Skills\n"
+        
+        // Sort the unique characters alphabetically by name, then by set
+        let uniqueCharacters = processedCharacters.values.sorted { char1, char2 in
+            if char1.name.lowercased() != char2.name.lowercased() {
+                return char1.name.lowercased() < char2.name.lowercased()
+            } else {
+                let set1 = char1.set?.lowercased() ?? ""
+                let set2 = char2.set?.lowercased() ?? ""
+                return set1 < set2
+            }
+        }
+        
+        // Process each unique character for CSV export
+        for character in uniqueCharacters {
+            // Capitalize the name properly for a character (Title Case)
+            let nameWords = character.name.split(separator: " ")
+            let capitalizedName = nameWords.map { $0.prefix(1).uppercased() + $0.dropFirst().lowercased() }.joined(separator: " ")
+            
+            let name = capitalizedName.replacingOccurrences(of: "\"", with: "\"\"") 
             let set = (character.set ?? "").replacingOccurrences(of: "\"", with: "\"\"") 
             let notes = (character.notes ?? "").replacingOccurrences(of: "\"", with: "\"\"") 
-            let skills = (character.skills ?? []).sorted { $0.position < $1.position }.map { $0.name }.joined(separator: ";").replacingOccurrences(of: "\"", with: "\"\"") 
-            let row = "\"\(name)\",\"\(set)\",\"\(notes)\",\"\(skills)\""
+            
+            // Sort and normalize skill names
+            let normalizedSkills = (character.skills ?? [])
+                .sorted { $0.position < $1.position }
+                .map { Skill.normalizeSkillName($0.name) }
+                .joined(separator: ";")
+                .replacingOccurrences(of: "\"", with: "\"\"") 
+            
+            let row = "\"\(name)\",\"\(set)\",\"\(notes)\",\"\(normalizedSkills)\""
             csvString.append(row + "\n")
         }
         
@@ -164,6 +229,19 @@ struct HeaderView: View {
             }
         } catch {
             print("Export failed: \(error)")
+            
+            // Show error alert
+            let alert = UIAlertController(
+                title: "Export Failed",
+                message: "Failed to export characters: \(error.localizedDescription)",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootVC = windowScene.windows.first?.rootViewController {
+                rootVC.present(alert, animated: true)
+            }
         }
     }
     
@@ -190,11 +268,34 @@ struct HeaderView: View {
                 return
             }
             
+            // Dictionary to track processed skills by name (lowercase) to prevent duplicates
+            var processedSkills: [String: Skill] = [:]
+            
+            // First pass - collect unique skills by lowercase name
+            for skill in allSkills {
+                let lowerName = skill.name.lowercased()
+                
+                // If this lowercase name exists, keep the one with more information
+                if let existingSkill = processedSkills[lowerName] {
+                    // Choose the one with the most information
+                    if skill.skillDescription.count > existingSkill.skillDescription.count {
+                        processedSkills[lowerName] = skill
+                    }
+                } else {
+                    // First time seeing this skill name
+                    processedSkills[lowerName] = skill
+                }
+            }
+            
             // Generate CSV content
             var csvString = "Name,Description\n"
             
-            for skill in allSkills {
-                let name = skill.name.replacingOccurrences(of: "\"", with: "\"\"")
+            // Sort the unique skills alphabetically
+            let uniqueSkills = processedSkills.values.sorted { $0.name.lowercased() < $1.name.lowercased() }
+            
+            for skill in uniqueSkills {
+                // Use normalized name to ensure consistent capitalization
+                let name = Skill.normalizeSkillName(skill.name).replacingOccurrences(of: "\"", with: "\"\"")
                 let description = skill.skillDescription.replacingOccurrences(of: "\"", with: "\"\"")
                 let row = "\"\(name)\",\"\(description)\""
                 csvString.append(row + "\n")
@@ -273,14 +374,21 @@ struct HeaderView: View {
                     // Skip if empty name
                     if name.isEmpty { continue }
                     
-                    // Check if skill with the same name already exists
-                    let skillDescriptor = FetchDescriptor<Skill>(predicate: #Predicate<Skill> { skill in skill.name == name })
+                    // Check if skill with the same name (case-insensitive) already exists
+                    // First normalize the name using our helper
+                    let normalizedName = Skill.normalizeSkillName(name)
+                    
+                    // For predicate, we can only use exact matching without string functions
+                    var skillDescriptor = FetchDescriptor<Skill>()
+                    skillDescriptor.predicate = #Predicate<Skill> { skill in 
+                        skill.name == normalizedName
+                    }
                     
                     do {
                         let existingSkills = try modelContext.fetch(skillDescriptor)
                         
                         if existingSkills.isEmpty {
-                            // Create new skill
+                            // Create new skill - Note: Skill initializer will normalize the name automatically
                             let newSkill = Skill(name: name, skillDescription: description, manual: true, importedFlag: true)
                             modelContext.insert(newSkill)
                             importedCount += 1
@@ -445,6 +553,47 @@ struct HeaderView: View {
             rootVC.present(alert, animated: true, completion: nil)
         }
         return
+    }
+    
+    // Ensures that all skill names are consistently capitalized
+    private func normalizeSkillNamesIfNeeded() {
+        // Check if we've already normalized skill names this session
+        let normalizedKey = "ActionTracker.skillsNormalizedThisSession"
+        if UserDefaults.standard.bool(forKey: normalizedKey) {
+            return  // Already normalized this session
+        }
+        
+        // Fetch all skills
+        let skillsDescriptor = FetchDescriptor<Skill>()
+        
+        do {
+            let allSkills = try context.fetch(skillsDescriptor)
+            var changesMade = false
+            
+            // Normalize each skill name
+            for skill in allSkills {
+                let currentName = skill.name
+                let normalizedName = Skill.normalizeSkillName(currentName)
+                
+                // Check if the name needs normalization
+                if currentName != normalizedName {
+                    print("Normalizing skill name from '\(currentName)' to '\(normalizedName)'")
+                    skill.name = normalizedName
+                    changesMade = true
+                }
+            }
+            
+            // Save changes if needed
+            if changesMade {
+                try context.save()
+                print("Successfully normalized skill names")
+            }
+            
+            // Mark as normalized for this session
+            UserDefaults.standard.set(true, forKey: normalizedKey)
+        } catch {
+            print("Error normalizing skill names: \(error)")
+        }
     }
     
     // MARK: - Data Wiping Functions

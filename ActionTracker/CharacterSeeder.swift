@@ -41,6 +41,10 @@ struct CharacterSeeder: ViewModifier {
                                     UserDefaults.standard.set(true, forKey: hasLaunchedBeforeKey)
                                 } else {
                                     print("Skills already exist, skipping seeding")
+                                    
+                                    // Normalize existing skill names on app startup
+                                    normalizeExistingSkillNames(existingSkills)
+                                    
                                     hasAttemptedSeed = true
                                     UserDefaults.standard.set(true, forKey: hasLaunchedBeforeKey)
                                 }
@@ -74,6 +78,10 @@ struct CharacterSeeder: ViewModifier {
                             UserDefaults.standard.set(true, forKey: hasLaunchedBeforeKey)
                         } else {
                             print("Skills already exist, skipping seeding")
+                            
+                            // Normalize existing skill names on app startup
+                            normalizeExistingSkillNames(existingSkills)
+                            
                             hasAttemptedSeed = true
                             UserDefaults.standard.set(true, forKey: hasLaunchedBeforeKey)
                         }
@@ -88,6 +96,38 @@ struct CharacterSeeder: ViewModifier {
             }
     }
 
+    // Normalizes all existing skill names to ensure consistent capitalization
+    private func normalizeExistingSkillNames(_ skills: [Skill]) {
+        print("Normalizing existing skill names...")
+        
+        var changesMade = false
+        
+        // Go through each skill and normalize its name
+        for skill in skills {
+            let currentName = skill.name
+            let normalizedName = Skill.normalizeSkillName(currentName)
+            
+            // If the name is different after normalization, update it
+            if currentName != normalizedName {
+                print("Normalizing skill name from '\(currentName)' to '\(normalizedName)'")
+                skill.name = normalizedName
+                changesMade = true
+            }
+        }
+        
+        // Save changes if needed
+        if changesMade {
+            do {
+                try context.save()
+                print("Successfully normalized skill names")
+            } catch {
+                print("Error saving normalized skill names: \(error)")
+            }
+        } else {
+            print("No skill name normalization needed")
+        }
+    }
+    
     private func seedCharacters() {
         print("Seeding initial character data...")
         // Define character data with skill names and descriptions
@@ -130,9 +170,17 @@ struct CharacterSeeder: ViewModifier {
         
         // Create skills with positions and descriptions
         for (index, skillData) in fredSkillsData.enumerated() {
-            // Check if skill already exists
+            // Check if skill already exists (case-insensitive)
             let skillName = skillData.name
-            let descriptor = FetchDescriptor<Skill>(predicate: #Predicate<Skill> { skill in skill.name == skillName })
+            // First normalize using the static method
+            let normalizedSkillName = Skill.normalizeSkillName(skillName)
+            
+            // For predicate, we can only use exact matching without string functions
+            // Create a non-case-sensitive fetch descriptor
+            var descriptor = FetchDescriptor<Skill>()
+            descriptor.predicate = #Predicate<Skill> { skill in 
+                skill.name == normalizedSkillName
+            }
             var skill: Skill
             
             do {
@@ -173,9 +221,17 @@ struct CharacterSeeder: ViewModifier {
         }
         
         for (index, skillData) in bunnySkillsData.enumerated() {
-            // Check if skill already exists
+            // Check if skill already exists (case-insensitive)
             let skillName = skillData.name
-            let descriptor = FetchDescriptor<Skill>(predicate: #Predicate<Skill> { skill in skill.name == skillName })
+            // First normalize using the static method
+            let normalizedSkillName = Skill.normalizeSkillName(skillName)
+            
+            // For predicate, we can only use exact matching without string functions
+            // Create a non-case-sensitive fetch descriptor
+            var descriptor = FetchDescriptor<Skill>()
+            descriptor.predicate = #Predicate<Skill> { skill in 
+                skill.name == normalizedSkillName
+            }
             var skill: Skill
             
             do {
@@ -216,9 +272,17 @@ struct CharacterSeeder: ViewModifier {
         }
         
         for (index, skillData) in tigerSkillsData.enumerated() {
-            // Check if skill already exists
+            // Check if skill already exists (case-insensitive)
             let skillName = skillData.name
-            let descriptor = FetchDescriptor<Skill>(predicate: #Predicate<Skill> { skill in skill.name == skillName })
+            // First normalize using the static method
+            let normalizedSkillName = Skill.normalizeSkillName(skillName)
+            
+            // For predicate, we can only use exact matching without string functions
+            // Create a non-case-sensitive fetch descriptor
+            var descriptor = FetchDescriptor<Skill>()
+            descriptor.predicate = #Predicate<Skill> { skill in 
+                skill.name == normalizedSkillName
+            }
             var skill: Skill
             
             do {

@@ -31,8 +31,24 @@ class Skill {
     // Relationship to characters - made optional for CloudKit compatibility
     var characters: [Character]? = []
     
+    // Normalizes skill names to be consistent regardless of original case
+    static func normalizeSkillName(_ name: String) -> String {
+        // First trim leading/trailing spaces
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Then capitalize each word
+        return trimmed.capitalized
+    }
+    
+    // Lowercase version of name for case-insensitive comparison
+    @Transient
+    var normalizedName: String {
+        // Get lowercase version for comparison
+        return name.lowercased()
+    }
+    
     init(name: String, skillDescription: String = "", position: Int = 0, manual: Bool = false, importedFlag: Bool = false) {
-        self.name = name
+        // Store the name with consistent capitalization (each word capitalized)
+        self.name = Skill.normalizeSkillName(name)
         self.skillDescription = skillDescription
         self.position = position
         self.manual = manual
