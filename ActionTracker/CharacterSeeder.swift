@@ -12,53 +12,77 @@ struct CharacterSeeder: ViewModifier {
     @Environment(\.modelContext) private var context
     @Query var existing: [Character]
     @State private var hasAttemptedSeed = false
+    
+    // Key for UserDefaults to track first launch
+    private let hasLaunchedBeforeKey = "ActionTracker.hasLaunchedBefore"
 
     func body(content: Content) -> some View {
         content
             .onAppear {
-                // Add a longer delay to ensure modelContext is properly set up
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    // Only seed if there are no existing characters AND we haven't attempted to seed yet
-                    if !hasAttemptedSeed && existing.isEmpty {
-                        // Check if any skills already exist - if so, don't seed
-                        let skillDescriptor = FetchDescriptor<Skill>()
-                        do {
-                            let existingSkills = try context.fetch(skillDescriptor)
-                            if existingSkills.isEmpty {
+                // Check if app has been launched before
+                let hasLaunchedBefore = UserDefaults.standard.bool(forKey: hasLaunchedBeforeKey)
+                
+                // Only proceed if this is the first launch
+                if !hasLaunchedBefore {
+                    print("First app launch detected, preparing to seed data...")
+                    // Add a delay to ensure modelContext is properly set up
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        // Only seed if there are no existing characters AND we haven't attempted to seed yet
+                        if !hasAttemptedSeed && existing.isEmpty {
+                            // Check if any skills already exist - if so, don't seed
+                            let skillDescriptor = FetchDescriptor<Skill>()
+                            do {
+                                let existingSkills = try context.fetch(skillDescriptor)
+                                if existingSkills.isEmpty {
+                                    hasAttemptedSeed = true
+                                    seedCharacters()
+                                    
+                                    // Set flag that app has been launched before
+                                    UserDefaults.standard.set(true, forKey: hasLaunchedBeforeKey)
+                                } else {
+                                    print("Skills already exist, skipping seeding")
+                                    hasAttemptedSeed = true
+                                    UserDefaults.standard.set(true, forKey: hasLaunchedBeforeKey)
+                                }
+                            } catch {
+                                print("Error checking for existing skills: \(error)")
+                                // Proceed with seeding if we can't check
                                 hasAttemptedSeed = true
                                 seedCharacters()
-                            } else {
-                                print("Skills already exist, skipping seeding")
-                                hasAttemptedSeed = true
+                                UserDefaults.standard.set(true, forKey: hasLaunchedBeforeKey)
                             }
-                        } catch {
-                            print("Error checking for existing skills: \(error)")
-                            // Proceed with seeding if we can't check
-                            hasAttemptedSeed = true
-                            seedCharacters()
+                        } else {
+                            // If we have characters already, mark the app as launched
+                            UserDefaults.standard.set(true, forKey: hasLaunchedBeforeKey)
                         }
                     }
+                } else {
+                    print("App has launched before, skipping initial seed data")
                 }
             }
             .task {
-                // This is a secondary attempt to seed the data if the first one fails
-                try? await Task.sleep(for: .seconds(2))
-                if !hasAttemptedSeed && existing.isEmpty {
+                // Secondary attempt only if it's the first launch and the first attempt failed
+                if !UserDefaults.standard.bool(forKey: hasLaunchedBeforeKey) && !hasAttemptedSeed && existing.isEmpty {
+                    try? await Task.sleep(for: .seconds(2))
+                    
                     let skillDescriptor = FetchDescriptor<Skill>()
                     do {
                         let existingSkills = try context.fetch(skillDescriptor)
                         if existingSkills.isEmpty {
                             hasAttemptedSeed = true
                             seedCharacters()
+                            UserDefaults.standard.set(true, forKey: hasLaunchedBeforeKey)
                         } else {
                             print("Skills already exist, skipping seeding")
                             hasAttemptedSeed = true
+                            UserDefaults.standard.set(true, forKey: hasLaunchedBeforeKey)
                         }
                     } catch {
                         print("Error checking for existing skills: \(error)")
                         // Proceed with seeding if we can't check
                         hasAttemptedSeed = true
                         seedCharacters()
+                        UserDefaults.standard.set(true, forKey: hasLaunchedBeforeKey)
                     }
                 }
             }

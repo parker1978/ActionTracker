@@ -89,11 +89,26 @@ struct HeaderView: View {
                         Text("Import Characters")
                         Image(systemName: "square.and.arrow.down.fill")
                     }
+                    
+                    Button {
+                        importSkills()
+                    } label: {
+                        Text("Import Skills")
+                        Image(systemName: "square.and.arrow.down.on.square.fill")
+                    }
+                    
                     Button {
                         exportCharacters()
                     } label: {
                         Text("Export Characters")
                         Image(systemName: "square.and.arrow.up.fill")
+                    }
+                    
+                    Button {
+                        exportSkills()
+                    } label: {
+                        Text("Export Skills")
+                        Image(systemName: "square.and.arrow.up.on.square.fill")
                     }
                     
                     Divider()
@@ -128,30 +143,249 @@ struct HeaderView: View {
         }
     }
     
-    private func exportCharacters() {
-        var csvString = "Name,Set,Notes,Skills\n"
-        for character in characters {
-            let name = character.name.replacingOccurrences(of: "\"", with: "\"\"") 
-            let set = (character.set ?? "").replacingOccurrences(of: "\"", with: "\"\"") 
-            let notes = (character.notes ?? "").replacingOccurrences(of: "\"", with: "\"\"") 
-            let skills = (character.skills ?? []).sorted { $0.position < $1.position }.map { $0.name }.joined(separator: ";").replacingOccurrences(of: "\"", with: "\"\"") 
-            let row = "\"\(name)\",\"\(set)\",\"\(notes)\",\"\(skills)\""
-            csvString.append(row + "\n")
-        }
+    private func exportSkills() {
+        // Fetch all skills
+        let skillsDescriptor = FetchDescriptor<Skill>(sortBy: [SortDescriptor(\.name)])
         
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("characters.csv")
         do {
+            let allSkills = try context.fetch(skillsDescriptor)
+            
+            if allSkills.isEmpty {
+                // Show alert if no skills to export
+                let alert = UIAlertController(
+                    title: "No Skills",
+                    message: "There are no skills to export.",
+                    preferredStyle: .alert
+                )
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let rootVC = windowScene.windows.first?.rootViewController {
+                    rootVC.present(alert, animated: true)
+                }
+                return
+            }
+            
+            // Generate CSV content
+            var csvString = "Name,Description\n"
+            
+            for skill in allSkills {
+                let name = skill.name.replacingOccurrences(of: "\"", with: "\"\"")
+                let description = skill.skillDescription.replacingOccurrences(of: "\"", with: "\"\"")
+                let row = "\"\(name)\",\"\(description)\""
+                csvString.append(row + "\n")
+            }
+            
+            // Write to temporary file
+            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("skills.csv")
             try csvString.write(to: tempURL, atomically: true, encoding: .utf8)
+            
+            // Show share sheet
             let activityVC = UIActivityViewController(activityItems: [tempURL], applicationActivities: nil)
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                let rootVC = windowScene.windows.first?.rootViewController {
                 rootVC.present(activityVC, animated: true, completion: nil)
             }
+            
         } catch {
-            print("Export failed: \(error)")
+            print("Failed to export skills: \(error)")
+            
+            // Show error alert
+            let alert = UIAlertController(
+                title: "Export Failed",
+                message: "Failed to export skills: \(error.localizedDescription)",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootVC = windowScene.windows.first?.rootViewController {
+                rootVC.present(alert, animated: true)
+            }
         }
     }
-
+    
+    // Key to store the coordinator reference to prevent it from being deallocated
+    private var coordinatorKey: UInt8 = 0
+    
+    // Coordinator class for handling skill imports
+    class SkillImportCoordinator: NSObject, UIDocumentPickerDelegate {
+        private let modelContext: ModelContext
+        
+        init(modelContext: ModelContext) {
+            self.modelContext = modelContext
+            super.init()
+        }
+        
+        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+            guard let url = urls.first else { return }
+            
+            guard url.startAccessingSecurityScopedResource() else {
+                print("Failed to access security-scoped resource.")
+                return
+            }
+            
+            defer { url.stopAccessingSecurityScopedResource() }
+            
+            do {
+                // Read the CSV file
+                let content = try String(contentsOf: url, encoding: .utf8)
+                let rows = content.components(separatedBy: CharacterSet.newlines).dropFirst() // Skip header
+                
+                var importedCount = 0
+                var skippedCount = 0
+                
+                // Process each row
+                for line in rows {
+                    guard !line.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
+                    
+                    // Parse the CSV line (assuming no commas in quoted values for simplicity)
+                    let columns = parseCSVLine(line)
+                    guard columns.count >= 2 else { continue }
+                    
+                    let name = columns[0].trimmingCharacters(in: .whitespaces)
+                    let description = columns[1].trimmingCharacters(in: .whitespaces)
+                    
+                    // Skip if empty name
+                    if name.isEmpty { continue }
+                    
+                    // Check if skill with the same name already exists
+                    let skillDescriptor = FetchDescriptor<Skill>(predicate: #Predicate<Skill> { skill in skill.name == name })
+                    
+                    do {
+                        let existingSkills = try modelContext.fetch(skillDescriptor)
+                        
+                        if existingSkills.isEmpty {
+                            // Create new skill
+                            let newSkill = Skill(name: name, skillDescription: description, manual: true, importedFlag: true)
+                            modelContext.insert(newSkill)
+                            importedCount += 1
+                        } else {
+                            // Skill already exists, skip
+                            skippedCount += 1
+                            
+                            // Optionally update description if the existing one is empty
+                            if let existingSkill = existingSkills.first, existingSkill.skillDescription.isEmpty && !description.isEmpty {
+                                existingSkill.skillDescription = description
+                            }
+                        }
+                    } catch {
+                        print("Error checking for existing skill: \(error)")
+                    }
+                }
+                
+                // Save changes
+                try modelContext.save()
+                
+                // Show success alert
+                DispatchQueue.main.async {
+                    self.showResultAlert(imported: importedCount, skipped: skippedCount)
+                }
+                
+            } catch {
+                print("Import failed: \(error)")
+                
+                // Show error alert
+                DispatchQueue.main.async {
+                    self.showErrorAlert(error: error)
+                }
+            }
+        }
+        
+        private func parseCSVLine(_ line: String) -> [String] {
+            var results: [String] = []
+            var value = ""
+            var insideQuotes = false
+            
+            var iterator = line.makeIterator()
+            while let char = iterator.next() {
+                switch char {
+                case "\"":
+                    insideQuotes.toggle()
+                case ",":
+                    if insideQuotes {
+                        value.append(char)
+                    } else {
+                        results.append(value)
+                        value = ""
+                    }
+                default:
+                    value.append(char)
+                }
+            }
+            results.append(value)
+            return results.map { $0.replacingOccurrences(of: "\"\"", with: "\"") }
+        }
+        
+        private func showResultAlert(imported: Int, skipped: Int) {
+            let alert = UIAlertController(
+                title: "Import Complete",
+                message: "Successfully imported \(imported) new skills. \(skipped) existing skills were skipped.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootVC = windowScene.windows.first?.rootViewController {
+                rootVC.present(alert, animated: true)
+            }
+        }
+        
+        private func showErrorAlert(error: Error) {
+            let alert = UIAlertController(
+                title: "Import Failed",
+                message: "Failed to import skills: \(error.localizedDescription)",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootVC = windowScene.windows.first?.rootViewController {
+                rootVC.present(alert, animated: true)
+            }
+        }
+    }
+    
+    private func importSkills() {
+        let alert = UIAlertController(
+            title: "Import Skills",
+            message: """
+            Import will add new skills to your library.
+            Existing skills with the same name will be skipped.
+            
+            Make sure your CSV has this format:
+            
+            Name,Description
+            "+1 Die: Combat","Add 1 die to combat rolls"
+            "Lucky","Re-roll one failed die per turn"
+            """,
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Continue", style: .default) { _ in
+            let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.commaSeparatedText])
+            documentPicker.allowsMultipleSelection = false
+            
+            // Using a coordinator for the document picker
+            let coordinator = SkillImportCoordinator(modelContext: self.context)
+            documentPicker.delegate = coordinator
+            
+            // Keep a reference to the coordinator to prevent it from being deallocated
+            objc_setAssociatedObject(documentPicker, &self.coordinatorKey, coordinator, .OBJC_ASSOCIATION_RETAIN)
+            
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootVC = windowScene.windows.first?.rootViewController {
+                rootVC.present(documentPicker, animated: true, completion: nil)
+            }
+        })
+        
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootVC = windowScene.windows.first?.rootViewController {
+            rootVC.present(alert, animated: true, completion: nil)
+        }
+    }
+    
     private func importCharacters() {
         // Configure with context and completion handler
         CustomContext.shared.configure(with: context) {
