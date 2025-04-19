@@ -82,8 +82,8 @@ struct CharacterListView: View {
                                     VStack(alignment: .leading) {
                                         Text(character.set?.isEmpty == false ? "\(character.name) (\(character.set!))" : character.name)
                                             .font(.headline)
-                                        // Display skills sorted by position
-                                        Text((character.skills ?? []).sorted { $0.position < $1.position }.map { $0.name }.joined(separator: ", ")).font(.caption)
+                                        // Display skills sorted by position with enhanced description display
+                                        SkillsWithDescriptionView(skills: (character.skills ?? []).sorted { $0.position < $1.position })
                                     }
                                     .foregroundColor(.primary)
                                 }
@@ -239,6 +239,19 @@ struct CharacterListView: View {
     }
     
     // The wipe functions have been moved to HeaderView.swift
+}
+
+// Simple skill list display with full wrapping
+struct SkillsWithDescriptionView: View {
+    let skills: [Skill]
+    
+    var body: some View {
+        // Show just the skill names with proper wrapping
+        Text(skills.map { $0.name }.joined(separator: ", "))
+            .font(.caption)
+            .foregroundColor(.secondary)
+            .fixedSize(horizontal: false, vertical: true) // Ensure proper wrapping
+    }
 }
 
 #Preview {

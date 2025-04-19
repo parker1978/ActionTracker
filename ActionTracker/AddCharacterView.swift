@@ -82,8 +82,11 @@ struct AddCharacterView: View {
             Text(errorMessage)
         }
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                focusField = .name
+            // Only set initial focus if we're adding a new character (not editing)
+            if !isEditing {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    focusField = .name
+                }
             }
         }
     }
@@ -154,16 +157,26 @@ struct AddCharacterView: View {
                 }
             }
             
-            TextField("Description (optional)", text: Binding(
-                get: { skillInputs[index].skillDescription },
-                set: { skillInputs[index].skillDescription = $0 }
-            ))
-            .textInputAutocapitalization(.sentences)
-            .font(.caption)
-            .focused($focusField, equals: .skillDesc(index))
-            .submitLabel(index == skillInputs.count - 1 ? .done : .next)
-            .onSubmit {
-                handleSkillSubmit(at: index)
+            // Improved multiline description field
+            VStack(alignment: .leading, spacing: 4) {
+                if skillInputs[index].skillDescription.isEmpty {
+                    Text("Description (optional)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.bottom, 2)
+                }
+                
+                TextEditor(text: Binding(
+                    get: { skillInputs[index].skillDescription },
+                    set: { skillInputs[index].skillDescription = $0 }
+                ))
+                .textInputAutocapitalization(.sentences)
+                .font(.caption)
+                .frame(minHeight: 60)  // Give more space for the description
+                .focused($focusField, equals: .skillDesc(index))
+                .scrollContentBackground(.hidden)
+                .background(Color(.systemGray6))
+                .cornerRadius(6)
             }
         }
         .padding(.vertical, 4)

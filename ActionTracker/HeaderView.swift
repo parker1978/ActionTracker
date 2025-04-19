@@ -88,32 +88,36 @@ struct HeaderView: View {
                         Image(systemName: "book.fill")
                     }
                     
-                    Button {
-                        importCharacters()
+                    Menu {
+                        // Import options
+                        Button {
+                            importCharacters()
+                        } label: {
+                            Label("Import Characters", systemImage: "square.and.arrow.down.fill")
+                        }
+                        
+                        Button {
+                            importSkills()
+                        } label: {
+                            Label("Import Skills", systemImage: "square.and.arrow.down.on.square.fill")
+                        }
+                        
+                        Divider()
+                        
+                        // Export options
+                        Button {
+                            exportCharacters()
+                        } label: {
+                            Label("Export Characters", systemImage: "square.and.arrow.up.fill")
+                        }
+                        
+                        Button {
+                            exportSkills()
+                        } label: {
+                            Label("Export Skills", systemImage: "square.and.arrow.up.on.square.fill")
+                        }
                     } label: {
-                        Text("Import Characters")
-                        Image(systemName: "square.and.arrow.down.fill")
-                    }
-                    
-                    Button {
-                        importSkills()
-                    } label: {
-                        Text("Import Skills")
-                        Image(systemName: "square.and.arrow.down.on.square.fill")
-                    }
-                    
-                    Button {
-                        exportCharacters()
-                    } label: {
-                        Text("Export Characters")
-                        Image(systemName: "square.and.arrow.up.fill")
-                    }
-                    
-                    Button {
-                        exportSkills()
-                    } label: {
-                        Text("Export Skills")
-                        Image(systemName: "square.and.arrow.up.on.square.fill")
+                        Label("Import/Export", systemImage: "square.and.arrow.up.down.fill")
                     }
                     
                     Divider()

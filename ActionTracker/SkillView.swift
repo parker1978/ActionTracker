@@ -13,6 +13,10 @@ struct SkillView: View {
     @Query var skills: [Skill]
     @State private var searchText = ""
     
+    // Section expand/collapse state (only for headers)
+    @State private var isActiveSkillsExpanded = true
+    @State private var isUnusedSkillsExpanded = true
+    
     var filteredSkills: [Skill] {
         guard !searchText.isEmpty else { return skills }
         return skills.filter {
@@ -32,39 +36,55 @@ struct SkillView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Active Skills (\(activeSkills.count))") {
-                    if activeSkills.isEmpty {
-                        Text("No active skills found")
-                            .foregroundColor(.secondary)
-                    } else {
-                        ForEach(activeSkills.sorted(by: { $0.name < $1.name })) { skill in
-                            SkillItemView(skill: skill)
+                // Active Skills Section with collapsible header
+                DisclosureGroup(
+                    isExpanded: $isActiveSkillsExpanded,
+                    content: {
+                        if activeSkills.isEmpty {
+                            Text("No active skills found")
+                                .foregroundColor(.secondary)
+                        } else {
+                            ForEach(activeSkills.sorted(by: { $0.name < $1.name })) { skill in
+                                SkillItemView(skill: skill)
+                            }
                         }
+                    },
+                    label: {
+                        Text("Active Skills (\(activeSkills.count))")
+                            .font(.headline)
                     }
-                }
+                )
                 
-                Section("Unused Skills (\(orphanedSkills.count))") {
-                    if orphanedSkills.isEmpty {
-                        Text("No unused skills found")
-                            .foregroundColor(.secondary)
-                    } else {
-                        ForEach(orphanedSkills.sorted(by: { $0.name < $1.name })) { skill in
-                            SkillItemView(skill: skill)
-                                .swipeActions(edge: .trailing) {
-                                    Button(role: .destructive) {
-                                        withAnimation {
-                                            // Only delete skills with no characters
-                                            if skill.characters == nil || skill.characters!.isEmpty {
-                                                context.delete(skill)
+                // Unused Skills Section with collapsible header
+                DisclosureGroup(
+                    isExpanded: $isUnusedSkillsExpanded,
+                    content: {
+                        if orphanedSkills.isEmpty {
+                            Text("No unused skills found")
+                                .foregroundColor(.secondary)
+                        } else {
+                            ForEach(orphanedSkills.sorted(by: { $0.name < $1.name })) { skill in
+                                SkillItemView(skill: skill)
+                                    .swipeActions(edge: .trailing) {
+                                        Button(role: .destructive) {
+                                            withAnimation {
+                                                // Only delete skills with no characters
+                                                if skill.characters == nil || skill.characters!.isEmpty {
+                                                    context.delete(skill)
+                                                }
                                             }
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
                                         }
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
                                     }
-                                }
+                            }
                         }
+                    },
+                    label: {
+                        Text("Unused Skills (\(orphanedSkills.count))")
+                            .font(.headline)
                     }
-                }
+                )
             }
             .searchable(text: $searchText)
             .navigationTitle("Skill Library")
@@ -85,12 +105,14 @@ struct SkillItemView: View {
                 Text(skill.skillDescription)
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true) // Allow proper wrapping
             }
             
             if skill.characters != nil && !skill.characters!.isEmpty {
                 Text("Used by: \(characterNames)")
                     .font(.caption2)
                     .foregroundColor(.blue)
+                    .fixedSize(horizontal: false, vertical: true) // Allow proper wrapping
             }
         }
         .padding(.vertical, 4)
@@ -131,12 +153,34 @@ struct SkillDetailView: View {
                 Section("Skill Information") {
                     if isEditing {
                         TextField("Name", text: $editedName)
-                        TextField("Description", text: $editedDescription)
+                            .textInputAutocapitalization(.words)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Description")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            // Enhanced multi-line text field for description
+                            TextEditor(text: $editedDescription)
+                                .font(.body)
+                                .frame(minHeight: 100)
+                                .padding(4)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(8)
+                                .textInputAutocapitalization(.sentences)
+                        }
                     } else {
                         LabeledContent("Name", value: skill.name)
                         
                         if !skill.skillDescription.isEmpty {
-                            LabeledContent("Description", value: skill.skillDescription)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Description")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                
+                                Text(skill.skillDescription)
+                                    .fixedSize(horizontal: false, vertical: true) // Allow proper wrapping
+                            }
                         }
                     }
                     
@@ -147,7 +191,16 @@ struct SkillDetailView: View {
                 if skill.characters != nil && !skill.characters!.isEmpty {
                     Section("Used By Characters") {
                         ForEach((skill.characters ?? []).sorted(by: { $0.name < $1.name })) { character in
-                            Text(character.name)
+                            VStack(alignment: .leading) {
+                                Text(character.name)
+                                    .font(.subheadline)
+                                
+                                if let set = character.set, !set.isEmpty {
+                                    Text(set)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
                         }
                     }
                 }
@@ -166,8 +219,14 @@ struct SkillDetailView: View {
                         Button("Save") {
                             // Only update if values have changed
                             if editedName != skill.name || editedDescription != skill.skillDescription {
-                                skill.name = editedName
-                                skill.skillDescription = editedDescription
+                                // Normalize the skill name
+                                skill.name = Skill.normalizeSkillName(editedName)
+                                
+                                // Clean up whitespace in description
+                                let cleanDescription = editedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+                                    .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+                                
+                                skill.skillDescription = cleanDescription
                                 try? context.save()
                             }
                             isEditing = false
