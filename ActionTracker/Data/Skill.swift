@@ -35,8 +35,12 @@ class Skill {
     static func normalizeSkillName(_ name: String) -> String {
         // First trim leading/trailing spaces
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Replace multiple spaces with single spaces
+        let noDoubleSpaces = trimmed.replacingOccurrences(of: "\\s{2,}", with: " ", options: .regularExpression)
+        
         // Then capitalize each word
-        return trimmed.capitalized
+        return noDoubleSpaces.capitalized
     }
     
     // Lowercase version of name for case-insensitive comparison

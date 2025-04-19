@@ -158,9 +158,12 @@ struct HeaderView: View {
         
         // First pass - collect unique characters by name+set combo
         for character in characters {
-            // Normalize the name and set
-            let normalizedName = character.name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-            let normalizedSet = (character.set ?? "").lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            // Normalize the name and set - trim and fix all whitespace issues
+            let trimmedName = character.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            let normalizedName = trimmedName.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression).lowercased()
+            
+            let trimmedSet = (character.set ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            let normalizedSet = trimmedSet.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression).lowercased()
             
             // Create a composite key for uniqueness
             let key = "\(normalizedName)|\(normalizedSet)"
@@ -200,13 +203,25 @@ struct HeaderView: View {
         
         // Process each unique character for CSV export
         for character in uniqueCharacters {
+            // First clean up all whitespace in both name and set
+            let cleanName = character.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                                         .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            
             // Capitalize the name properly for a character (Title Case)
-            let nameWords = character.name.split(separator: " ")
+            let nameWords = cleanName.split(separator: " ")
             let capitalizedName = nameWords.map { $0.prefix(1).uppercased() + $0.dropFirst().lowercased() }.joined(separator: " ")
             
+            // Clean up set and notes too
+            let cleanSet = (character.set ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+                                              .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            
+            let cleanNotes = (character.notes ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+                                                  .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            
+            // Escape quotes for CSV
             let name = capitalizedName.replacingOccurrences(of: "\"", with: "\"\"") 
-            let set = (character.set ?? "").replacingOccurrences(of: "\"", with: "\"\"") 
-            let notes = (character.notes ?? "").replacingOccurrences(of: "\"", with: "\"\"") 
+            let set = cleanSet.replacingOccurrences(of: "\"", with: "\"\"") 
+            let notes = cleanNotes.replacingOccurrences(of: "\"", with: "\"\"") 
             
             // Sort and normalize skill names
             let normalizedSkills = (character.skills ?? [])
@@ -273,7 +288,10 @@ struct HeaderView: View {
             
             // First pass - collect unique skills by lowercase name
             for skill in allSkills {
-                let lowerName = skill.name.lowercased()
+                // Clean up whitespace before normalization
+                let trimmedName = skill.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                let cleanName = trimmedName.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+                let lowerName = cleanName.lowercased()
                 
                 // If this lowercase name exists, keep the one with more information
                 if let existingSkill = processedSkills[lowerName] {
@@ -296,8 +314,13 @@ struct HeaderView: View {
             for skill in uniqueSkills {
                 // Use normalized name to ensure consistent capitalization
                 let name = Skill.normalizeSkillName(skill.name).replacingOccurrences(of: "\"", with: "\"\"")
-                let description = skill.skillDescription.replacingOccurrences(of: "\"", with: "\"\"")
-                let row = "\"\(name)\",\"\(description)\""
+                
+                // Clean up description whitespace
+                let cleanDescription = skill.skillDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+                                                            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+                                                            .replacingOccurrences(of: "\"", with: "\"\"")
+                
+                let row = "\"\(name)\",\"\(cleanDescription)\""
                 csvString.append(row + "\n")
             }
             
@@ -368,15 +391,19 @@ struct HeaderView: View {
                     let columns = parseCSVLine(line)
                     guard columns.count >= 2 else { continue }
                     
-                    let name = columns[0].trimmingCharacters(in: .whitespaces)
-                    let description = columns[1].trimmingCharacters(in: .whitespaces)
+                    // Clean up name and description - trim spaces and normalize internal spacing
+                    let rawName = columns[0].trimmingCharacters(in: .whitespacesAndNewlines)
+                    let cleanName = rawName.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+                    
+                    let rawDescription = columns[1].trimmingCharacters(in: .whitespacesAndNewlines)
+                    let description = rawDescription.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
                     
                     // Skip if empty name
-                    if name.isEmpty { continue }
+                    if cleanName.isEmpty { continue }
                     
                     // Check if skill with the same name (case-insensitive) already exists
                     // First normalize the name using our helper
-                    let normalizedName = Skill.normalizeSkillName(name)
+                    let normalizedName = Skill.normalizeSkillName(cleanName)
                     
                     // For predicate, we can only use exact matching without string functions
                     var skillDescriptor = FetchDescriptor<Skill>()

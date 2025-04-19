@@ -46,10 +46,21 @@ class CustomContext: NSObject, UIDocumentPickerDelegate {
                 let columns = parseCSVLine(line)
                 guard columns.count >= 4 else { continue }
 
-                let name = columns[0]
-                let set = columns[1].isEmpty ? nil : columns[1]
-                let notes = columns[2].isEmpty ? nil : columns[2]
-                let skills = columns[3].split(separator: ";").map { $0.trimmingCharacters(in: .whitespaces) }
+                // Clean and normalize input data
+                let rawName = columns[0].trimmingCharacters(in: .whitespacesAndNewlines)
+                let name = rawName.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+                
+                let rawSet = columns[1].trimmingCharacters(in: .whitespacesAndNewlines)
+                let set = rawSet.isEmpty ? nil : rawSet.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+                
+                let rawNotes = columns[2].trimmingCharacters(in: .whitespacesAndNewlines)
+                let notes = rawNotes.isEmpty ? nil : rawNotes.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+                
+                // Clean each skill name by trimming and normalizing whitespace
+                let skills = columns[3].split(separator: ";").map { skillName -> String in
+                    let trimmed = skillName.trimmingCharacters(in: .whitespacesAndNewlines)
+                    return trimmed.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+                }
 
                 // Create the character first
                 let newChar = Character(name: name, set: set, notes: notes)
