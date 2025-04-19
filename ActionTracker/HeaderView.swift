@@ -143,6 +143,30 @@ struct HeaderView: View {
         }
     }
     
+    private func exportCharacters() {
+        var csvString = "Name,Set,Notes,Skills\n"
+        for character in characters {
+            let name = character.name.replacingOccurrences(of: "\"", with: "\"\"") 
+            let set = (character.set ?? "").replacingOccurrences(of: "\"", with: "\"\"") 
+            let notes = (character.notes ?? "").replacingOccurrences(of: "\"", with: "\"\"") 
+            let skills = (character.skills ?? []).sorted { $0.position < $1.position }.map { $0.name }.joined(separator: ";").replacingOccurrences(of: "\"", with: "\"\"") 
+            let row = "\"\(name)\",\"\(set)\",\"\(notes)\",\"\(skills)\""
+            csvString.append(row + "\n")
+        }
+        
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("characters.csv")
+        do {
+            try csvString.write(to: tempURL, atomically: true, encoding: .utf8)
+            let activityVC = UIActivityViewController(activityItems: [tempURL], applicationActivities: nil)
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootVC = windowScene.windows.first?.rootViewController {
+                rootVC.present(activityVC, animated: true, completion: nil)
+            }
+        } catch {
+            print("Export failed: \(error)")
+        }
+    }
+    
     private func exportSkills() {
         // Fetch all skills
         let skillsDescriptor = FetchDescriptor<Skill>(sortBy: [SortDescriptor(\.name)])
@@ -205,8 +229,8 @@ struct HeaderView: View {
         }
     }
     
-    // Key to store the coordinator reference to prevent it from being deallocated
-    private var coordinatorKey: UInt8 = 0
+    // Static key to store the coordinator reference to prevent it from being deallocated
+    private static var coordinatorKey = "com.actiontracker.skillImportCoordinatorKey"
     
     // Coordinator class for handling skill imports
     class SkillImportCoordinator: NSObject, UIDocumentPickerDelegate {
@@ -372,7 +396,7 @@ struct HeaderView: View {
             documentPicker.delegate = coordinator
             
             // Keep a reference to the coordinator to prevent it from being deallocated
-            objc_setAssociatedObject(documentPicker, &self.coordinatorKey, coordinator, .OBJC_ASSOCIATION_RETAIN)
+            objc_setAssociatedObject(documentPicker, HeaderView.coordinatorKey, coordinator, .OBJC_ASSOCIATION_RETAIN)
             
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                let rootVC = windowScene.windows.first?.rootViewController {
