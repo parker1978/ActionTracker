@@ -20,14 +20,16 @@ struct SkillSearchView: View {
     // Returns filtered characters matching ALL selected skills, including group skills
     var filteredCharacters: [Character] {
         allCharacters.filter { character in
-            selectedSkills.allSatisfy { skill in
+            let characterSkillNames = (character.skills ?? []).map { $0.name }
+            
+            return selectedSkills.allSatisfy { skill in
                 if isGroupSkill(skill) {
                     // For a group skill, check if character has ANY of the skills in the group
                     let groupSkills = skillsInGroup(skill)
-                    return !Set(character.allSkills).isDisjoint(with: groupSkills)
+                    return !Set(characterSkillNames).isDisjoint(with: groupSkills)
                 } else {
                     // For a regular skill, character must have the exact skill
-                    return character.allSkills.contains(skill)
+                    return characterSkillNames.contains(skill)
                 }
             }
         }
@@ -42,7 +44,7 @@ struct SkillSearchView: View {
         let usedSkills = Set(selectedSkills.prefix(index))
         
         // Get all skills from relevant characters
-        let remainingSkills = characters.flatMap { $0.allSkills }
+        let remainingSkills = characters.flatMap { ($0.skills ?? []).map { $0.name } }
         
         // Remove duplicates and already selected skills
         let uniqueRemaining = Set(remainingSkills).subtracting(usedSkills)
@@ -87,7 +89,7 @@ struct SkillSearchView: View {
     
     // Get all skills that belong to a group prefix
     private func skillsInGroup(_ prefix: String) -> [String] {
-        let allSkillsList = allCharacters.flatMap { $0.allSkills }
+        let allSkillsList = allCharacters.flatMap { ($0.skills ?? []).map { $0.name } }
         
         return allSkillsList.filter { skill in
             if let colonIndex = skill.firstIndex(of: ":") {
@@ -198,6 +200,7 @@ struct SkillSearchView: View {
                                 
                                 if !searchResults.isEmpty {
                                     Section("Results") {
+                                        // Results are already sorted in performSearch()
                                         ForEach(searchResults) { character in
                                             Button {
                                                 selectedCharacter = character
@@ -207,7 +210,10 @@ struct SkillSearchView: View {
                                                         .font(.headline)
                                                     
                                                     // Highlight matched skills in the results
-                                                    SkillsView(allSkills: character.allSkills, highlightSkills: selectedSkills)
+                                                    SkillsView(
+                                                        allSkills: (character.skills ?? []).sorted { $0.position < $1.position }.map { $0.name }, 
+                                                        highlightSkills: selectedSkills
+                                                    )
                                                 }
                                                 .padding(.vertical, 4)
                                                 .foregroundColor(.primary)
@@ -238,7 +244,7 @@ struct SkillSearchView: View {
 
     private func dropdownCount() -> Int {
         // Maximum number of skill dropdowns to show
-        let maxDropdowns = min(5, allCharacters.flatMap { $0.allSkills }.count)
+        let maxDropdowns = min(5, allCharacters.flatMap { ($0.skills ?? []).map { $0.name } }.count)
         
         // Calculate how many dropdowns to show based on current selections and available skills
         var count = min(selectedSkills.count + 1, maxDropdowns)
@@ -254,11 +260,14 @@ struct SkillSearchView: View {
 
             if let currentSkill = selectedSkills[safe: i] {
                 currentSkills.append(currentSkill)
-                matching = matching.filter { $0.allSkills.contains(currentSkill) }
+                matching = matching.filter { character in 
+                    let skillNames = (character.skills ?? []).map { $0.name }
+                    return skillNames.contains(currentSkill)
+                }
                 
                 // Check if there are any remaining skills for the next dropdown
                 let usedSet = Set(currentSkills)
-                let available = Set(matching.flatMap { $0.allSkills }).subtracting(usedSet)
+                let available = Set(matching.flatMap { ($0.skills ?? []).map { $0.name } }).subtracting(usedSet)
                 
                 if available.isEmpty {
                     count = i + 1
@@ -271,7 +280,17 @@ struct SkillSearchView: View {
     }
     
     private func performSearch() {
-        searchResults = filteredCharacters
+        // Sort the filtered characters by name, then by set
+        searchResults = filteredCharacters.sorted { char1, char2 in
+            if char1.name != char2.name {
+                return char1.name < char2.name // Primary sort by name
+            } else {
+                // Secondary sort by set if names are identical
+                let set1 = char1.set ?? ""
+                let set2 = char2.set ?? ""
+                return set1 < set2
+            }
+        }
         hasSearched = true
     }
 }
@@ -289,6 +308,7 @@ struct SkillsView: View {
     private var attributedSkillsString: AttributedString {
         var result = AttributedString("")
         
+        // Get the skills sorted by position if they're from a character
         for (index, skill) in allSkills.enumerated() {
             var skillText = AttributedString(skill)
             

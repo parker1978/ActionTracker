@@ -51,8 +51,56 @@ class CustomContext: NSObject, UIDocumentPickerDelegate {
                 let notes = columns[2].isEmpty ? nil : columns[2]
                 let skills = columns[3].split(separator: ";").map { $0.trimmingCharacters(in: .whitespaces) }
 
-                let newChar = Character(name: name, set: set, allSkills: skills, notes: notes)
+                // Create the character first
+                let newChar = Character(name: name, set: set, notes: notes)
                 context.insert(newChar)
+                
+                // Create skills with the import flag set to true
+                for (index, skillName) in skills.enumerated() {
+                    // Check if skill already exists in the database
+                    let skillDescriptor = FetchDescriptor<Skill>(predicate: #Predicate<Skill> { skill in skill.name == skillName })
+                    var existingSkill: Skill?
+                    
+                    do {
+                        existingSkill = try context.fetch(skillDescriptor).first
+                    } catch {
+                        print("Error fetching skill: \(error)")
+                    }
+                    
+                    // Use existing skill or create a new one
+                    if let skill = existingSkill {
+                        // Add relationship to the character
+                        if skill.characters == nil {
+                            skill.characters = []
+                        }
+                        if newChar.skills == nil {
+                            newChar.skills = []
+                        }
+                        
+                        if !((skill.characters ?? []).contains(where: { $0.id == newChar.id })) {
+                            skill.characters?.append(newChar)
+                            // Set the proper position for this character
+                            if let characterSkill = (newChar.skills ?? []).first(where: { $0.id == skill.id }) {
+                                characterSkill.position = index
+                            }
+                        }
+                    } else {
+                        // Create a new skill with the import flag
+                        let newSkill = Skill(name: skillName, position: index, importedFlag: true)
+                        
+                        // Initialize arrays if needed
+                        if newSkill.characters == nil {
+                            newSkill.characters = []
+                        }
+                        if newChar.skills == nil {
+                            newChar.skills = []
+                        }
+                        
+                        newSkill.characters?.append(newChar)
+                        newChar.skills?.append(newSkill)
+                        context.insert(newSkill)
+                    }
+                }
             }
             
             // Save changes immediately

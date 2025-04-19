@@ -15,7 +15,7 @@ struct AddCharacterView: View {
     @State private var name: String = ""
     @State private var set: String = ""
     @State private var notes: String = ""
-    @State private var skillInputs: [String] = [""]
+    @State private var skillInputs: [(name: String, skillDescription: String)] = [("", "")]
     @State private var showingValidationAlert = false
     @State private var errorMessage = ""
     @FocusState private var focusField: Field?
@@ -26,12 +26,13 @@ struct AddCharacterView: View {
         case name
         case set
         case notes
-        case skill(Int)
+        case skillName(Int)
+        case skillDesc(Int)
     }
     
     var canSave: Bool {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && 
-        !skillInputs.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }.isEmpty
+        !skillInputs.filter { !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }.isEmpty
     }
     
     var isEditing: Bool {
@@ -45,7 +46,10 @@ struct AddCharacterView: View {
             _name = State(initialValue: character.name)
             _set = State(initialValue: character.set ?? "")
             _notes = State(initialValue: character.notes ?? "")
-            _skillInputs = State(initialValue: character.allSkills.isEmpty ? [""] : character.allSkills)
+            
+            // Get skills from the character, sorted by position
+            let sortedSkills = (character.skills ?? []).sorted { $0.position < $1.position }
+            _skillInputs = State(initialValue: sortedSkills.isEmpty ? [("", "")] : sortedSkills.map { ($0.name, $0.skillDescription) })
         }
     }
     
@@ -71,7 +75,7 @@ struct AddCharacterView: View {
                 if errorMessage.contains("name") {
                     focusField = .name
                 } else {
-                    focusField = .skill(0)
+                    focusField = .skillName(0)
                 }
             }
         } message: {
@@ -125,37 +129,52 @@ struct AddCharacterView: View {
     }
     
     private func skillRow(for index: Int) -> some View {
-        HStack {
-            TextField("Skill \(index + 1)", text: Binding(
-                get: { skillInputs[index] },
-                set: { skillInputs[index] = $0 }
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                TextField("Skill \(index + 1)", text: Binding(
+                    get: { skillInputs[index].name },
+                    set: { skillInputs[index].name = $0 }
+                ))
+                .textInputAutocapitalization(.words)
+                .focused($focusField, equals: .skillName(index))
+                .submitLabel(.next)
+                .onSubmit {
+                    focusField = .skillDesc(index)
+                }
+                
+                if index > 0 {
+                    Button {
+                        withAnimation {
+                            removeSkill(at: index)
+                        }
+                    } label: {
+                        Image(systemName: "minus.circle.fill")
+                            .foregroundColor(.red)
+                    }
+                }
+            }
+            
+            TextField("Description (optional)", text: Binding(
+                get: { skillInputs[index].skillDescription },
+                set: { skillInputs[index].skillDescription = $0 }
             ))
-            .textInputAutocapitalization(.words)
-            .focused($focusField, equals: .skill(index))
+            .textInputAutocapitalization(.sentences)
+            .font(.caption)
+            .focused($focusField, equals: .skillDesc(index))
             .submitLabel(index == skillInputs.count - 1 ? .done : .next)
             .onSubmit {
                 handleSkillSubmit(at: index)
             }
-            
-            if index > 0 {
-                Button {
-                    withAnimation {
-                        removeSkill(at: index)
-                    }
-                } label: {
-                    Image(systemName: "minus.circle.fill")
-                        .foregroundColor(.red)
-                }
-            }
         }
+        .padding(.vertical, 4)
     }
     
     private var addSkillButton: some View {
         Button {
             withAnimation {
-                skillInputs.append("")
+                skillInputs.append(("", ""))
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    focusField = .skill(skillInputs.count - 1)
+                    focusField = .skillName(skillInputs.count - 1)
                 }
             }
         } label: {
@@ -204,9 +223,13 @@ struct AddCharacterView: View {
                 set.append(text)
             case .notes:
                 notes.append(text)
-            case .skill(let index):
+            case .skillName(let index):
                 if index < skillInputs.count {
-                    skillInputs[index].append(text)
+                    skillInputs[index].name.append(text)
+                }
+            case .skillDesc(let index):
+                if index < skillInputs.count {
+                    skillInputs[index].skillDescription.append(text)
                 }
             }
         }
@@ -233,12 +256,12 @@ struct AddCharacterView: View {
     
     private func handleSkillSubmit(at index: Int) {
         if index == skillInputs.count - 1 {
-            skillInputs.append("")
+            skillInputs.append(("", ""))
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                focusField = .skill(index + 1)
+                focusField = .skillName(index + 1)
             }
         } else {
-            focusField = .skill(index + 1)
+            focusField = .skillName(index + 1)
         }
     }
     
@@ -250,9 +273,12 @@ struct AddCharacterView: View {
     
     private func saveCharacter() {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Process skill inputs, cleaning names and preserving descriptions
         let cleanedSkills = skillInputs
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
+            .map { (name: $0.name.trimmingCharacters(in: .whitespacesAndNewlines), 
+                   skillDescription: $0.skillDescription.trimmingCharacters(in: .whitespacesAndNewlines)) }
+            .filter { !$0.name.isEmpty }
         
         if trimmedName.isEmpty {
             errorMessage = "Please enter a character name"
@@ -273,17 +299,144 @@ struct AddCharacterView: View {
             // Update existing character
             existingCharacter.name = trimmedName
             existingCharacter.set = trimmedSet
-            existingCharacter.allSkills = cleanedSkills
             existingCharacter.notes = trimmedNotes
+            
+            // Get new skill names to determine what to keep
+            let newSkillNames = cleanedSkills.map { $0.name }
+            let newSkillsSet = Set(newSkillNames)
+            
+            // Create dictionary to store existing skills by name
+            var skillsByName: [String: Skill] = [:]
+            for skill in (existingCharacter.skills ?? []) {
+                skillsByName[skill.name] = skill
+            }
+            
+            // Create skills array if nil
+            if existingCharacter.skills == nil {
+                existingCharacter.skills = []
+            }
+            
+            // Remove skills that are no longer in the list
+            existingCharacter.skills?.removeAll { !newSkillsSet.contains($0.name) }
+            
+            // Add or update skills
+            for (index, skillData) in cleanedSkills.enumerated() {
+                let skillName = skillData.name
+                let skillDescription = skillData.skillDescription
+                
+                if let existingSkill = skillsByName[skillName] {
+                    // Update the position of the existing skill
+                    existingSkill.position = index
+                    
+                    // Only update description if it's not empty and the existing one is empty
+                    if !skillDescription.isEmpty && existingSkill.skillDescription.isEmpty {
+                        existingSkill.skillDescription = skillDescription
+                    }
+                } else {
+                    // Check if the skill already exists in the database
+                    let skillDescriptor = FetchDescriptor<Skill>(predicate: #Predicate<Skill> { skill in skill.name == skillName })
+                    var skill: Skill
+                    
+                    do {
+                        // Try to find the skill in the database
+                        if let existingSkill = try context.fetch(skillDescriptor).first {
+                            skill = existingSkill
+                            
+                            // Update description if provided and existing is empty
+                            if !skillDescription.isEmpty && existingSkill.skillDescription.isEmpty {
+                                existingSkill.skillDescription = skillDescription
+                            }
+                        } else {
+                            // Create a new skill if it doesn't exist
+                            skill = Skill(name: skillName, skillDescription: skillDescription, position: index, manual: true)
+                            context.insert(skill)
+                        }
+                        
+                        // Add the skill to the character
+                        if skill.characters == nil {
+                            skill.characters = []
+                        }
+                        skill.characters?.append(existingCharacter)
+                        existingCharacter.skills?.append(skill)
+                    } catch {
+                        print("Error fetching or creating skill: \(error)")
+                        // Create a new skill anyway if there was an error
+                        skill = Skill(name: skillName, skillDescription: skillDescription, position: index, manual: true)
+                        context.insert(skill)
+                        if skill.characters == nil {
+                            skill.characters = []
+                        }
+                        skill.characters?.append(existingCharacter)
+                        existingCharacter.skills?.append(skill)
+                    }
+                }
+            }
         } else {
             // Create new character
             let newCharacter = Character(
                 name: trimmedName,
                 set: trimmedSet,
-                allSkills: cleanedSkills,
                 notes: trimmedNotes
             )
             context.insert(newCharacter)
+            
+            // Initialize skills array if needed
+            if newCharacter.skills == nil {
+                newCharacter.skills = []
+            }
+            
+            // Create or reference skills
+            for (index, skillData) in cleanedSkills.enumerated() {
+                let skillName = skillData.name
+                let skillDescription = skillData.skillDescription
+                
+                // Check if the skill already exists in the database
+                let skillDescriptor = FetchDescriptor<Skill>(predicate: #Predicate<Skill> { skill in skill.name == skillName })
+                var skill: Skill
+                
+                do {
+                    // Try to find the skill in the database
+                    if let existingSkill = try context.fetch(skillDescriptor).first {
+                        skill = existingSkill
+                        
+                        // Update description if provided and existing is empty
+                        if !skillDescription.isEmpty && existingSkill.skillDescription.isEmpty {
+                            existingSkill.skillDescription = skillDescription
+                        }
+                    } else {
+                        // Create a new skill if it doesn't exist
+                        skill = Skill(name: skillName, skillDescription: skillDescription, position: index, manual: true)
+                        context.insert(skill)
+                    }
+                    
+                    // Initialize characters array if needed
+                    if skill.characters == nil {
+                        skill.characters = []
+                    }
+                    
+                    // Add the skill to the character
+                    skill.characters?.append(newCharacter)
+                    newCharacter.skills?.append(skill)
+                } catch {
+                    print("Error fetching or creating skill: \(error)")
+                    // Create a new skill anyway if there was an error
+                    skill = Skill(name: skillName, skillDescription: skillDescription, position: index, manual: true)
+                    context.insert(skill)
+                    if skill.characters == nil {
+                        skill.characters = []
+                    }
+                    skill.characters?.append(newCharacter)
+                    newCharacter.skills?.append(skill)
+                }
+            }
+        }
+        
+        // Try to save changes to persist the data
+        do {
+            try context.save()
+            print("Successfully saved character data")
+        } catch {
+            print("Failed to save character data: \(error)")
         }
         
         dismiss()

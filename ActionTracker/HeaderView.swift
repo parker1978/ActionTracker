@@ -21,6 +21,7 @@ struct HeaderView: View {
     @Binding var actionItems: [ActionItem]
     @Binding var isShowingAddCharacter: Bool
     @State private var addWiggle: Bool = false
+    @State private var showingSkillLibrary: Bool = false
     
     @Query(sort: \Character.name) var characters: [Character]
     @Environment(\.modelContext) private var context
@@ -74,6 +75,14 @@ struct HeaderView: View {
                                 .symbolEffect(.wiggle, value: addWiggle)
                         }
                     }
+                    
+                    Button {
+                        showingSkillLibrary = true
+                    } label: {
+                        Text("Skill Library")
+                        Image(systemName: "book.fill")
+                    }
+                    
                     Button {
                         importCharacters()
                     } label: {
@@ -86,6 +95,26 @@ struct HeaderView: View {
                         Text("Export Characters")
                         Image(systemName: "square.and.arrow.up.fill")
                     }
+                    
+                    Divider()
+                    
+                    Button(role: .destructive) {
+                        wipeAllCharacters()
+                    } label: {
+                        Label("Wipe All Characters", systemImage: "trash.fill")
+                    }
+                    
+                    Button(role: .destructive) {
+                        wipeAllSkills()
+                    } label: {
+                        Label("Wipe All Skills", systemImage: "trash.fill")
+                    }
+                    
+                    Button(role: .destructive) {
+                        wipeAllData()
+                    } label: {
+                        Label("Wipe All Data", systemImage: "exclamationmark.triangle.fill")
+                    }
                 }
             } label: {
                 Image(systemName: "ellipsis.circle")
@@ -94,6 +123,9 @@ struct HeaderView: View {
             }
         }
         .padding(.horizontal)
+        .sheet(isPresented: $showingSkillLibrary) {
+            SkillView()
+        }
     }
     
     private func exportCharacters() {
@@ -102,7 +134,7 @@ struct HeaderView: View {
             let name = character.name.replacingOccurrences(of: "\"", with: "\"\"") 
             let set = (character.set ?? "").replacingOccurrences(of: "\"", with: "\"\"") 
             let notes = (character.notes ?? "").replacingOccurrences(of: "\"", with: "\"\"") 
-            let skills = character.allSkills.joined(separator: ";").replacingOccurrences(of: "\"", with: "\"\"") 
+            let skills = (character.skills ?? []).sorted { $0.position < $1.position }.map { $0.name }.joined(separator: ";").replacingOccurrences(of: "\"", with: "\"\"") 
             let row = "\"\(name)\",\"\(set)\",\"\(notes)\",\"\(skills)\""
             csvString.append(row + "\n")
         }
@@ -155,6 +187,167 @@ struct HeaderView: View {
             rootVC.present(alert, animated: true, completion: nil)
         }
         return
+    }
+    
+    // MARK: - Data Wiping Functions
+    
+    private func wipeAllCharacters() {
+        // Show confirmation alert
+        let alert = UIAlertController(
+            title: "Delete All Characters",
+            message: "This will delete ALL characters in the database. Skills will remain but will be orphaned. This action cannot be undone.",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Delete All", style: .destructive) { _ in
+            self.executeWipeAllCharacters()
+        })
+        
+        // Present the alert
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootVC = windowScene.windows.first?.rootViewController {
+            rootVC.present(alert, animated: true)
+        }
+    }
+    
+    private func executeWipeAllCharacters() {
+        do {
+            // 1. Fetch all characters
+            let allCharacters = try context.fetch(FetchDescriptor<Character>())
+            
+            // 2. Delete all characters
+            for character in allCharacters {
+                context.delete(character)
+            }
+            
+            // 3. Save changes
+            try context.save()
+        } catch {
+            print("Error wiping characters: \(error)")
+            
+            // Show error alert
+            let alert = UIAlertController(
+                title: "Error",
+                message: "Failed to delete characters: \(error.localizedDescription)",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootVC = windowScene.windows.first?.rootViewController {
+                rootVC.present(alert, animated: true)
+            }
+        }
+    }
+    
+    private func wipeAllSkills() {
+        // Show confirmation alert
+        let alert = UIAlertController(
+            title: "Delete All Skills",
+            message: "This will delete ALL skills in the database and remove them from all characters. This action cannot be undone.",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Delete All", style: .destructive) { _ in
+            self.executeWipeAllSkills()
+        })
+        
+        // Present the alert
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootVC = windowScene.windows.first?.rootViewController {
+            rootVC.present(alert, animated: true)
+        }
+    }
+    
+    private func executeWipeAllSkills() {
+        do {
+            // 1. First, clear skills from all characters
+            for character in characters {
+                character.skills = []
+            }
+            
+            // 2. Fetch all skills
+            let allSkills = try context.fetch(FetchDescriptor<Skill>())
+            
+            // 3. Delete all skills
+            for skill in allSkills {
+                context.delete(skill)
+            }
+            
+            // 4. Save changes
+            try context.save()
+        } catch {
+            print("Error wiping skills: \(error)")
+            
+            // Show error alert
+            let alert = UIAlertController(
+                title: "Error",
+                message: "Failed to delete skills: \(error.localizedDescription)",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootVC = windowScene.windows.first?.rootViewController {
+                rootVC.present(alert, animated: true)
+            }
+        }
+    }
+    
+    private func wipeAllData() {
+        // Show confirmation alert
+        let alert = UIAlertController(
+            title: "Delete ALL Data",
+            message: "This will delete ALL characters AND skills in the database. The database will be completely empty. This action cannot be undone.",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Delete Everything", style: .destructive) { _ in
+            self.executeWipeAllData()
+        })
+        
+        // Present the alert
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootVC = windowScene.windows.first?.rootViewController {
+            rootVC.present(alert, animated: true)
+        }
+    }
+    
+    private func executeWipeAllData() {
+        do {
+            // 1. First, delete all characters
+            let allCharacters = try context.fetch(FetchDescriptor<Character>())
+            for character in allCharacters {
+                context.delete(character)
+            }
+            
+            // 2. Then, delete all skills
+            let allSkills = try context.fetch(FetchDescriptor<Skill>())
+            for skill in allSkills {
+                context.delete(skill)
+            }
+            
+            // 3. Save changes
+            try context.save()
+        } catch {
+            print("Error wiping all data: \(error)")
+            
+            // Show error alert
+            let alert = UIAlertController(
+                title: "Error",
+                message: "Failed to delete all data: \(error.localizedDescription)",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootVC = windowScene.windows.first?.rootViewController {
+                rootVC.present(alert, animated: true)
+            }
+        }
     }
 }
 
