@@ -396,7 +396,7 @@ struct HeaderView: View {
                     let cleanName = rawName.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
                     
                     let rawDescription = columns[1].trimmingCharacters(in: .whitespacesAndNewlines)
-                    let description = rawDescription.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+                    let cleanDescription = rawDescription.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
                     
                     // Skip if empty name
                     if cleanName.isEmpty { continue }
@@ -416,7 +416,7 @@ struct HeaderView: View {
                         
                         if existingSkills.isEmpty {
                             // Create new skill - Note: Skill initializer will normalize the name automatically
-                            let newSkill = Skill(name: name, skillDescription: description, manual: true, importedFlag: true)
+                            let newSkill = Skill(name: cleanName, skillDescription: cleanDescription, manual: true, importedFlag: true)
                             modelContext.insert(newSkill)
                             importedCount += 1
                         } else {
@@ -424,8 +424,8 @@ struct HeaderView: View {
                             skippedCount += 1
                             
                             // Optionally update description if the existing one is empty
-                            if let existingSkill = existingSkills.first, existingSkill.skillDescription.isEmpty && !description.isEmpty {
-                                existingSkill.skillDescription = description
+                            if let existingSkill = existingSkills.first, existingSkill.skillDescription.isEmpty && !cleanDescription.isEmpty {
+                                existingSkill.skillDescription = cleanDescription
                             }
                         }
                     } catch {
