@@ -121,19 +121,19 @@ struct HeaderView: View {
                     Button(role: .destructive) {
                         wipeAllCharacters()
                     } label: {
-                        Label("Wipe All Characters", systemImage: "trash.fill")
+                        Label("Delete All Characters", systemImage: "trash.fill")
                     }
                     
                     Button(role: .destructive) {
                         wipeAllSkills()
                     } label: {
-                        Label("Wipe All Skills", systemImage: "trash.fill")
+                        Label("Delete All Skills", systemImage: "trash.fill")
                     }
                     
                     Button(role: .destructive) {
                         wipeAllData()
                     } label: {
-                        Label("Wipe All Data", systemImage: "exclamationmark.triangle.fill")
+                        Label("Delete All Data", systemImage: "exclamationmark.triangle.fill")
                     }
                 }
             } label: {
