@@ -20,7 +20,7 @@ struct ActionTrackerApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .modelContainer(for: [Character.self, Skill.self], isAutosaveEnabled: true)
+                .modelContainer(for: [Character.self, Skill.self, Campaign.self, Mission.self], isAutosaveEnabled: true)
                 .onAppear {
                     // Reset the persistent store if there was an error with migrations
                     if UserDefaults.standard.bool(forKey: "swiftdata_reset_needed") {

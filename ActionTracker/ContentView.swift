@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
     // Persist state using AppStorage
@@ -26,10 +27,13 @@ struct ContentView: View {
                        actionItems: $actionItems, 
                        isShowingAddCharacter: $isShowingAddCharacter)
             
-            if currentView == .action {
+            switch currentView {
+            case .action:
                 ActionView(actionItems: $actionItems)
-            } else {
+            case .character:
                 CharacterListView(isShowingAddCharacter: $isShowingAddCharacter)
+            case .campaign:
+                CampaignView()
             }
         }
         .onChange(of: keepAwake) {
@@ -37,7 +41,16 @@ struct ContentView: View {
         }
         .onChange(of: currentView) { _, newValue in
             // Save the view type when it changes
-            activeViewString = newValue == .action ? "action" : "character"
+            print(newValue)
+            switch newValue {
+            case .action:
+                activeViewString = "action"
+            case .character:
+                activeViewString = "character"
+            case .campaign:
+                activeViewString = "campaign"
+            }
+            // activeViewString = newValue == .action ? "action" : "character"
         }
         .onChange(of: actionItems) { _, newItems in
             // Save actionItems when they change
@@ -45,7 +58,17 @@ struct ContentView: View {
         }
         .onAppear {
             // Initialize the view state from AppStorage
-            currentView = activeViewString == "action" ? .action : .character
+            switch activeViewString {
+            case "action":
+                currentView = .action
+            case "character":
+                currentView = .character
+            case "campaign":
+                currentView = .campaign
+            default:
+                currentView = .action
+            }
+            // currentView = activeViewString == "action" ? .action : .character
             
             // Load saved actions if available, otherwise use defaults
             if let savedItems = loadActionItems() {

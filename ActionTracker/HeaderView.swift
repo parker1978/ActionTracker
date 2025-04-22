@@ -13,6 +13,7 @@ import UIKit
 enum ViewType {
     case action
     case character
+    case campaign
 }
 
 struct HeaderView: View {
@@ -26,9 +27,20 @@ struct HeaderView: View {
     @Query(sort: \Character.name) var characters: [Character]
     @Environment(\.modelContext) private var context
     
+    var title: String {
+        switch currentView {
+        case .action:
+            return "Actions"
+        case .character:
+            return "Characters"
+        case .campaign:
+            return "Campaigns"
+        }
+    }
+    
     var body: some View {
         HStack {
-            Text(currentView == .action ? "Actions" : "Characters")
+            Text(title)
                 .font(.largeTitle.bold())
             
             Spacer()
@@ -51,10 +63,35 @@ struct HeaderView: View {
 
                 Button {
                     withAnimation(.snappy) {
-                        currentView = currentView == .action ? .character : .action
+                        currentView = .action
                     }
                 } label: {
-                    Label(currentView == .action ? "Switch to Characters" : "Switch to Actions", systemImage: "arrow.triangle.2.circlepath")
+                    Label(
+                        "Switch to Actions",
+                        systemImage: "checkmark.seal.fill"
+                    )
+                }
+                
+                Button {
+                    withAnimation(.snappy) {
+                        currentView = .character
+                    }
+                } label: {
+                    Label(
+                        "Switch to Characters",
+                        systemImage: "person.2.fill"
+                    )
+                }
+
+                Button {
+                    withAnimation(.snappy) {
+                        currentView = .campaign
+                    }
+                } label: {
+                    Label(
+                        "Switch to Campaigns",
+                        systemImage: "list.bullet.clipboard"
+                    )
                 }
                 
                 if currentView == .action {
