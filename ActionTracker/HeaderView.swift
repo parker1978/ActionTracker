@@ -94,11 +94,12 @@ struct HeaderView: View {
                     )
                 }
                 
-                if currentView == .action {
+                switch currentView {
+                case .action:
+                    Divider ()
+                    
                     Button(role: .destructive) {
-                        withAnimation(.easeOut) {
-                            actionItems = ActionItem.defaultActions()
-                        }
+                        resetActions()
                     } label: {
                         HStack {
                             Text("Reset Actions")
@@ -106,7 +107,9 @@ struct HeaderView: View {
                         }
                         .foregroundColor(.red)
                     }
-                } else {
+                case .character:
+                    Divider()
+                    
                     Button {
                         isShowingAddCharacter = true
                         addWiggle.toggle()
@@ -124,58 +127,91 @@ struct HeaderView: View {
                         Text("Skill Library")
                         Image(systemName: "book.fill")
                     }
-                    
-                    Menu {
-                        // Import options
-                        Button {
-                            importCharacters()
-                        } label: {
-                            Label("Import Characters", systemImage: "square.and.arrow.down.fill")
-                        }
-                        
-                        Button {
-                            importSkills()
-                        } label: {
-                            Label("Import Skills", systemImage: "square.and.arrow.down.on.square.fill")
-                        }
-                        
-                        Divider()
-                        
-                        // Export options
-                        Button {
-                            exportCharacters()
-                        } label: {
-                            Label("Export Characters", systemImage: "square.and.arrow.up.fill")
-                        }
-                        
-                        Button {
-                            exportSkills()
-                        } label: {
-                            Label("Export Skills", systemImage: "square.and.arrow.up.on.square.fill")
-                        }
-                    } label: {
-                        Label("Import/Export", systemImage: "square.and.arrow.up.down.fill")
-                    }
-                    
+                case .campaign:
                     Divider()
                     
                     Button(role: .destructive) {
-                        wipeAllCharacters()
+                        withAnimation(.easeOut(duration: 30)) {
+                            wipeAllCampaigns()
+                        }
                     } label: {
-                        Label("Delete All Characters", systemImage: "trash.fill")
+                        HStack {
+                            Text("Reset Campaigns")
+                            Image(systemName: "trash")
+                        }
+                        .foregroundColor(.red)
                     }
+                }
+                Divider()
+                
+                Menu {
+                    // Import options
+                    Button {
+                        importCharacters()
+                    } label: {
+                        Label(
+                            "Import Characters",
+                            systemImage: "square.and.arrow.down.fill"
+                        )
+                    }
+                        
+                    Button {
+                        importSkills()
+                    } label: {
+                        Label(
+                            "Import Skills",
+                            systemImage: "square.and.arrow.down.on.square.fill"
+                        )
+                    }
+                        
+                    Divider()
+                        
+                    // Export options
+                    Button {
+                        exportCharacters()
+                    } label: {
+                        Label(
+                            "Export Characters",
+                            systemImage: "square.and.arrow.up.fill"
+                        )
+                    }
+                        
+                    Button {
+                        exportSkills()
+                    } label: {
+                        Label(
+                            "Export Skills",
+                            systemImage: "square.and.arrow.up.on.square.fill"
+                        )
+                    }
+                } label: {
+                    Label(
+                        "Import/Export",
+                        systemImage: "square.and.arrow.up.down.fill"
+                    )
+                }
                     
-                    Button(role: .destructive) {
-                        wipeAllSkills()
-                    } label: {
-                        Label("Delete All Skills", systemImage: "trash.fill")
-                    }
+                Divider()
                     
-                    Button(role: .destructive) {
-                        wipeAllData()
-                    } label: {
-                        Label("Delete All Data", systemImage: "exclamationmark.triangle.fill")
-                    }
+                Button(role: .destructive) {
+                    wipeAllCharacters()
+                } label: {
+                    Label("Delete All Characters", systemImage: "trash.fill")
+                }
+                    
+                Button(role: .destructive) {
+                    wipeAllSkills()
+                } label: {
+                    Label("Delete All Skills", systemImage: "trash.fill")
+                }
+                    
+                Button(role: .destructive) {
+                    wipeAllData()
+                } label: {
+                    Label(
+                        "Delete All Data",
+                        systemImage: "exclamationmark.triangle.fill"
+                    )
                 }
             } label: {
                 Image(systemName: "ellipsis.circle")
@@ -665,6 +701,31 @@ struct HeaderView: View {
     }
     
     // MARK: - Data Wiping Functions
+    private func resetActions() {
+        // Show confirmation alert
+        let alert = UIAlertController(
+            title: "Reset All Actions",
+            message: "This will reset ALL to the default 3 starting actions. This action cannot be undone.",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Reset All", style: .destructive) { _ in
+            self.executeResetActions()
+        })
+        
+        // Present the alert
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootVC = windowScene.windows.first?.rootViewController {
+            rootVC.present(alert, animated: true)
+        }
+    }
+    
+    private func executeResetActions() {
+        withAnimation(.easeOut(duration: 30)) {
+            actionItems = ActionItem.defaultActions()
+        }
+    }
     
     private func wipeAllCharacters() {
         // Show confirmation alert
@@ -705,6 +766,52 @@ struct HeaderView: View {
             let alert = UIAlertController(
                 title: "Error",
                 message: "Failed to delete characters: \(error.localizedDescription)",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootVC = windowScene.windows.first?.rootViewController {
+                rootVC.present(alert, animated: true)
+            }
+        }
+    }
+    
+    private func wipeAllCampaigns() {
+        // Show confirmation alert
+        let alert = UIAlertController(
+            title: "Wipe All Campaigns",
+            message: "This will delete ALL campaigns in the database. This action cannot be undone.",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Delete All", style: .destructive) { _ in
+            self.executeWipeAllCampaigns()
+        })
+        
+        // Present the alert
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootVC = windowScene.windows.first?.rootViewController {
+            rootVC.present(alert, animated: true)
+        }
+    }
+    
+    private func executeWipeAllCampaigns() {
+        do {
+            let allCampaigns = try context.fetch(FetchDescriptor<Campaign>())
+            
+            for campaign in allCampaigns {
+                context.delete(campaign)
+            }
+            
+            try context.save()
+        } catch {
+            print("Error wiping campaigns: \(error)")
+            
+            let alert = UIAlertController(
+                title: "Error",
+                message: "Failed to delete campaigns: \(error.localizedDescription)",
                 preferredStyle: .alert
             )
             alert.addAction(UIAlertAction(title: "OK", style: .default))
