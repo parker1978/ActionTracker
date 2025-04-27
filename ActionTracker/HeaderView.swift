@@ -9,6 +9,9 @@ import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 import UIKit
+import Foundation
+
+// Removed menu tracking
 
 enum ViewType {
     case action
@@ -24,6 +27,18 @@ struct HeaderView: View {
     @State private var addWiggle: Bool = false
     @State private var showingSkillLibrary: Bool = false
     
+    // Timer related state - simplified
+    @State private var timerStartDate: Date? = nil
+    @State private var elapsedTime: TimeInterval = 0
+    @State private var showResetConfirmation: Bool = false
+    @State private var showStopConfirmation: Bool = false
+    @State private var showGameSummary: Bool = false
+    @State private var gameEndDate: Date? = nil
+    @State private var displayPaused: Bool = false
+    
+    // Binding to share timer state with parent and siblings
+    @Binding var timerRunningBinding: Bool
+    
     @Query(sort: \Character.name) var characters: [Character]
     @Environment(\.modelContext) private var context
     
@@ -38,10 +53,76 @@ struct HeaderView: View {
         }
     }
     
+    // Format the elapsed time - hours and minutes only
+    var formattedElapsedTime: String {
+        let hours = Int(elapsedTime) / 3600
+        let minutes = (Int(elapsedTime) % 3600) / 60
+        
+        // Always show hours and minutes only (no seconds)
+        return String(format: "%02d:%02d", hours, minutes)
+    }
+    
     var body: some View {
         HStack {
             Text(title)
                 .font(.largeTitle.bold())
+                
+            Spacer()
+            
+            // Timer display - only show in action view
+            if (timerRunningBinding || (timerStartDate != nil && !timerRunningBinding)) && currentView == .action {
+                HStack(spacing: 4) {
+                    // Show icon based on timer state
+                    if timerRunningBinding {
+                        if displayPaused {
+                            // Paused state - show pause icon
+                            Image(systemName: "pause.fill")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        } else {
+                            // Active state - no icon needed
+                        }
+                    } else if timerStartDate != nil {
+                        // Stopped state
+                        Image(systemName: "stop.fill")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    }
+                    
+                    // Timer text with simple styling based on state
+                    Text(formattedElapsedTime)
+                        .font(.title2.monospacedDigit())
+                        .foregroundColor(getTimerTextColor())
+                        .contentTransition(.numericText())
+                        .animation(displayPaused ? nil : .easeInOut, value: elapsedTime)
+                }
+                .padding(8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(getTimerBackgroundColor())
+                        .animation(.easeInOut(duration: 0.2), value: timerRunningBinding)
+                        .animation(.easeInOut(duration: 0.2), value: displayPaused)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(getTimerBorderColor(), lineWidth: 1.5)
+                        .animation(.easeInOut(duration: 0.2), value: timerRunningBinding)
+                        .animation(.easeInOut(duration: 0.2), value: displayPaused)
+                )
+                .onTapGesture {
+                    // Only allow pause/unpause when timer is running
+                    if timerRunningBinding {
+                        withAnimation {
+                            displayPaused.toggle()
+                        }
+                        
+                        // When unpausing, update immediately
+                        if !displayPaused {
+                            updateElapsedTime()
+                        }
+                    }
+                }
+            }
             
             Spacer()
             
@@ -51,97 +132,133 @@ struct HeaderView: View {
             }
             
             Menu {
-                Button {
-                    keepAwake.toggle()
-                    UIApplication.shared.isIdleTimerDisabled = keepAwake
-                } label: {
-                    Label(keepAwake ? "Disable Keep Awake" : "Enable Keep Awake", systemImage: keepAwake ? "moon" : "sun.max")
-                }
-                .onAppear {
-                    UIApplication.shared.isIdleTimerDisabled = keepAwake
-                }
-
-                Button {
-                    withAnimation(.snappy) {
-                        currentView = .action
-                    }
-                } label: {
-                    Label(
-                        "Switch to Actions",
-                        systemImage: "checkmark.seal.fill"
-                    )
-                }
-                
-                Button {
-                    withAnimation(.snappy) {
-                        currentView = .character
-                    }
-                } label: {
-                    Label(
-                        "Switch to Characters",
-                        systemImage: "person.2.fill"
-                    )
-                }
-
-                Button {
-                    withAnimation(.snappy) {
-                        currentView = .campaign
-                    }
-                } label: {
-                    Label(
-                        "Switch to Campaigns",
-                        systemImage: "list.bullet.clipboard"
-                    )
-                }
-                
-                switch currentView {
-                case .action:
-                    Divider ()
-                    
-                    Button(role: .destructive) {
-                        resetActions()
+                    Button {
+                        keepAwake.toggle()
+                        UIApplication.shared.isIdleTimerDisabled = keepAwake
                     } label: {
-                        HStack {
-                            Text("Reset Actions")
-                            Image(systemName: "trash")
-                        }
-                        .foregroundColor(.red)
+                        Label(keepAwake ? "Disable Keep Awake" : "Enable Keep Awake", systemImage: keepAwake ? "moon" : "sun.max")
                     }
-                case .character:
-                    Divider()
+                    .onAppear {
+                        UIApplication.shared.isIdleTimerDisabled = keepAwake
+                    }
+
+                    Button {
+                        withAnimation(.snappy) {
+                            currentView = .action
+                        }
+                    } label: {
+                        Label(
+                            "Switch to Actions",
+                            systemImage: "checkmark.seal.fill"
+                        )
+                    }
+                
+                    Button {
+                        withAnimation(.snappy) {
+                            currentView = .character
+                        }
+                    } label: {
+                        Label(
+                            "Switch to Characters",
+                            systemImage: "person.2.fill"
+                        )
+                    }
+
+                    Button {
+                        withAnimation(.snappy) {
+                            currentView = .campaign
+                        }
+                    } label: {
+                        Label(
+                            "Switch to Campaigns",
+                            systemImage: "list.bullet.clipboard"
+                        )
+                    }
+                
+                    switch currentView {
+                    case .action:
+                        Divider ()
+                        
+                        Button(role: .destructive) {
+                            resetActions()
+                        } label: {
+                            HStack {
+                                Text("Reset Actions")
+                                Image(systemName: "trash")
+                            }
+                            .foregroundColor(.red)
+                        }
+                    case .character:
+                        Divider()
+                        
+                        Button {
+                            isShowingAddCharacter = true
+                            addWiggle.toggle()
+                        } label: {
+                            HStack {
+                                Text("Add Character")
+                                Image(systemName: "plus.circle.fill")
+                                    .symbolEffect(.wiggle, value: addWiggle)
+                            }
+                        }
+                        
+                        Button {
+                            showingSkillLibrary = true
+                        } label: {
+                            Text("Skill Library")
+                            Image(systemName: "book.fill")
+                        }
+                    case .campaign:
+                        Divider()
+                        
+                        Button(role: .destructive) {
+                            withAnimation(.easeOut(duration: 30)) {
+                                wipeAllCampaigns()
+                            }
+                        } label: {
+                            HStack {
+                                Text("Reset Campaigns")
+                                Image(systemName: "trash")
+                            }
+                            .foregroundColor(.red)
+                        }
+                    }
+                Divider()
+                
+                Menu {
+                    Button {
+                        startTimer()
+                    } label: {
+                        Label(
+                            "Start",
+                            systemImage: "timer"
+                        )
+                    }
+                    .disabled(timerRunningBinding)
                     
                     Button {
-                        isShowingAddCharacter = true
-                        addWiggle.toggle()
+                        showResetConfirmation = true
                     } label: {
-                        HStack {
-                            Text("Add Character")
-                            Image(systemName: "plus.circle.fill")
-                                .symbolEffect(.wiggle, value: addWiggle)
-                        }
+                        Label(
+                            "Reset",
+                            systemImage: "clock.arrow.trianglehead.2.counterclockwise.rotate.90"
+                        )
                     }
+                    .disabled(timerStartDate == nil)
                     
                     Button {
-                        showingSkillLibrary = true
+                        showStopConfirmation = true
                     } label: {
-                        Text("Skill Library")
-                        Image(systemName: "book.fill")
+                        Label(
+                            "Stop",
+                            systemImage: "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90"
+                        )
                     }
-                case .campaign:
-                    Divider()
-                    
-                    Button(role: .destructive) {
-                        withAnimation(.easeOut(duration: 30)) {
-                            wipeAllCampaigns()
-                        }
-                    } label: {
-                        HStack {
-                            Text("Reset Campaigns")
-                            Image(systemName: "trash")
-                        }
-                        .foregroundColor(.red)
-                    }
+                    .disabled(!timerRunningBinding)
+                } label: {
+                    Text("Timer")
                 }
+                
                 Divider()
                 
                 Menu {
@@ -225,6 +342,136 @@ struct HeaderView: View {
         }
         .sheet(isPresented: $showingSkillLibrary) {
             SkillView()
+        }
+        .confirmationDialog("Reset Timer?", isPresented: $showResetConfirmation) {
+            Button("Reset", role: .destructive) {
+                resetTimer()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to reset the timer? This will restart the timer at 00:00:00.")
+        }
+        .confirmationDialog("Stop Timer?", isPresented: $showStopConfirmation) {
+            Button("Stop", role: .destructive) {
+                stopTimer()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to stop the timer? This will end the current game session.")
+        }
+        .alert("Game Summary", isPresented: $showGameSummary) {
+            Button("OK") {}
+        } message: {
+            if let startDate = timerStartDate, let endDate = gameEndDate {
+                let startFormatter = DateFormatter()
+                startFormatter.dateStyle = .none
+                startFormatter.timeStyle = .short  // HH:MM format
+                
+                let endFormatter = DateFormatter()
+                endFormatter.dateStyle = .none
+                endFormatter.timeStyle = .short    // HH:MM format
+                
+                let durationHours = Int(elapsedTime) / 3600
+                let durationMinutes = (Int(elapsedTime) % 3600) / 60
+                
+                // Just hours and minutes for simplicity
+                return Text("Game session started at \(startFormatter.string(from: startDate)) and ended at \(endFormatter.string(from: endDate)).\n\nTotal game time: \(durationHours)h \(durationMinutes)m")
+            } else {
+                return Text("Game session ended.")
+            }
+        }
+        .onReceive(Timer.publish(every: 60, on: .main, in: .common).autoconnect()) { _ in
+            // Update once per minute to keep timer showing the right time
+            // Since we only display HH:MM, updating more frequently isn't needed
+            if timerRunningBinding && !displayPaused {
+                updateElapsedTime()
+            }
+        }
+        // Also update every second in background (while not displaying)
+        // This ensures we have the correct time even when paused
+        .onReceive(Timer.publish(every: 10, on: .main, in: .common).autoconnect()) { _ in
+            if timerRunningBinding {
+                // Silent update - just calculate time but don't update display
+                // This ensures when we unpause, we have the correct time
+                if let startDate = timerStartDate {
+                    // Store but don't display if paused
+                    elapsedTime = Date().timeIntervalSince(startDate)
+                }
+            }
+        }
+    }
+    
+    // Timer functions - simplified
+    private func startTimer() {
+        // Start a new timer
+        timerStartDate = Date()
+        timerRunningBinding = true
+        displayPaused = false  // Always start with display active
+        elapsedTime = 0
+        updateElapsedTime()    // Initialize with proper time
+    }
+    
+    private func resetTimer() {
+        // Reset the timer to current time
+        timerStartDate = Date()
+        timerRunningBinding = true
+        displayPaused = false  // Always reset with display active
+        elapsedTime = 0
+        updateElapsedTime()    // Initialize with proper time
+    }
+    
+    private func stopTimer() {
+        timerRunningBinding = false
+        gameEndDate = Date()
+        showGameSummary = true
+    }
+    
+    // Helper functions for timer display
+    private func updateElapsedTime() {
+        if let startDate = timerStartDate {
+            elapsedTime = Date().timeIntervalSince(startDate)
+        }
+    }
+    
+    // Get the appropriate text color based on timer state
+    private func getTimerTextColor() -> Color {
+        if !timerRunningBinding && timerStartDate != nil {
+            // Stopped state - red text
+            return .red
+        } else if displayPaused {
+            // Paused state - grey text
+            return .secondary
+        } else {
+            // Running state - white/primary text
+            return .primary
+        }
+    }
+    
+    // Get the appropriate background color based on timer state
+    private func getTimerBackgroundColor() -> Color {
+        if !timerRunningBinding && timerStartDate != nil {
+            // Stopped state - light red background
+            return Color.red.opacity(0.1)
+        } else if displayPaused {
+            // Paused state - light grey background
+            return Color(UIColor.secondarySystemBackground).opacity(0.3)
+        } else {
+            // Running state - subtle blue background
+            return Color.blue.opacity(0.05)
+        }
+    }
+    
+    // Get the appropriate border color based on timer state
+    private func getTimerBorderColor() -> Color {
+        if !timerRunningBinding && timerStartDate != nil {
+            // Stopped state - red border
+            return Color.red.opacity(0.3)
+        } else if displayPaused {
+            // Paused state - grey border
+            return Color.secondary.opacity(0.3)
+        } else {
+            // Running state - blue border
+            return Color.blue.opacity(0.3)
         }
     }
     
@@ -934,5 +1181,13 @@ struct HeaderView: View {
 }
 
 #Preview {
-    ContentView()
+    struct PreviewWrapper: View {
+        @State private var timerRunning: Bool = false
+        
+        var body: some View {
+            ContentView()
+        }
+    }
+    
+    return PreviewWrapper()
 }

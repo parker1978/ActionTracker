@@ -17,6 +17,9 @@ struct ContentView: View {
     @State private var currentView: ViewType = .action
     @State private var isShowingAddCharacter = false
     
+    // Timer state
+    @State private var timerIsRunning: Bool = false
+    
     // Actions state with custom persistence via Codable
     @State private var actionItems: [ActionItem] = []
     
@@ -25,7 +28,8 @@ struct ContentView: View {
             HeaderView(keepAwake: $keepAwake, 
                        currentView: $currentView, 
                        actionItems: $actionItems, 
-                       isShowingAddCharacter: $isShowingAddCharacter)
+                       isShowingAddCharacter: $isShowingAddCharacter,
+                       timerRunningBinding: $timerIsRunning)
             
             switch currentView {
             case .action:
