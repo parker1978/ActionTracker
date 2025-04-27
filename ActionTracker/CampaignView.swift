@@ -928,17 +928,22 @@ struct CharacterSelectorView: View {
             }
         } else if searchText.lowercased().hasPrefix("skill:") {
             let skillQuery = searchText.dropFirst(6).trimmingCharacters(in: .whitespaces)
-            return characters.filter { 
-                ($0.skills ?? []).contains { 
+            return characters.filter { char in
+                // unwrap or default to empty
+                let skills = char.skills ?? []
+                return skills.contains {
                     $0.name.localizedCaseInsensitiveContains(skillQuery)
                 }
             }
         } else {
             // Standard search - name or any skill
-            return characters.filter {
-                $0.name.localizedCaseInsensitiveContains(searchText) ||
-                ($0.skills ?? []).contains { $0.name.localizedCaseInsensitiveContains(searchText) } ||
-                (($0.set ?? "").localizedCaseInsensitiveContains(searchText))
+            // → Around line 940: standard search (name OR any skill OR set)
+            return characters.filter { char in
+                let skills = char.skills ?? []
+                return
+                    char.name.localizedCaseInsensitiveContains(searchText) ||
+                    skills.contains { $0.name.localizedCaseInsensitiveContains(searchText) } ||
+                    (char.set ?? "").localizedCaseInsensitiveContains(searchText)
             }
         }
     }
@@ -962,8 +967,8 @@ struct CharacterSelectorView: View {
                                 Text(character.set?.isEmpty == false ? "\(character.name) (\(character.set!))" : character.name)
                                     .font(.headline)
                                 // Display skills sorted by position
-                                if let skills = character.skills, !skills.isEmpty {
-                                    SkillsWithDescriptionView(skills: skills.sorted { $0.position < $1.position })
+                                if !(character.skills ?? []).isEmpty {
+                                    SkillsWithDescriptionView(skills: (character.skills ?? []).sorted { $0.position < $1.position })
                                 }
                             }
                             .foregroundColor(.primary)
@@ -995,53 +1000,3 @@ struct CharacterSelectorView: View {
     }
 }
 
-// Already declared in CharacterListView, so we don't need to redeclare it here
-
-#Preview {
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    do {
-        let schema = Schema([Campaign.self, Mission.self, Character.self, Skill.self])
-        let container = try ModelContainer(for: schema, configurations: config)
-
-        // Add a sample character
-        let character = Character(name: "John Doe", set: "Core Box", allSkills: ["Steady Aim", "First Aid"])
-        container.mainContext.insert(character)
-        
-        let campaign = Campaign(
-            campaignName: "Fort Hendrix",
-            survivorName: "John Doe"
-        )
-        campaign.totalCXP = 12
-        campaign.campaignSkills = ["Sniper", "Night Vision"]
-        campaign.bonusActions = 2
-        campaign.campaignAchievements = ["Saved Base", "Rescued Civilians"]
-        campaign.equipmentKept = ["M4 Rifle", "First Aid Kit"]
-
-        let mission1 = Mission(
-            missionName: "Secure the Gates",
-            cxpEarned: 6,
-            objectivesCompleted: ["Gate Secured"],
-            bonusActionsUsed: 1,
-            equipmentGained: ["Ammo Pack"]
-        )
-
-        let mission2 = Mission(
-            missionName: "Night Raid",
-            cxpEarned: 6,
-            objectivesCompleted: ["Intel Gathered"],
-            bonusActionsUsed: 1,
-            equipmentGained: ["Flashlight"]
-        )
-
-        container.mainContext.insert(campaign)
-        campaign.missions?.append(contentsOf: [mission1, mission2])
-
-        return NavigationStack {
-            CampaignView()
-                .modelContainer(container)
-        }
-    } catch {
-        return Text("Preview failed: \(error.localizedDescription)")
-            .padding()
-    }
-}

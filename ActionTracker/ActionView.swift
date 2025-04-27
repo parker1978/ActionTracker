@@ -6,9 +6,13 @@
 //
 
 import SwiftUI
+import SwiftData
 import TipKit
 
 struct ActionView: View {
+    // Central app state model
+    @EnvironmentObject private var appViewModel: AppViewModel
+    
     @Binding var actionItems: [ActionItem]
     @Binding var timerIsRunning: Bool
     @State private var showActions: Bool = false
@@ -16,109 +20,12 @@ struct ActionView: View {
     @State private var addBounce: Bool = false
     @State private var shouldRotate: Bool = false
     
-    // Experience tracking
-    @AppStorage("playerExperience") private var experience: Int = 0
-    @AppStorage("ultraRedCount") private var ultraRedCount: Int = 0
-    @AppStorage("totalExperienceGained") private var totalExperienceGained: Int = 0
-    
     var availableActions: Int {
         actionItems.filter { !$0.isUsed }.count
     }
     
     var actionActions: Int {
         actionItems.filter { $0.label.hasPrefix("Action") }.count
-    }
-    
-    // Helper functions for experience tracking
-    
-    // Get color based on experience level
-    private func getExperienceColor() -> Color {
-        // For starting level
-        if experience == 0 {
-            return .gray
-        }
-        
-        // Determine cycle (1-based) and base level
-        let cycle = ((experience - 1) / 43) + 1
-        let baseLevel = ((experience - 1) % 43) + 1
-        
-        // Base colors
-        let blueColor = Color(red: 0.0, green: 0.5, blue: 1.0)
-        let yellowColor = Color(red: 1.0, green: 0.84, blue: 0.0)
-        let orangeColor = Color(red: 1.0, green: 0.6, blue: 0.0)
-        let redColor = Color(red: 1.0, green: 0.2, blue: 0.2)
-        
-        // In Ultra-Red mode (cycle > 1), use more intense colors
-        if cycle > 1 {
-            // For Ultra-Red cycles, use more vibrant colors with subtle glow effect
-            switch baseLevel {
-            case 1...6:
-                // Ultra-Blue: more vibrant blue
-                return Color(red: 0.1, green: 0.4, blue: 1.0)
-            case 7...18:
-                // Ultra-Yellow: more vibrant yellow/gold
-                return Color(red: 1.0, green: 0.85, blue: 0.2)
-            case 19...42:
-                // Ultra-Orange: more vibrant orange
-                return Color(red: 1.0, green: 0.5, blue: 0.0)
-            case 43:
-                // Ultra-Red: bright crimson red
-                return Color(red: 0.85, green: 0.0, blue: 0.0)
-            default:
-                return .gray
-            }
-        } else {
-            // Standard colors for first cycle
-            switch baseLevel {
-            case 1...6:
-                return blueColor
-            case 7...18:
-                return yellowColor
-            case 19...42:
-                return orangeColor
-            case 43:
-                return redColor
-            default:
-                return .gray
-            }
-        }
-    }
-    
-    // Get level label based on experience
-    private func getLevelLabel() -> String {
-        if experience == 0 {
-            return "Novice"
-        }
-        
-        // Calculate which cycle we're in (0-based)
-        let baseLevel = experience == 0 ? 0 : ((experience - 1) % 43) + 1
-        
-        // Determine level name based only on the base level
-        switch baseLevel {
-        case 1...6:
-            return "Blue"
-        case 7...18:
-            return "Yellow"
-        case 19...42:
-            return "Orange"
-        case 43:
-            return "Red"
-        default:
-            return "Novice"
-        }
-    }
-    
-    // Check if in ultra-red mode (beyond first level 43)
-    private func isUltraMode() -> Bool {
-        return experience > 43
-    }
-    
-    // Get the current base level (1-43)
-    private func getCurrentBaseLevel() -> Int {
-        if experience == 0 {
-            return 0
-        }
-        return ((experience - 1) % 43) + 1
     }
 
     func waitForTraySelection() async -> ActionItem? {
@@ -130,8 +37,31 @@ struct ActionView: View {
 
     var body: some View {
         VStack {
-            // Header with available actions counter and control buttons
+            // Header with character selector and available actions counter
             HStack {
+                // Character Selection Button
+                Button(action: {
+                    appViewModel.showCharacterPicker = true
+                }) {
+                    HStack {
+                        if let character = appViewModel.selectedCharacter, character.isFavorite {
+                            Image(systemName: "star.fill")
+                                .foregroundColor(.yellow)
+                                .font(.caption)
+                        }
+                        Image(systemName: "person.fill")
+                        Text(appViewModel.selectedCharacter?.name ?? "Select Character")
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .strokeBorder(Color.blue.opacity(0.5), lineWidth: 1)
+                    )
+                }
+                
                 Spacer()
                 
                 Text("Actions Available: \(availableActions)")
@@ -139,7 +69,7 @@ struct ActionView: View {
             }
             .padding(.horizontal)
             
-            // List showing each action as an HStack with a toggle and a text field
+            // List showing each action with identity for efficient updates
             List {
                 ForEach(actionItems.indices, id: \.self) { index in
                     HStack {
@@ -155,6 +85,8 @@ struct ActionView: View {
                         })
                         .buttonStyle(BorderlessButtonStyle())
                     }
+                    // Use id to ensure proper identification for ForEach
+                    .id("action_\(index)_\(actionItems[index].label)")
                     // Enable swipe-to-delete only for actions beyond the first three
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         if index >= 3 {
@@ -172,12 +104,42 @@ struct ActionView: View {
                 try? Tips.configure()
             }
             
+            // Active Skills Display
+            if let character = appViewModel.selectedCharacter {
+                ActiveSkillsView(
+                    character: character,
+                    experience: appViewModel.experience,
+                    showSkillManager: $appViewModel.showSkillManager
+                )
+                .padding(.horizontal)
+                .padding(.bottom, 6) // Add space between skills and experience section
+            } else {
+                // Simple placeholder when no character selected
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text("Active Skills:")
+                            .font(.headline)
+                        Spacer()
+                    }
+                    Text("No character selected")
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal)
+                .padding(.vertical)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(Color.gray.opacity(0.3), lineWidth: 1)
+                        .padding(.horizontal, 10)
+                )
+                .padding(.bottom, 6) // Add space between message and experience section
+            }
+            
             // Experience tracking and controls
             VStack(spacing: 12) {
                 // ULTRA banner (only when in ultra mode - experience > 43)
-                if experience > 43 {
+                if appViewModel.isUltraMode() {
                     // Calculate which Ultra cycle we're in (0-based)
-                    let ultraCycle = ((experience - 1) / 43)
+                    let ultraCycle = ((appViewModel.experience - 1) / 43)
                     
                     // First Ultra cycle (ultraCycle = 1) shows just "ULTRA"
                     // Second Ultra cycle (ultraCycle = 2) shows "ULTRA X"
@@ -200,25 +162,26 @@ struct ActionView: View {
                 // Experience level indicator
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Level: \(getLevelLabel())")
+                        Text("Level: \(appViewModel.getLevelLabel())")
                             .font(.headline)
-                            .foregroundColor(getExperienceColor())
+                            .foregroundColor(appViewModel.getExperienceColor())
                     }
                     .padding(.horizontal)
                     
                     Spacer()
                     
                     VStack(alignment: .trailing, spacing: 2) {
-                        Text("XP: \(getCurrentBaseLevel())/43")
+                        Text("XP: \(appViewModel.getCurrentBaseLevel())/43")
                             .font(.headline)
-                            .foregroundColor(getExperienceColor())
+                            .foregroundColor(appViewModel.getExperienceColor())
                     }
                     .padding(.horizontal)
                 }
                 .padding(.vertical, 8)
+                .frame(maxWidth: .infinity) // Ensure same width as skills section
                 .background(
                     RoundedRectangle(cornerRadius: 8)
-                        .strokeBorder(getExperienceColor(), lineWidth: 2)
+                        .strokeBorder(appViewModel.getExperienceColor(), lineWidth: 2)
                         .padding(.horizontal, 8)
                 )
                 
@@ -230,26 +193,13 @@ struct ActionView: View {
                     
                     Spacer()
                     
-                    Stepper(value: $experience, in: 0...Int.max, step: 1) {
-                        Text("\(experience)")
-                            .foregroundColor(getExperienceColor())
+                    Stepper(value: Binding(
+                        get: { appViewModel.experience },
+                        set: { appViewModel.updateExperience($0) }
+                    ), in: 0...Int.max, step: 1) {
+                        Text("\(appViewModel.experience)")
+                            .foregroundColor(appViewModel.getExperienceColor())
                             .fontWeight(.bold)
-                    }
-                    .onChange(of: experience) { oldValue, newValue in
-                        // Track total experience gained
-                        if newValue > oldValue {
-                            totalExperienceGained += (newValue - oldValue)
-                        }
-                        
-                        // Handle level transitions - base level calculation is crucial
-                        let oldBaseLevel = oldValue == 0 ? 0 : ((oldValue - 1) % 43) + 1
-                        let newBaseLevel = newValue == 0 ? 0 : ((newValue - 1) % 43) + 1
-                        
-                        // When base level goes from 43 to something higher (which would wrap to 1+)
-                        if oldBaseLevel == 43 && newBaseLevel < oldBaseLevel && newValue > oldValue {
-                            // We've gone past level 43 - increment ultra count
-                            ultraRedCount += 1
-                        }
                     }
                 }
                 .padding(.horizontal)
@@ -307,6 +257,17 @@ struct ActionView: View {
                 }
             }
         }
+        .sheet(isPresented: $appViewModel.showCharacterPicker) {
+            CharacterPickerView()
+        }
+        .sheet(isPresented: $appViewModel.showSkillManager) {
+            if let character = appViewModel.selectedCharacter {
+                SkillManagerView(
+                    character: character,
+                    experience: appViewModel.experience
+                )
+            }
+        }
         .systemTrayView($showActions) {
             TrayView { selectedAction in
                 trayContinuation?.resume(returning: selectedAction)
@@ -316,12 +277,19 @@ struct ActionView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ResetExperience"))) { _ in
             // Reset all experience tracking when notification is received
-            experience = 0
-            ultraRedCount = 0
-            totalExperienceGained = 0
+            appViewModel.resetExperience()
+            
+            // Reset all actions to unused state
+            for index in actionItems.indices {
+                actionItems[index].isUsed = false
+            }
+            
+            // Also clear the selected character
+            appViewModel.clearSelectedCharacter()
         }
     }
     
+    // Renumber action items to maintain a clean sequence 
     func renumberActionItems() {
         var expectedNumber = 1
         for index in actionItems.indices where actionItems[index].label.hasPrefix("Action") {

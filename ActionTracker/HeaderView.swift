@@ -498,25 +498,24 @@ struct HeaderView: View {
             
             // If this name/set combo exists, keep the one with more information
             if let existingChar = processedCharacters[key] {
-                // Decide which to keep based on notes and skills
+                // Treat a nil skills array as “0” skills
                 let existingSkillCount = existingChar.skills?.count ?? 0
-                let newSkillCount = character.skills?.count ?? 0
+                let newSkillCount      = character.skills?.count     ?? 0
                 let existingNotesLength = existingChar.notes?.count ?? 0
-                let newNotesLength = character.notes?.count ?? 0
-                
-                // If the new character has more information, use it instead
-                if newSkillCount > existingSkillCount || 
+                let newNotesLength      = character.notes?.count     ?? 0
+
+                // Now both are Int, so you can compare safely
+                if newSkillCount > existingSkillCount ||
                    (newSkillCount == existingSkillCount && newNotesLength > existingNotesLength) {
                     processedCharacters[key] = character
                 }
             } else {
-                // First time seeing this name/set combo
                 processedCharacters[key] = character
             }
         }
         
-        // Generate CSV content
-        var csvString = "Name,Set,Notes,Skills\n"
+        // Generate CSV content - updated header for the new format
+        var csvString = "Name,Set,Notes,Blue,Orange,Red\n"
         
         // Sort the unique characters alphabetically by name, then by set
         let uniqueCharacters = processedCharacters.values.sorted { char1, char2 in
@@ -551,14 +550,37 @@ struct HeaderView: View {
             let set = cleanSet.replacingOccurrences(of: "\"", with: "\"\"") 
             let notes = cleanNotes.replacingOccurrences(of: "\"", with: "\"\"") 
             
-            // Sort and normalize skill names
-            let normalizedSkills = (character.skills ?? [])
-                .sorted { $0.position < $1.position }
-                .map { Skill.normalizeSkillName($0.name) }
-                .joined(separator: ";")
-                .replacingOccurrences(of: "\"", with: "\"\"") 
+            // Group skills by color
+            var blueSkills: [String] = []
+            var orangeSkills: [String] = []
+            var redSkills: [String] = []
             
-            let row = "\"\(name)\",\"\(set)\",\"\(notes)\",\"\(normalizedSkills)\""
+            // Sort skills by position and group by color
+            if let sortedSkills = character.skills?
+                                    .sorted(by: { $0.position < $1.position }) {
+                for skill in sortedSkills {
+                    let normalizedName = Skill.normalizeSkillName(skill.name)
+
+                    switch skill.color {
+                    case .blue:
+                        blueSkills.append(normalizedName)
+                    case .orange:
+                        orangeSkills.append(normalizedName)
+                    case .red:
+                        redSkills.append(normalizedName)
+                    case .none:
+                        break   // or handle missing color if needed
+                    }
+                }
+            }
+            
+            // Join skills by color with semicolons and escape quotes
+            let blueSkillsStr = blueSkills.joined(separator: ";").replacingOccurrences(of: "\"", with: "\"\"")
+            let orangeSkillsStr = orangeSkills.joined(separator: ";").replacingOccurrences(of: "\"", with: "\"\"")
+            let redSkillsStr = redSkills.joined(separator: ";").replacingOccurrences(of: "\"", with: "\"\"")
+            
+            // Create the CSV row with the new format
+            let row = "\"\(name)\",\"\(set)\",\"\(notes)\",\"\(blueSkillsStr)\",\"\(orangeSkillsStr)\",\"\(redSkillsStr)\""
             csvString.append(row + "\n")
         }
         
@@ -744,7 +766,7 @@ struct HeaderView: View {
                         
                         if existingSkills.isEmpty {
                             // Create new skill - Note: Skill initializer will normalize the name automatically
-                            let newSkill = Skill(name: cleanName, skillDescription: cleanDescription, manual: true, importedFlag: true)
+                            let newSkill = Skill(name: cleanName, skillDescription: cleanDescription, manual: true, importedFlag: true, color: .blue)
                             modelContext.insert(newSkill)
                             importedCount += 1
                         } else {
@@ -878,7 +900,24 @@ struct HeaderView: View {
         CustomContext.shared.configure(with: context) {
             // This will be called after successful import
             print("Import completed, refreshing view...")
-            try? context.save()
+            
+            // Important: Save the context and send a notification
+            do {
+                try context.save()
+                print("Context saved after import")
+                
+                // Verify character count from the context that's using the view
+                let verifyCount = try context.fetch(FetchDescriptor<Character>()).count
+                print("Verified after import completion: \(verifyCount) characters in UI context")
+                
+                // Force refresh notification
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    print("==== SENDING REFRESH NOTIFICATION AFTER IMPORT ====")
+                    NotificationCenter.default.post(name: NSNotification.Name("RefreshCharacterData"), object: nil)
+                }
+            } catch {
+                print("Error saving context after import: \(error)")
+            }
         }
         
         let alert = UIAlertController(
@@ -888,8 +927,13 @@ struct HeaderView: View {
             
             Make sure your CSV has this format:
             
-            Name,Set,Notes,Skills
-            "Dean Winchester","Supernatural","Some notes","Brother In Arms: Tough;Is That All You Got?;Taunt;+1 Free Ranged Action;Bloodlust: Melee;Regeneration"
+            Name,Set,Notes,Blue,Orange,Red
+            "Adam","","Special","Zombie Link","+1 To Dice Roll: Melee;Distributor","+1 Damage: Combat;+1 Free Action: Combat;Born Leader"
+            
+            - Blue skills are active by default
+            - Orange skills can be activated at XP 19
+            - Red skills can be activated at XP 43
+            - Multiple skills in the same power level are separated by ";"
             """,
             preferredStyle: .alert
         )
@@ -955,7 +999,7 @@ struct HeaderView: View {
     private func resetActions() {
         // Get current experience for the summary
         let currentExperience = UserDefaults.standard.integer(forKey: "playerExperience")
-        let totalExperienceGained = UserDefaults.standard.integer(forKey: "totalExperienceGained")
+        _ = UserDefaults.standard.integer(forKey: "totalExperienceGained")
         
         // Show confirmation alert with experience info
         let alert = UIAlertController(

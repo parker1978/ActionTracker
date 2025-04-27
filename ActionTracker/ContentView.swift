@@ -9,6 +9,12 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    // Main app state via EnvironmentObject
+    @EnvironmentObject private var appViewModel: AppViewModel
+    
+    // Required SwiftData model context to configure the view model
+    @Environment(\.modelContext) private var modelContext
+    
     // Persist state using AppStorage
     @AppStorage("keepAwakeEnabled") private var keepAwake: Bool = false
     @AppStorage("activeViewTab") private var activeViewString: String = "action"
@@ -45,7 +51,6 @@ struct ContentView: View {
         }
         .onChange(of: currentView) { _, newValue in
             // Save the view type when it changes
-            print(newValue)
             switch newValue {
             case .action:
                 activeViewString = "action"
@@ -54,13 +59,15 @@ struct ContentView: View {
             case .campaign:
                 activeViewString = "campaign"
             }
-            // activeViewString = newValue == .action ? "action" : "character"
         }
         .onChange(of: actionItems) { _, newItems in
             // Save actionItems when they change
             saveActionItems(newItems)
         }
         .onAppear {
+            // Initialize the AppViewModel with the model context
+            appViewModel.configure(with: modelContext)
+            
             // Initialize the view state from AppStorage
             switch activeViewString {
             case "action":
@@ -72,7 +79,6 @@ struct ContentView: View {
             default:
                 currentView = .action
             }
-            // currentView = activeViewString == "action" ? .action : .character
             
             // Load saved actions if available, otherwise use defaults
             if let savedItems = loadActionItems() {
@@ -86,13 +92,20 @@ struct ContentView: View {
         }
     }
     
-    // Save action items to UserDefaults
+    // Save action items to UserDefaults - now in a more efficient way
     private func saveActionItems(_ items: [ActionItem]) {
-        guard let encoded = try? JSONEncoder().encode(items) else {
-            print("Failed to encode action items")
-            return
+        Task {
+            // Move encoding to background thread
+            guard let encoded = try? JSONEncoder().encode(items) else {
+                print("Failed to encode action items")
+                return
+            }
+            
+            // UI updates back on main thread
+            await MainActor.run {
+                UserDefaults.standard.set(encoded, forKey: "savedActionItems")
+            }
         }
-        UserDefaults.standard.set(encoded, forKey: "savedActionItems")
     }
     
     // Load action items from UserDefaults
@@ -107,4 +120,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(AppViewModel())
 }

@@ -9,6 +9,8 @@ import SwiftUI
 import SwiftData
 import OSLog
 
+// We'll use the standard modelContainer modifier instead of a shared container
+
 @main
 struct ActionTrackerApp: App {
     // Setup logger
@@ -17,10 +19,14 @@ struct ActionTrackerApp: App {
     // Create a simplified SwiftData container
     @State private var modelContainerError: Error?
     
+    // Main app state manager as a single source of truth
+    @StateObject private var appViewModel = AppViewModel()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .modelContainer(for: [Character.self, Skill.self, Campaign.self, Mission.self], isAutosaveEnabled: true)
+                .modelContainer(for: [Character.self, Skill.self, Campaign.self, Mission.self])
+                .environmentObject(appViewModel)
                 .onAppear {
                     // Reset the persistent store if there was an error with migrations
                     if UserDefaults.standard.bool(forKey: "swiftdata_reset_needed") {

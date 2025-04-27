@@ -14,58 +14,152 @@ class Character {
     var name: String = ""
     var set: String?
     var notes: String?
+    var isFavorite: Bool = false
     
     // Many-to-many relationship with skills - made optional for CloudKit compatibility
+    var blueSkills: [String] = []
+    var orangeSkills: [String] = []
+    var redSkills: [String] = []
+    
+    // Active skills per power level 
+    var activeBlueSkills: [String] = []
+    var activeOrangeSkills: [String] = []
+    var activeRedSkills: [String] = []
+    
+    // Optional relationship for CloudKit compatibility
+    @Relationship(deleteRule: .cascade)
     var skills: [Skill]? = []
     
-    // Deprecated: Kept for migration purposes only
-    @Transient
-    var allSkills: [String] {
-        get {
-            return (skills ?? []).sorted { $0.position < $1.position }.map { $0.name }
-        }
-        set {
-            // Migration support: This will be used when loading old data
-            // Convert string skills to Skill objects
-            let existingSkillNames = Set((skills ?? []).map { $0.name })
-            let newSkillsSet = Set(newValue)
-            
-            // Create skills array if nil
+    init(name: String, set: String? = nil, notes: String? = nil, isFavorite: Bool = false, blueSkills: [String] = [], orangeSkills: [String] = [], redSkills: [String] = []) {
+        self.name = name
+        self.set = set
+        self.notes = notes
+        self.isFavorite = isFavorite
+        self.blueSkills = blueSkills
+        self.orangeSkills = orangeSkills
+        self.redSkills = redSkills
+        
+        // Blue skills start active by default
+        self.activeBlueSkills = blueSkills
+        
+        // Only create skill objects if we have actual skills
+        if !blueSkills.isEmpty || !orangeSkills.isEmpty || !redSkills.isEmpty {
+            // Ensure skills array is initialized
             if skills == nil {
                 skills = []
             }
             
-            // Remove skills that are no longer present
-            skills?.removeAll { !newSkillsSet.contains($0.name) }
-            
-            // Add new skills
-            for (index, skillName) in newValue.enumerated() {
-                if !existingSkillNames.contains(skillName) {
-                    // Create a new skill
-                    let newSkill = Skill(name: skillName, position: index, manual: true)
-                    skills?.append(newSkill)
-                } else {
-                    // Update position of existing skill
-                    if let skill = skills?.first(where: { $0.name == skillName }) {
-                        skill.position = index
-                    }
-                }
+            // Convert string skills to Skill objects
+            var skillPosition = 0
+    
+            for skillName in blueSkills {
+                let skill = Skill(name: skillName, position: skillPosition, manual: true, color: .blue)
+                skills?.append(skill)
+                skillPosition += 1
+            }
+    
+            for skillName in orangeSkills {
+                let skill = Skill(name: skillName, position: skillPosition, manual: true, color: .orange)
+                skills?.append(skill)
+                skillPosition += 1
+            }
+    
+            for skillName in redSkills {
+                let skill = Skill(name: skillName, position: skillPosition, manual: true, color: .red)
+                skills?.append(skill)
+                skillPosition += 1
             }
         }
     }
     
-    init(name: String, set: String? = nil, allSkills: [String] = [], notes: String? = nil) {
-        self.name = name
-        self.set = set
-        self.notes = notes
-        self.skills = [] // Initialize with empty array
+    // Returns all active skills in proper order (blue, orange, red) - optimized version
+    func allActiveSkills() -> [String] {
+        // Pre-allocate capacity to avoid multiple array resizing operations
+        var result = [String]()
+        result.reserveCapacity(activeBlueSkills.count + activeOrangeSkills.count + activeRedSkills.count)
         
-        // Convert string skills to Skill objects
-        for (index, skillName) in allSkills.enumerated() {
-            let skill = Skill(name: skillName, position: index, manual: true)
-            
-            // Add the relationship
-            skills?.append(skill)
+        // Append using a single operation for each color
+        result.append(contentsOf: activeBlueSkills)
+        result.append(contentsOf: activeOrangeSkills)
+        result.append(contentsOf: activeRedSkills)
+        
+        return result
+    }
+    
+    // Activates a skill based on experience level
+    func activateSkill(name: String, color: SkillColor) -> Bool {
+        switch color {
+        case .blue:
+            // Blue skills are always active by default
+            if !activeBlueSkills.contains(name) && blueSkills.contains(name) {
+                activeBlueSkills.append(name)
+                return true
+            }
+        case .orange:
+            if !activeOrangeSkills.contains(name) && orangeSkills.contains(name) {
+                activeOrangeSkills.append(name)
+                return true
+            }
+        case .red:
+            if !activeRedSkills.contains(name) && redSkills.contains(name) {
+                activeRedSkills.append(name)
+                return true
+            }
         }
+        return false
+    }
+    
+    // Deactivates a skill
+    func deactivateSkill(name: String, color: SkillColor) -> Bool {
+        switch color {
+        case .blue:
+            if let index = activeBlueSkills.firstIndex(of: name) {
+                activeBlueSkills.remove(at: index)
+                return true
+            }
+        case .orange:
+            if let index = activeOrangeSkills.firstIndex(of: name) {
+                activeOrangeSkills.remove(at: index)
+                return true
+            }
+        case .red:
+            if let index = activeRedSkills.firstIndex(of: name) {
+                activeRedSkills.remove(at: index)
+                return true
+            }
+        }
+        return false
+    }
+    
+    // Returns skills that can be activated based on experience level
+    func availableSkillsForExperience(_ experience: Int) -> (blue: [String], orange: [String], red: [String]) {
+        // Blue skills are always available
+        let availableBlueSkills = blueSkills.filter { !activeBlueSkills.contains($0) }
+        
+        // Orange skills become available at XP 19
+        var availableOrangeSkills: [String] = []
+        
+        // Calculate how many orange skills can be activated based on XP
+        if experience >= 19 {
+            let cyclesPast19 = (experience - 19) / 43
+            let maxActiveOrange = 1 + cyclesPast19
+            if activeOrangeSkills.count < maxActiveOrange {
+                availableOrangeSkills = orangeSkills.filter { !activeOrangeSkills.contains($0) }
+            }
+        }
+        
+        // Red skills become available at XP 43
+        var availableRedSkills: [String] = []
+        
+        // Calculate how many red skills can be activated based on XP
+        if experience >= 43 {
+            let cyclesPast43 = (experience - 43) / 43 + 1
+            let maxActiveRed = cyclesPast43
+            if activeRedSkills.count < maxActiveRed {
+                availableRedSkills = redSkills.filter { !activeRedSkills.contains($0) }
+            }
+        }
+        
+        return (availableBlueSkills, availableOrangeSkills, availableRedSkills)
     }
 }

@@ -9,7 +9,8 @@ import SwiftUI
 import SwiftData
 
 struct CharacterListView: View {
-    @Query(sort: \Character.name) var characters: [Character]
+    // Use State instead of Query as a workaround for SwiftData issues
+    @State private var characters: [Character] = []
     @State private var searchText = ""
     @Binding var isShowingAddCharacter: Bool
     @State private var selectedCharacter: Character?
@@ -62,6 +63,9 @@ struct CharacterListView: View {
                             Button("Refresh Data") {
                                 refreshDataModel()
                             }
+                            Button("Create Test Character") {
+                                createTestCharacter()
+                            }
                             Text(debugMessage)
                         }
                         
@@ -79,11 +83,30 @@ struct CharacterListView: View {
                                     // Navigate to edit character
                                     selectedCharacter = character
                                 } label: {
-                                    VStack(alignment: .leading) {
-                                        Text(character.set?.isEmpty == false ? "\(character.name) (\(character.set!))" : character.name)
-                                            .font(.headline)
-                                        // Display skills sorted by position with enhanced description display
-                                        SkillsWithDescriptionView(skills: (character.skills ?? []).sorted { $0.position < $1.position })
+                                    HStack {
+                                        VStack(alignment: .leading) {
+                                            HStack {
+                                                if character.isFavorite {
+                                                    Image(systemName: "star.fill")
+                                                        .foregroundColor(.yellow)
+                                                }
+                                                Text(character.set?.isEmpty == false ? "\(character.name) (\(character.set!))" : character.name)
+                                                    .font(.headline)
+                                            }
+                                            // Display skills sorted by position with enhanced description display
+                                            SkillsWithDescriptionView(skills: (character.skills ?? []).sorted { $0.position < $1.position })
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        // Favorite toggle button
+                                        Button {
+                                            toggleFavorite(character)
+                                        } label: {
+                                            Image(systemName: character.isFavorite ? "star.fill" : "star")
+                                                .foregroundColor(character.isFavorite ? .yellow : .gray)
+                                        }
+                                        .buttonStyle(BorderlessButtonStyle())
                                     }
                                     .foregroundColor(.primary)
                                 }
@@ -140,6 +163,26 @@ struct CharacterListView: View {
                 // No toolbar needed anymore as options moved to HeaderView
                 .onAppear {
                     refreshDataModel()
+                }
+                .onChange(of: isShowingAddCharacter) { oldValue, newValue in
+                    if oldValue && !newValue {
+                        // Character sheet was dismissed, refresh data
+                        refreshDataModel()
+                    }
+                }
+                .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshCharacterData"))) { _ in
+                    print("==== RECEIVED NOTIFICATION TO REFRESH CHARACTER DATA ====")
+                    
+                    // Let's double-check the data is available in the database before refreshing
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        do {
+                            let count = try context.fetch(FetchDescriptor<Character>()).count
+                            print("Current character count before refresh: \(count)")
+                        } catch {
+                            print("Error checking characters: \(error)")
+                        }
+                        refreshDataModel()
+                    }
                 }
             }
         }
@@ -242,9 +285,112 @@ struct CharacterListView: View {
         Orphaned skills: \(orphanedSkills.count)
         """
         
-        // Force SwiftData to refresh by forcing a new fetch if needed
-        if characters.isEmpty {
-            try? context.fetch(FetchDescriptor<Character>())
+        // First make sure any changes are saved
+        do {
+            try context.save()
+        } catch {
+            print("Error saving context before fetch: \(error)")
+        }
+        
+        // Always fetch characters to ensure we have the latest data
+        do {
+            var descriptor = FetchDescriptor<Character>()
+            descriptor.sortBy = [SortDescriptor(\.name)]
+            
+            // Reset modelContext to make sure we have fresh data
+            context.processPendingChanges()
+            
+            // Fetch characters from database
+            var fetchedCharacters = try context.fetch(descriptor)
+            
+            // Sort favorites to the top manually
+            fetchedCharacters.sort { (char1, char2) -> Bool in
+                if char1.isFavorite && !char2.isFavorite {
+                    return true
+                } else if !char1.isFavorite && char2.isFavorite {
+                    return false
+                } else {
+                    return char1.name.localizedCaseInsensitiveCompare(char2.name) == .orderedAscending
+                }
+            }
+            
+            characters = fetchedCharacters
+            
+            print("Fetched \(characters.count) characters from context \(context)")
+            
+            // If characters is empty, try again after a brief delay
+            if characters.isEmpty {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self.retryFetchCharacters()
+                }
+            }
+        } catch {
+            print("Error fetching characters: \(error)")
+            characters = []
+        }
+    }
+    
+    private func retryFetchCharacters() {
+        do {
+            var descriptor = FetchDescriptor<Character>()
+            descriptor.sortBy = [SortDescriptor(\.name)]
+            
+            // Fetch characters from database
+            var fetchedCharacters = try context.fetch(descriptor)
+            
+            // Sort favorites to the top manually
+            fetchedCharacters.sort { (char1, char2) -> Bool in
+                if char1.isFavorite && !char2.isFavorite {
+                    return true
+                } else if !char1.isFavorite && char2.isFavorite {
+                    return false
+                } else {
+                    return char1.name.localizedCaseInsensitiveCompare(char2.name) == .orderedAscending
+                }
+            }
+            
+            characters = fetchedCharacters
+            
+            print("Retry fetch: \(characters.count) characters")
+        } catch {
+            print("Error in retry fetch: \(error)")
+            characters = []
+        }
+    }
+    
+    private func createTestCharacter() {
+        // Create a test character directly
+        let testCharacter = Character(
+            name: "MANUAL TEST CHARACTER \(Date().timeIntervalSince1970)", 
+            set: "Test Set", 
+            notes: "Test Notes",
+            isFavorite: false,
+            blueSkills: ["Test Blue Skill"],
+            orangeSkills: ["Test Orange Skill"],
+            redSkills: ["Test Red Skill"]
+        )
+        
+        // Insert and save
+        context.insert(testCharacter)
+        do {
+            try context.save()
+            print("Test character saved successfully")
+            refreshDataModel()
+        } catch {
+            print("Error saving test character: \(error)")
+        }
+    }
+    
+    private func toggleFavorite(_ character: Character) {
+        character.isFavorite.toggle()
+        
+        // Save changes
+        do {
+            try context.save()
+            // Refresh the list to update sorting
+            refreshDataModel()
+        } catch {
+            print("Error toggling favorite status: \(error)")
         }
     }
     

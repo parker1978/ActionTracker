@@ -16,7 +16,8 @@ struct AddCharacterView: View {
     @State private var name: String = ""
     @State private var set: String = ""
     @State private var notes: String = ""
-    @State private var skillInputs: [(name: String, skillDescription: String)] = [("", "")]
+    @State private var isFavorite: Bool = false
+    @State private var skillInputs: [(name: String, skillDescription: String, color: SkillColor)] = [("", "", .blue)]
     @State private var showingValidationAlert = false
     @State private var errorMessage = ""
     @FocusState private var focusField: Field?
@@ -47,10 +48,11 @@ struct AddCharacterView: View {
             _name = State(initialValue: character.name)
             _set = State(initialValue: character.set ?? "")
             _notes = State(initialValue: character.notes ?? "")
+            _isFavorite = State(initialValue: character.isFavorite)
             
             // Get skills from the character, sorted by position
             let sortedSkills = (character.skills ?? []).sorted { $0.position < $1.position }
-            _skillInputs = State(initialValue: sortedSkills.isEmpty ? [("", "")] : sortedSkills.map { ($0.name, $0.skillDescription) })
+            _skillInputs = State(initialValue: sortedSkills.isEmpty ? [("", "", .blue)] : sortedSkills.map { ($0.name, $0.skillDescription, $0.color ?? .blue) })
         }
     }
     
@@ -122,6 +124,16 @@ struct AddCharacterView: View {
                 .onSubmit {
                     focusField = nil
                 }
+            
+            Toggle(isOn: $isFavorite) {
+                HStack {
+                    Text("Favorite")
+                    if isFavorite {
+                        Image(systemName: "star.fill")
+                            .foregroundColor(.yellow)
+                    }
+                }
+            }
         }
     }
     
@@ -161,6 +173,24 @@ struct AddCharacterView: View {
                 }
             }
             
+            // Power level selector
+            HStack {
+                Text("Power Level:")
+                    .font(.caption)
+                
+                Picker("", selection: Binding(
+                    get: { skillInputs[index].color },
+                    set: { skillInputs[index].color = $0 }
+                )) {
+                    Text("Blue").foregroundColor(.skillBlue).tag(SkillColor.blue)
+                    Text("Orange").foregroundColor(.skillOrange).tag(SkillColor.orange)
+                    Text("Red").foregroundColor(.skillRed).tag(SkillColor.red)
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .frame(maxWidth: .infinity)
+            }
+            .padding(.vertical, 4)
+            
             // Improved multiline description field
             VStack(alignment: .leading, spacing: 4) {
                 if skillInputs[index].skillDescription.isEmpty {
@@ -189,7 +219,7 @@ struct AddCharacterView: View {
     private var addSkillButton: some View {
         Button {
             withAnimation {
-                skillInputs.append(("", ""))
+                skillInputs.append(("", "", .blue))
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     focusField = .skillName(skillInputs.count - 1)
                 }
@@ -245,7 +275,7 @@ struct AddCharacterView: View {
     
     private func handleSkillSubmit(at index: Int) {
         if index == skillInputs.count - 1 {
-            skillInputs.append(("", ""))
+            skillInputs.append(("", "", .blue))
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 focusField = .skillName(index + 1)
             }
@@ -263,10 +293,11 @@ struct AddCharacterView: View {
     private func saveCharacter() {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        // Process skill inputs, cleaning names and preserving descriptions
+        // Process skill inputs, cleaning names and preserving descriptions and colors
         let cleanedSkills = skillInputs
             .map { (name: $0.name.trimmingCharacters(in: .whitespacesAndNewlines), 
-                   skillDescription: $0.skillDescription.trimmingCharacters(in: .whitespacesAndNewlines)) }
+                   skillDescription: $0.skillDescription.trimmingCharacters(in: .whitespacesAndNewlines),
+                   color: $0.color) }
             .filter { !$0.name.isEmpty }
         
         if trimmedName.isEmpty {
@@ -289,6 +320,7 @@ struct AddCharacterView: View {
             existingCharacter.name = trimmedName
             existingCharacter.set = trimmedSet
             existingCharacter.notes = trimmedNotes
+            existingCharacter.isFavorite = isFavorite
             
             // Get new skill names to determine what to keep
             let newSkillNames = cleanedSkills.map { $0.name }
@@ -300,10 +332,7 @@ struct AddCharacterView: View {
                 skillsByName[skill.name] = skill
             }
             
-            // Create skills array if nil
-            if existingCharacter.skills == nil {
-                existingCharacter.skills = []
-            }
+            // skills is now a non-optional array
             
             // Remove skills that are no longer in the list
             existingCharacter.skills?.removeAll { !newSkillsSet.contains($0.name) }
@@ -321,6 +350,9 @@ struct AddCharacterView: View {
                     if !skillDescription.isEmpty && existingSkill.skillDescription.isEmpty {
                         existingSkill.skillDescription = skillDescription
                     }
+                    
+                    // Update the color
+                    existingSkill.color = skillData.color
                 } else {
                     // Check if the skill already exists in the database (case-insensitive)
                     // First normalize the name
@@ -342,9 +374,12 @@ struct AddCharacterView: View {
                             if !skillDescription.isEmpty && existingSkill.skillDescription.isEmpty {
                                 existingSkill.skillDescription = skillDescription
                             }
+                            
+                            // Update the color
+                            existingSkill.color = skillData.color
                         } else {
                             // Create a new skill if it doesn't exist
-                            skill = Skill(name: skillName, skillDescription: skillDescription, position: index, manual: true)
+                            skill = Skill(name: skillName, skillDescription: skillDescription, position: index, manual: true, color: skillData.color)
                             context.insert(skill)
                         }
                         
@@ -357,7 +392,7 @@ struct AddCharacterView: View {
                     } catch {
                         print("Error fetching or creating skill: \(error)")
                         // Create a new skill anyway if there was an error
-                        skill = Skill(name: skillName, skillDescription: skillDescription, position: index, manual: true)
+                        skill = Skill(name: skillName, skillDescription: skillDescription, position: index, manual: true, color: skillData.color)
                         context.insert(skill)
                         if skill.characters == nil {
                             skill.characters = []
@@ -372,14 +407,12 @@ struct AddCharacterView: View {
             let newCharacter = Character(
                 name: trimmedName,
                 set: trimmedSet,
-                notes: trimmedNotes
+                notes: trimmedNotes,
+                isFavorite: isFavorite
             )
             context.insert(newCharacter)
             
-            // Initialize skills array if needed
-            if newCharacter.skills == nil {
-                newCharacter.skills = []
-            }
+            // skills is now a non-optional array
             
             // Create or reference skills
             for (index, skillData) in cleanedSkills.enumerated() {
@@ -406,9 +439,12 @@ struct AddCharacterView: View {
                         if !skillDescription.isEmpty && existingSkill.skillDescription.isEmpty {
                             existingSkill.skillDescription = skillDescription
                         }
+                        
+                        // Update the color
+                        existingSkill.color = skillData.color
                     } else {
                         // Create a new skill if it doesn't exist
-                        skill = Skill(name: skillName, skillDescription: skillDescription, position: index, manual: true)
+                        skill = Skill(name: skillName, skillDescription: skillDescription, position: index, manual: true, color: skillData.color)
                         context.insert(skill)
                     }
                     
@@ -423,7 +459,7 @@ struct AddCharacterView: View {
                 } catch {
                     print("Error fetching or creating skill: \(error)")
                     // Create a new skill anyway if there was an error
-                    skill = Skill(name: skillName, skillDescription: skillDescription, position: index, manual: true)
+                    skill = Skill(name: skillName, skillDescription: skillDescription, position: index, manual: true, color: skillData.color)
                     context.insert(skill)
                     if skill.characters == nil {
                         skill.characters = []

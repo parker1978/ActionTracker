@@ -32,19 +32,38 @@ class CustomContext: NSObject, UIDocumentPickerDelegate {
         defer { url.stopAccessingSecurityScopedResource() } // 🧹 Clean up after
 
         do {
-            // Delete existing characters first
-            for character in try context.fetch(FetchDescriptor<Character>()) {
+            print("==== IMPORT STARTED: Current context = \(context) ====")
+            
+            // Delete existing characters first - handle with care
+            let existingCharacters = try context.fetch(FetchDescriptor<Character>())
+            print("Found \(existingCharacters.count) existing characters to delete")
+            
+            for character in existingCharacters {
                 context.delete(character)
             }
+            
+            // Save the deletion before continuing
+            try context.save()
+            print("Deleted all existing characters")
 
             let content = try String(contentsOf: url, encoding: .utf8)
             let rows = content.components(separatedBy: CharacterSet.newlines).dropFirst()
+            
+            // Create a single test character with no skills first to verify basic persistence
+            print("Creating a minimal test character for verification")
+            let minimalCharacter = Character(name: "MINIMAL TEST")
+            context.insert(minimalCharacter)
+            try context.save()
+            
+            // Verify the test character was saved
+            let testVerify = try context.fetch(FetchDescriptor<Character>())
+            print("After minimal character insertion: \(testVerify.count) characters, name: \(testVerify.first?.name ?? "none")")
             
             // Parse and insert new characters
             for line in rows {
                 guard !line.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
                 let columns = parseCSVLine(line)
-                guard columns.count >= 4 else { continue }
+                guard columns.count >= 6 else { continue } // New format requires 6 columns (Name,Set,Notes,Blue,Orange,Red)
 
                 // Clean and normalize input data
                 let rawName = columns[0].trimmingCharacters(in: .whitespacesAndNewlines)
@@ -56,60 +75,53 @@ class CustomContext: NSObject, UIDocumentPickerDelegate {
                 let rawNotes = columns[2].trimmingCharacters(in: .whitespacesAndNewlines)
                 let notes = rawNotes.isEmpty ? nil : rawNotes.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
                 
-                // Clean each skill name by trimming and normalizing whitespace
-                let skills = columns[3].split(separator: ";").map { skillName -> String in
-                    let trimmed = skillName.trimmingCharacters(in: .whitespacesAndNewlines)
-                    return trimmed.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-                }
+                // Process each color of skills separately
+                let blueSkills = parseSkillList(columns[3])
+                let orangeSkills = parseSkillList(columns[4])
+                let redSkills = parseSkillList(columns[5])
 
-                // Create the character first
-                let newChar = Character(name: name, set: set, notes: notes)
+                // Create the character with all its skills
+                let newChar = Character(name: name, set: set, notes: notes, 
+                                        blueSkills: blueSkills, 
+                                        orangeSkills: orangeSkills, 
+                                        redSkills: redSkills)
+                
                 context.insert(newChar)
                 
-                // Create skills with the import flag set to true
-                for (index, skillName) in skills.enumerated() {
-                    // Check if skill already exists in the database
-                    let skillDescriptor = FetchDescriptor<Skill>(predicate: #Predicate<Skill> { skill in skill.name == skillName })
-                    var existingSkill: Skill?
+                // Blue skills are already marked as active in the Character initializer
+                
+                // Process and create the actual Skill objects - this is now handled in the Character initializer,
+                // but we need to ensure the skills exist in the database
+                for skill in (newChar.skills ?? []) {
+                    // Check if the same skill (by name) already exists without predicate
+                    // Fetch all skills and filter manually
+                    let skillDescriptor = FetchDescriptor<Skill>()
                     
                     do {
-                        existingSkill = try context.fetch(skillDescriptor).first
-                    } catch {
-                        print("Error fetching skill: \(error)")
-                    }
-                    
-                    // Use existing skill or create a new one
-                    if let skill = existingSkill {
-                        // Add relationship to the character
-                        if skill.characters == nil {
-                            skill.characters = []
-                        }
-                        if newChar.skills == nil {
-                            newChar.skills = []
-                        }
-                        
-                        if !((skill.characters ?? []).contains(where: { $0.id == newChar.id })) {
-                            skill.characters?.append(newChar)
-                            // Set the proper position for this character
-                            if let characterSkill = (newChar.skills ?? []).first(where: { $0.id == skill.id }) {
-                                characterSkill.position = index
+                        let allSkills = try context.fetch(skillDescriptor)
+                        if let existingSkill = allSkills.first(where: { $0.name == skill.name && $0.id != skill.id }) {
+                            // If the skill already exists with a different ID, use the existing one
+                            // and update its relationship to include this character
+                            if existingSkill.characters == nil {
+                                existingSkill.characters = []
+                            }
+                            
+                            // Add this character to the existing skill's relationships
+                            if !((existingSkill.characters ?? []).contains(where: { $0.id == newChar.id })) {
+                                existingSkill.characters?.append(newChar)
+                            }
+                            
+                            // Remove the new skill from the character and replace with existing one
+                            if let skills = newChar.skills, let index = skills.firstIndex(where: { $0.id == skill.id }) {
+                                newChar.skills?.remove(at: index)
+                                newChar.skills?.append(existingSkill)
+                                
+                                // Delete the duplicate skill
+                                context.delete(skill)
                             }
                         }
-                    } else {
-                        // Create a new skill with the import flag
-                        let newSkill = Skill(name: skillName, position: index, importedFlag: true)
-                        
-                        // Initialize arrays if needed
-                        if newSkill.characters == nil {
-                            newSkill.characters = []
-                        }
-                        if newChar.skills == nil {
-                            newChar.skills = []
-                        }
-                        
-                        newSkill.characters?.append(newChar)
-                        newChar.skills?.append(newSkill)
-                        context.insert(newSkill)
+                    } catch {
+                        print("Error checking for existing skill: \(error)")
                     }
                 }
             }
@@ -117,14 +129,37 @@ class CustomContext: NSObject, UIDocumentPickerDelegate {
             // Save changes immediately
             try context.save()
             
+            // Double-check the fetch after save to verify persistence
+            let verifyDescriptor = FetchDescriptor<Character>()
+            let verifyResults = try context.fetch(verifyDescriptor)
+            let verifyCount = verifyResults.count
+            
+            print("Verified after save: \(verifyCount) characters in context")
+            if verifyCount > 0 {
+                // Print the first 5 character names to verify content
+                let names = verifyResults.prefix(5).map { $0.name }.joined(separator: ", ")
+                print("First 5 character names: \(names)")
+            }
+            
             // Call completion handler if provided
             DispatchQueue.main.async {
                 self.importCompletionHandler?()
+                
+                // Post a notification for any observers that data has changed
+                NotificationCenter.default.post(name: NSNotification.Name("RefreshCharacterData"), object: nil)
             }
             
             print("Import successful: \(rows.count) characters")
         } catch {
             print("Import failed: \(error)")
+        }
+    }
+    
+    // Helper function to parse a semicolon-separated list of skills
+    private func parseSkillList(_ skillsString: String) -> [String] {
+        return skillsString.split(separator: ";").map { skillName -> String in
+            let trimmed = skillName.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
         }
     }
 

@@ -1,6 +1,6 @@
 //
 //  CharacterSeeder.swift
-//  ZombicideCharacters
+//  ActionTracker
 //
 //  Created by Stephen Parker on 4/11/25.
 //
@@ -130,209 +130,215 @@ struct CharacterSeeder: ViewModifier {
     
     private func seedCharacters() {
         print("Seeding initial character data...")
+        
         // Define character data with skill names and descriptions
-        let fredSkillsData: [(name: String, skillDescription: String)] = [
+        // For each character, we'll group skills by color
+        
+        // Fred's skills by color
+        let fredBlueSkills: [(name: String, description: String)] = [
             ("Reaper: Combat", "Deal 1 damage to all Zombies in the same zone after combat"),
-            ("+1 Free Combat Action", "Get one additional combat action per turn"),
+            ("+1 Free Combat Action", "Get one additional combat action per turn")
+        ]
+        
+        let fredOrangeSkills: [(name: String, description: String)] = [
             ("Dreadnought: Walker", "Walker attacks do not cause damage to this character"),
-            ("+1 Die: Combat", "Add 1 die to combat rolls"),
+            ("+1 Die: Combat", "Add 1 die to combat rolls")
+        ]
+        
+        let fredRedSkills: [(name: String, description: String)] = [
             ("+1 Free Combat Action", "Get one additional combat action per turn"),
             ("+1 To Dice Roll: Combat", "Add 1 to each die rolled in combat")
         ]
         
-        let bunnySkillsData: [(name: String, skillDescription: String)] = [
+        // Bunny's skills by color
+        let bunnyBlueSkills: [(name: String, description: String)] = [
             ("Lucky", "Re-roll one failed die per turn"),
-            ("+1 To Dice Roll: Melee", "Add 1 to each melee die roll"),
+            ("+1 To Dice Roll: Melee", "Add 1 to each melee die roll")
+        ]
+        
+        let bunnyOrangeSkills: [(name: String, description: String)] = [
             ("Jump", "Move through zones with zombies without spending extra actions"),
-            ("+1 Damage: Melee", "Add 1 damage to successful melee attacks"),
+            ("+1 Damage: Melee", "Add 1 damage to successful melee attacks")
+        ]
+        
+        let bunnyRedSkills: [(name: String, description: String)] = [
             ("+1 Free Combat Action", "Get one additional combat action per turn"),
             ("Roll 6: +1 Die Combat", "When rolling a 6 in combat, get an extra die")
         ]
         
-        let tigerSkillsData: [(name: String, skillDescription: String)] = [
+        // Tiger's skills by color
+        let tigerBlueSkills: [(name: String, description: String)] = [
             ("+1 Die: Ranged", "Add 1 die to ranged attack rolls"),
-            ("+1 Free Move Action", "Get one additional move action per turn"),
+            ("+1 Free Move Action", "Get one additional move action per turn")
+        ]
+        
+        let tigerOrangeSkills: [(name: String, description: String)] = [
             ("Sniper", "Ignore range penalties when using ranged weapons"),
-            ("+1 Damage: Ranged", "Add 1 damage to successful ranged attacks"),
+            ("+1 Damage: Ranged", "Add 1 damage to successful ranged attacks")
+        ]
+        
+        let tigerRedSkills: [(name: String, description: String)] = [
             ("+1 Free Combat Action", "Get one additional combat action per turn"),
             ("Shove", "Push zombies to an adjacent zone once per turn")
         ]
         
-        // Create characters
-        let fred = Character(name: "Fred")
-        let bunny = Character(name: "Bunny G")
-        let tiger = Character(name: "Tiger Sam")
+        // Extract skill names for Character initialization
+        let fredBlueSkillNames = fredBlueSkills.map { $0.name }
+        let fredOrangeSkillNames = fredOrangeSkills.map { $0.name }
+        let fredRedSkillNames = fredRedSkills.map { $0.name }
         
-        // Initialize skills arrays if needed
-        if fred.skills == nil { fred.skills = [] }
-        if bunny.skills == nil { bunny.skills = [] }
-        if tiger.skills == nil { tiger.skills = [] }
+        let bunnyBlueSkillNames = bunnyBlueSkills.map { $0.name }
+        let bunnyOrangeSkillNames = bunnyOrangeSkills.map { $0.name }
+        let bunnyRedSkillNames = bunnyRedSkills.map { $0.name }
         
-        // Create skills with positions and descriptions
-        for (index, skillData) in fredSkillsData.enumerated() {
-            // Check if skill already exists (case-insensitive)
-            let skillName = skillData.name
+        let tigerBlueSkillNames = tigerBlueSkills.map { $0.name }
+        let tigerOrangeSkillNames = tigerOrangeSkills.map { $0.name }
+        let tigerRedSkillNames = tigerRedSkills.map { $0.name }
+        
+        // Create characters with their skills
+        let fred = Character(
+            name: "Fred",
+            blueSkills: fredBlueSkillNames,
+            orangeSkills: fredOrangeSkillNames,
+            redSkills: fredRedSkillNames
+        )
+        
+        let bunny = Character(
+            name: "Bunny G",
+            blueSkills: bunnyBlueSkillNames,
+            orangeSkills: bunnyOrangeSkillNames,
+            redSkills: bunnyRedSkillNames
+        )
+        
+        let tiger = Character(
+            name: "Tiger Sam",
+            blueSkills: tigerBlueSkillNames,
+            orangeSkills: tigerOrangeSkillNames,
+            redSkills: tigerRedSkillNames
+        )
+        
+        // Insert characters into context
+        context.insert(fred)
+        context.insert(bunny)
+        context.insert(tiger)
+        
+        // Skill creation helper function
+        func createSkillIfNeeded(name: String, description: String, color: SkillColor, position: Int, character: Character) {
             // First normalize using the static method
-            let normalizedSkillName = Skill.normalizeSkillName(skillName)
+            let normalizedName = Skill.normalizeSkillName(name)
             
-            // For predicate, we can only use exact matching without string functions
-            // Create a non-case-sensitive fetch descriptor
+            // Check if skill already exists
             var descriptor = FetchDescriptor<Skill>()
-            descriptor.predicate = #Predicate<Skill> { skill in 
-                skill.name == normalizedSkillName
+            descriptor.predicate = #Predicate<Skill> { skill in
+                skill.name == normalizedName
             }
-            var skill: Skill
             
             do {
                 if let existingSkill = try context.fetch(descriptor).first {
                     // Use existing skill
-                    skill = existingSkill
-                    // Update description if empty
-                    if skill.skillDescription.isEmpty {
-                        skill.skillDescription = skillData.skillDescription
+                    if existingSkill.skillDescription.isEmpty {
+                        existingSkill.skillDescription = description
+                    }
+                    
+                    // Ensure character relationship
+                    if existingSkill.characters == nil {
+                        existingSkill.characters = []
+                    }
+                    
+                    if !existingSkill.characters!.contains(where: { $0.id == character.id }) {
+                        existingSkill.characters?.append(character)
                     }
                 } else {
                     // Create new skill
-                    skill = Skill(name: skillData.name, skillDescription: skillData.skillDescription, position: index, manual: false)
-                    context.insert(skill)
-                }
-                
-                // Initialize characters array if needed
-                if skill.characters == nil {
-                    skill.characters = []
-                }
-                
-                // Add relationship
-                skill.characters?.append(fred)
-                fred.skills?.append(skill)
-            } catch {
-                // Create new skill if fetch failed
-                skill = Skill(name: skillData.name, skillDescription: skillData.skillDescription, position: index, manual: false)
-                context.insert(skill)
-                
-                // Initialize characters array if needed
-                if skill.characters == nil {
-                    skill.characters = []
-                }
-                
-                skill.characters?.append(fred)
-                fred.skills?.append(skill)
-            }
-        }
-        
-        for (index, skillData) in bunnySkillsData.enumerated() {
-            // Check if skill already exists (case-insensitive)
-            let skillName = skillData.name
-            // First normalize using the static method
-            let normalizedSkillName = Skill.normalizeSkillName(skillName)
-            
-            // For predicate, we can only use exact matching without string functions
-            // Create a non-case-sensitive fetch descriptor
-            var descriptor = FetchDescriptor<Skill>()
-            descriptor.predicate = #Predicate<Skill> { skill in 
-                skill.name == normalizedSkillName
-            }
-            var skill: Skill
-            
-            do {
-                if let existingSkill = try context.fetch(descriptor).first {
-                    // Use existing skill
-                    skill = existingSkill
-                    // Update description if empty
-                    if skill.skillDescription.isEmpty {
-                        skill.skillDescription = skillData.skillDescription
+                    let newSkill = Skill(
+                        name: name,
+                        skillDescription: description,
+                        position: position,
+                        manual: false,
+                        color: color
+                    )
+                    context.insert(newSkill)
+                    
+                    // Set up relationship
+                    if newSkill.characters == nil {
+                        newSkill.characters = []
                     }
-                } else {
-                    // Create new skill
-                    skill = Skill(name: skillData.name, skillDescription: skillData.skillDescription, position: index, manual: false)
-                    context.insert(skill)
+                    newSkill.characters?.append(character)
+                    
+                    // The Character init has already created the skills,
+                    // but we need to ensure our new skill objects are linked
+                    // Back-reference not needed since Character already has the skills
                 }
-                
-                // Initialize characters array if needed
-                if skill.characters == nil {
-                    skill.characters = []
-                }
-                
-                // Add relationship
-                skill.characters?.append(bunny)
-                bunny.skills?.append(skill)
             } catch {
-                // Create new skill if fetch failed
-                skill = Skill(name: skillData.name, skillDescription: skillData.skillDescription, position: index, manual: false)
-                context.insert(skill)
+                print("Error checking for existing skill '\(name)': \(error)")
                 
-                // Initialize characters array if needed
-                if skill.characters == nil {
-                    skill.characters = []
+                // Create new skill as fallback
+                let newSkill = Skill(
+                    name: name, 
+                    skillDescription: description,
+                    position: position,
+                    manual: false,
+                    color: color
+                )
+                context.insert(newSkill)
+                
+                // Set up relationship
+                if newSkill.characters == nil {
+                    newSkill.characters = []
                 }
-                
-                skill.characters?.append(bunny)
-                bunny.skills?.append(skill)
+                newSkill.characters?.append(character)
             }
         }
         
-        for (index, skillData) in tigerSkillsData.enumerated() {
-            // Check if skill already exists (case-insensitive)
-            let skillName = skillData.name
-            // First normalize using the static method
-            let normalizedSkillName = Skill.normalizeSkillName(skillName)
-            
-            // For predicate, we can only use exact matching without string functions
-            // Create a non-case-sensitive fetch descriptor
-            var descriptor = FetchDescriptor<Skill>()
-            descriptor.predicate = #Predicate<Skill> { skill in 
-                skill.name == normalizedSkillName
-            }
-            var skill: Skill
-            
-            do {
-                if let existingSkill = try context.fetch(descriptor).first {
-                    // Use existing skill
-                    skill = existingSkill
-                    // Update description if empty
-                    if skill.skillDescription.isEmpty {
-                        skill.skillDescription = skillData.skillDescription
-                    }
-                } else {
-                    // Create new skill
-                    skill = Skill(name: skillData.name, skillDescription: skillData.skillDescription, position: index, manual: false)
-                    context.insert(skill)
-                }
-                
-                // Initialize characters array if needed
-                if skill.characters == nil {
-                    skill.characters = []
-                }
-                
-                // Add relationship
-                skill.characters?.append(tiger)
-                tiger.skills?.append(skill)
-            } catch {
-                // Create new skill if fetch failed
-                skill = Skill(name: skillData.name, skillDescription: skillData.skillDescription, position: index, manual: false)
-                context.insert(skill)
-                
-                // Initialize characters array if needed
-                if skill.characters == nil {
-                    skill.characters = []
-                }
-                
-                skill.characters?.append(tiger)
-                tiger.skills?.append(skill)
-            }
+        // Process Fred's skills
+        var position = 0
+        for (name, description) in fredBlueSkills {
+            createSkillIfNeeded(name: name, description: description, color: .blue, position: position, character: fred)
+            position += 1
+        }
+        for (name, description) in fredOrangeSkills {
+            createSkillIfNeeded(name: name, description: description, color: .orange, position: position, character: fred)
+            position += 1
+        }
+        for (name, description) in fredRedSkills {
+            createSkillIfNeeded(name: name, description: description, color: .red, position: position, character: fred)
+            position += 1
         }
         
-        // Add characters to context
-        let characters: [Character] = [fred, bunny, tiger]
-
-        for character in characters {
-            context.insert(character)
+        // Process Bunny's skills
+        position = 0
+        for (name, description) in bunnyBlueSkills {
+            createSkillIfNeeded(name: name, description: description, color: .blue, position: position, character: bunny)
+            position += 1
+        }
+        for (name, description) in bunnyOrangeSkills {
+            createSkillIfNeeded(name: name, description: description, color: .orange, position: position, character: bunny)
+            position += 1
+        }
+        for (name, description) in bunnyRedSkills {
+            createSkillIfNeeded(name: name, description: description, color: .red, position: position, character: bunny)
+            position += 1
         }
         
-        // Attempt to save changes immediately
+        // Process Tiger's skills
+        position = 0
+        for (name, description) in tigerBlueSkills {
+            createSkillIfNeeded(name: name, description: description, color: .blue, position: position, character: tiger)
+            position += 1
+        }
+        for (name, description) in tigerOrangeSkills {
+            createSkillIfNeeded(name: name, description: description, color: .orange, position: position, character: tiger)
+            position += 1
+        }
+        for (name, description) in tigerRedSkills {
+            createSkillIfNeeded(name: name, description: description, color: .red, position: position, character: tiger)
+            position += 1
+        }
+        
+        // Save changes
         do {
             try context.save()
-            print("Successfully saved \(characters.count) seed characters")
+            print("Successfully saved seed characters with their skills")
         } catch {
             print("Failed to save seed characters: \(error)")
         }

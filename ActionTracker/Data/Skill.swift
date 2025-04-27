@@ -8,6 +8,12 @@
 import Foundation
 import SwiftData
 
+enum SkillColor: String, Codable {
+    case blue
+    case orange
+    case red
+}
+
 @Model
 class Skill {
     // Unique identifier for the skill - removed unique constraint for CloudKit compatibility
@@ -24,6 +30,9 @@ class Skill {
     
     // Flag to indicate if the skill was manually created
     var manual: Bool = false
+    
+    // Skill color level - optional for CloudKit compatibility
+    var color: SkillColor? = SkillColor.blue
     
     // Flag to indicate if the skill was created during a CSV import
     var importedFlag: Bool = false
@@ -50,13 +59,19 @@ class Skill {
         return name.lowercased()
     }
     
-    init(name: String, skillDescription: String = "", position: Int = 0, manual: Bool = false, importedFlag: Bool = false) {
+    init(name: String, skillDescription: String = "", position: Int = 0, manual: Bool = false, importedFlag: Bool = false, color: SkillColor) {
         // Store the name with consistent capitalization (each word capitalized)
         self.name = Skill.normalizeSkillName(name)
         self.skillDescription = skillDescription
         self.position = position
         self.manual = manual
         self.importedFlag = importedFlag
+        self.color = color // This will work even though color is optional now
         self.characters = [] // Initialize as empty array for CloudKit compatibility
+    }
+    
+    // Convenience initializer with default blue color
+    convenience init(name: String, skillDescription: String = "", position: Int = 0, manual: Bool = false, importedFlag: Bool = false) {
+        self.init(name: name, skillDescription: skillDescription, position: position, manual: manual, importedFlag: importedFlag, color: .blue)
     }
 }
