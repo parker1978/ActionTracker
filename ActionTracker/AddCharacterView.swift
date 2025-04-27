@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import Foundation
 
 struct AddCharacterView: View {
     @Environment(\.dismiss) private var dismiss
@@ -65,8 +66,11 @@ struct AddCharacterView: View {
         }
         .navigationTitle(isEditing ? "Edit Character" : "Add Character")
         .navigationBarTitleDisplayMode(.inline)
+        .keyboardToolbar(
+            onInsertText: { insertTextAtCursor($0) },
+            onDone: { focusField = nil }
+        )
         .toolbar {
-            keyboardToolbar
             cancelButton
             saveButton
         }
@@ -195,35 +199,7 @@ struct AddCharacterView: View {
         }
     }
     
-    private var keyboardToolbar: some ToolbarContent {
-        Group {
-            // +1 button on the left
-            ToolbarItem(placement: .keyboard) {
-                Button("+1") {
-                    insertTextAtCursor("+1 ")
-                }
-            }
-            
-            // Colon button on the left center
-            ToolbarItem(placement: .keyboard) {
-                Button(":") {
-                    insertTextAtCursor(": ")
-                }
-            }
-            
-            // Spacer to push Done button to the right
-            ToolbarItem(placement: .keyboard) {
-                Spacer()
-            }
-            
-            // Done button on the right
-            ToolbarItem(placement: .keyboard) {
-                Button("Done") {
-                    focusField = nil
-                }
-            }
-        }
-    }
+    // We now use the keyboardToolbar modifier from KeyboardToolbarHelper.swift
     
     // Helper method to insert text at the cursor position
     private func insertTextAtCursor(_ text: String) {

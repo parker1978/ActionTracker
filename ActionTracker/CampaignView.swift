@@ -55,8 +55,14 @@ struct CampaignRow: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(campaign.campaignName)
-                .font(.headline)
+            HStack {
+                Text(campaign.campaignName)
+                    .font(.headline)
+                Spacer()
+                Text(formatDate(campaign.startDate))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
             Text("Survivor: \(campaign.survivorName)")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -65,6 +71,13 @@ struct CampaignRow: View {
                 .foregroundStyle(.secondary)
         }
         .padding(.vertical, 4)
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 }
 
@@ -80,7 +93,13 @@ struct CampaignDetailView: View {
     @State private var newSkill = ""
     @State private var newAchievement = ""
     @State private var newEquipment = ""
-    @FocusState private var isFocused: Bool
+    @FocusState private var focusedField: CampaignDetailField?
+    
+    enum CampaignDetailField: Hashable {
+        case survivorName
+        case achievement
+        case equipment
+    }
     
     private func deleteMission(_ mission: Mission) {
         // Adjust campaign values before deleting
@@ -100,10 +119,28 @@ struct CampaignDetailView: View {
         try? context.save()
     }
     
+    private func insertTextAtCursor(_ text: String) {
+        if let field = focusedField {
+            switch field {
+            case .survivorName:
+                campaign.survivorName += text
+            case .achievement:
+                newAchievement += text
+            case .equipment:
+                newEquipment += text
+            }
+        }
+    }
+    
     var body: some View {
         List {
             Section("Survivor Info") {
                 TextField("Survivor Name", text: $campaign.survivorName)
+                    .focused($focusedField, equals: .survivorName)
+                    .submitLabel(.done)
+                    .onSubmit {
+                        focusedField = nil
+                    }
                 
                 HStack {
                     Text("Total CXP:")
@@ -162,7 +199,7 @@ struct CampaignDetailView: View {
                     Spacer()
                     Button(action: { 
                         showingAddAchievement = true 
-                        isFocused = true
+                        focusedField = .achievement
                     }) {
                         Image(systemName: "plus.circle")
                     }
@@ -171,7 +208,7 @@ struct CampaignDetailView: View {
                 if showingAddAchievement {
                     HStack {
                         TextField("New Achievement", text: $newAchievement)
-                            .focused($isFocused)
+                            .focused($focusedField, equals: .achievement)
                             .submitLabel(.done)
                             .onSubmit {
                                 if !newAchievement.isEmpty {
@@ -210,7 +247,7 @@ struct CampaignDetailView: View {
                     Spacer()
                     Button(action: { 
                         showingAddEquipment = true
-                        isFocused = true
+                        focusedField = .equipment
                     }) {
                         Image(systemName: "plus.circle")
                     }
@@ -219,7 +256,7 @@ struct CampaignDetailView: View {
                 if showingAddEquipment {
                     HStack {
                         TextField("New Equipment", text: $newEquipment)
-                            .focused($isFocused)
+                            .focused($focusedField, equals: .equipment)
                             .submitLabel(.done)
                             .onSubmit {
                                 if !newEquipment.isEmpty {
@@ -310,6 +347,10 @@ struct CampaignDetailView: View {
         .sheet(isPresented: $showingAddMission) {
             AddMissionView(campaign: campaign)
         }
+        .keyboardToolbar(
+            onInsertText: { insertTextAtCursor($0) },
+            onDone: { focusedField = nil }
+        )
     }
 }
 
@@ -322,13 +363,29 @@ struct AddCampaignView: View {
     @State private var campaignDescription = ""
     @State private var selectedCharacter: Character?
     @State private var showingCharacterSelector = false
+    @FocusState private var focusedField: CampaignField?
+    
+    enum CampaignField: Hashable {
+        case name
+        case description
+    }
     
     var body: some View {
         NavigationStack {
             Form {
                 Section("Campaign Information") {
                     TextField("Campaign Name", text: $campaignName)
+                        .focused($focusedField, equals: .name)
+                        .submitLabel(.next)
+                        .onSubmit {
+                            focusedField = .description
+                        }
                     TextField("Description (Optional)", text: $campaignDescription)
+                        .focused($focusedField, equals: .description)
+                        .submitLabel(.done)
+                        .onSubmit {
+                            focusedField = nil
+                        }
                 }
                 
                 Section("Survivor Information") {
@@ -378,6 +435,21 @@ struct AddCampaignView: View {
             .sheet(isPresented: $showingCharacterSelector) {
                 CharacterSelectorView(selectedCharacter: $selectedCharacter, dismiss: { showingCharacterSelector = false })
             }
+            .keyboardToolbar(
+                onInsertText: { insertTextAtCursor($0) },
+                onDone: { focusedField = nil }
+            )
+        }
+    }
+    
+    private func insertTextAtCursor(_ text: String) {
+        if let field = focusedField {
+            switch field {
+                case .name:
+                    campaignName.append(text)
+                case .description:
+                    campaignDescription.append(text)
+            }
         }
     }
     
@@ -411,10 +483,10 @@ struct AddMissionView: View {
     @State private var newObjective = ""
     @State private var objectivesList: [String] = []
     @State private var notes = ""
-    @FocusState private var focusedField: Field?
+    @FocusState private var focusedField: MissionField?
     
-    enum Field {
-        case equipment, objective
+    enum MissionField: Hashable {
+        case name, equipment, objective, notes
     }
     
     var body: some View {
@@ -422,11 +494,21 @@ struct AddMissionView: View {
             Form {
                 Section("Mission Information") {
                     TextField("Mission Name", text: $missionName)
+                        .focused($focusedField, equals: .name)
+                        .submitLabel(.next)
+                        .onSubmit {
+                            focusedField = .notes
+                        }
                     
                     Stepper("CXP Earned: \(cxpEarned)", value: $cxpEarned, in: 0...100)
                     Stepper("Bonus Actions Earned: \(bonusActionsUsed)", value: $bonusActionsUsed, in: 0...10)
                     
                     TextField("Notes (Optional)", text: $notes, axis: .vertical)
+                        .focused($focusedField, equals: .notes)
+                        .submitLabel(.done)
+                        .onSubmit {
+                            focusedField = nil
+                        }
                         .lineLimit(3, reservesSpace: true)
                 }
                 
@@ -492,6 +574,25 @@ struct AddMissionView: View {
                     .disabled(missionName.isEmpty)
                 }
             }
+            .keyboardToolbar(
+                onInsertText: { insertTextAtCursor($0) }, 
+                onDone: { focusedField = nil }
+            )
+        }
+    }
+    
+    private func insertTextAtCursor(_ text: String) {
+        if let field = focusedField {
+            switch field {
+                case .name:
+                    missionName += text
+                case .equipment:
+                    newEquipment += text
+                case .objective:
+                    newObjective += text
+                case .notes:
+                    notes += text
+            }
         }
     }
     
@@ -552,7 +653,14 @@ struct MissionDetailView: View {
     @State private var newEquipment = ""
     @State private var newObjective = ""
     @State private var selectedCampaignSkill = ""
-    @FocusState private var isFocused: Bool
+    @FocusState private var focusedField: MissionDetailField?
+    
+    enum MissionDetailField: Hashable {
+        case name
+        case notes
+        case equipment
+        case objective
+    }
     
     // Available campaign skills
     private let availableCampaignSkills = [
@@ -572,10 +680,34 @@ struct MissionDetailView: View {
         "Webbing"
     ]
     
+    private func insertTextAtCursor(_ text: String) {
+        if let field = focusedField {
+            switch field {
+            case .name:
+                mission.missionName += text
+            case .notes:
+                if mission.notes == nil {
+                    mission.notes = text
+                } else {
+                    mission.notes! += text
+                }
+            case .equipment:
+                newEquipment += text
+            case .objective:
+                newObjective += text
+            }
+        }
+    }
+    
     var body: some View {
         Form {
             Section {
                 TextField("Mission Name", text: $mission.missionName)
+                    .focused($focusedField, equals: .name)
+                    .submitLabel(.next)
+                    .onSubmit {
+                        focusedField = .notes
+                    }
                 
                 Stepper("CXP Earned: \(mission.cxpEarned)", value: $mission.cxpEarned, in: 0...100)
                     .onChange(of: mission.cxpEarned) { oldValue, newValue in
@@ -602,10 +734,13 @@ struct MissionDetailView: View {
                         get: { mission.notes ?? "" },
                         set: { mission.notes = $0.isEmpty ? nil : $0 }
                     ), axis: .vertical)
+                    .focused($focusedField, equals: .notes)
+                    .submitLabel(.done)
                     .lineLimit(3, reservesSpace: true)
                 } else {
                     Button("Add Notes") {
                         mission.notes = ""
+                        focusedField = .notes
                     }
                 }
             }
@@ -666,7 +801,7 @@ struct MissionDetailView: View {
                     Spacer()
                     Button(action: {
                         showingAddEquipment = true
-                        isFocused = true
+                        focusedField = .equipment
                     }) {
                         Image(systemName: "plus.circle")
                     }
@@ -675,7 +810,7 @@ struct MissionDetailView: View {
                 if showingAddEquipment {
                     HStack {
                         TextField("New Equipment", text: $newEquipment)
-                            .focused($isFocused)
+                            .focused($focusedField, equals: .equipment)
                             .submitLabel(.done)
                             .onSubmit {
                                 if !newEquipment.isEmpty {
@@ -722,7 +857,7 @@ struct MissionDetailView: View {
                     Spacer()
                     Button(action: {
                         showingAddObjective = true
-                        isFocused = true
+                        focusedField = .objective
                     }) {
                         Image(systemName: "plus.circle")
                     }
@@ -731,7 +866,7 @@ struct MissionDetailView: View {
                 if showingAddObjective {
                     HStack {
                         TextField("New Objective", text: $newObjective)
-                            .focused($isFocused)
+                            .focused($focusedField, equals: .objective)
                             .submitLabel(.done)
                             .onSubmit {
                                 if !newObjective.isEmpty {
@@ -766,6 +901,10 @@ struct MissionDetailView: View {
         }
         .navigationTitle(mission.missionName)
         .navigationBarTitleDisplayMode(.inline)
+        .keyboardToolbar(
+            onInsertText: { insertTextAtCursor($0) },
+            onDone: { focusedField = nil }
+        )
     }
 }
 

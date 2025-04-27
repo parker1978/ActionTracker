@@ -162,6 +162,12 @@ struct CharacterListView: View {
         @Binding var text: String
         @FocusState private var isSearchFocused: Bool
         
+        private func insertTextAtCursor(_ text: String) {
+            if isSearchFocused {
+                self.text.append(text)
+            }
+        }
+        
         var body: some View {
             HStack {
                 Image(systemName: "magnifyingglass")
@@ -216,6 +222,10 @@ struct CharacterListView: View {
                         .ignoresSafeArea()
                     }
                 }
+            )
+            .keyboardToolbar(
+                onInsertText: { insertTextAtCursor($0) },
+                onDone: { isSearchFocused = false }
             )
         }
     }
