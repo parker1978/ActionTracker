@@ -33,7 +33,7 @@ struct ContentView: View {
             
             switch currentView {
             case .action:
-                ActionView(actionItems: $actionItems)
+                ActionView(actionItems: $actionItems, timerIsRunning: $timerIsRunning)
             case .character:
                 CharacterListView(isShowingAddCharacter: $isShowingAddCharacter)
             case .campaign:

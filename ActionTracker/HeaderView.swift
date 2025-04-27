@@ -374,8 +374,12 @@ struct HeaderView: View {
                 let durationHours = Int(elapsedTime) / 3600
                 let durationMinutes = (Int(elapsedTime) % 3600) / 60
                 
-                // Just hours and minutes for simplicity
-                return Text("Game session started at \(startFormatter.string(from: startDate)) and ended at \(endFormatter.string(from: endDate)).\n\nTotal game time: \(durationHours)h \(durationMinutes)m")
+                // Get current experience and total gained
+                let currentXP = UserDefaults.standard.integer(forKey: "playerExperience")
+                let totalXP = UserDefaults.standard.integer(forKey: "totalExperienceGained")
+                
+                // Include experience info in summary
+                return Text("Game session started at \(startFormatter.string(from: startDate)) and ended at \(endFormatter.string(from: endDate)).\n\nTotal game time: \(durationHours)h \(durationMinutes)m\n\nCurrent Experience: \(currentXP)\nTotal Experience Gained: \(totalXP)")
             } else {
                 return Text("Game session ended.")
             }
@@ -949,10 +953,14 @@ struct HeaderView: View {
     
     // MARK: - Data Wiping Functions
     private func resetActions() {
-        // Show confirmation alert
+        // Get current experience for the summary
+        let currentExperience = UserDefaults.standard.integer(forKey: "playerExperience")
+        let totalExperienceGained = UserDefaults.standard.integer(forKey: "totalExperienceGained")
+        
+        // Show confirmation alert with experience info
         let alert = UIAlertController(
             title: "Reset All Actions",
-            message: "This will reset ALL to the default 3 starting actions. This action cannot be undone.",
+            message: "This will reset ALL to the default 3 starting actions, reset your experience to 0, and stop the timer if running. Your current experience is \(currentExperience). This action cannot be undone.",
             preferredStyle: .alert
         )
         
@@ -969,8 +977,45 @@ struct HeaderView: View {
     }
     
     private func executeResetActions() {
-        withAnimation(.easeOut(duration: 30)) {
+        // First stop the timer if it's running
+        if timerRunningBinding {
+            stopTimer()
+        }
+        
+        // Reset the actions
+        withAnimation(.easeOut(duration: 0.5)) {
             actionItems = ActionItem.defaultActions()
+        }
+        
+        // Get the current experience for the summary alert
+        let currentExperience = UserDefaults.standard.integer(forKey: "playerExperience")
+        let totalXP = UserDefaults.standard.integer(forKey: "totalExperienceGained")
+        
+        // Reset experience to 0
+        UserDefaults.standard.set(0, forKey: "playerExperience")
+        UserDefaults.standard.set(0, forKey: "ultraRedCount")
+        // Also reset total experience gained
+        UserDefaults.standard.set(0, forKey: "totalExperienceGained")
+        
+        // Post a notification to tell ActionView to update its experience value
+        NotificationCenter.default.post(name: NSNotification.Name("ResetExperience"), object: nil)
+        
+        // Show a summary alert with experience data
+        let experienceSummary = UIAlertController(
+            title: "Game Session Summary",
+            message: "Game session ended.\n\nExperience reset from \(currentExperience) to 0.\nTotal experience gained during your adventure: \(totalXP).",
+            preferredStyle: .alert
+        )
+        
+        experienceSummary.addAction(UIAlertAction(title: "OK", style: .default))
+        
+        // Present the summary after a short delay
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootVC = windowScene.windows.first?.rootViewController {
+            // Use a slight delay to show this after any timer summary
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                rootVC.present(experienceSummary, animated: true)
+            }
         }
     }
     
