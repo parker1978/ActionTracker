@@ -136,54 +136,56 @@ struct ActionView: View {
             
             // Experience tracking and controls
             VStack(spacing: 12) {
-                // ULTRA banner (only when in ultra mode - experience > 43)
-                if appViewModel.isUltraMode() {
-                    // Calculate which Ultra cycle we're in (0-based)
-                    let ultraCycle = ((appViewModel.experience - 1) / 43)
-                    
-                    // First Ultra cycle (ultraCycle = 1) shows just "ULTRA"
-                    // Second Ultra cycle (ultraCycle = 2) shows "ULTRA X"
-                    // Third Ultra cycle (ultraCycle = 3) shows "ULTRA XX" etc.
-                    let xCount = max(0, ultraCycle - 1)  // No X's for first Ultra
-                    let ultraText = xCount > 0 ? "ULTRA " + String(repeating: "X", count: xCount) : "ULTRA"
-                    
-                    Text(ultraText)
-                        .font(.system(size: 16, weight: .black))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 4)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.red)
-                        )
-                        .padding(.horizontal, 8)
-                }
-                
                 // Experience level indicator
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Level: \(appViewModel.getLevelLabel())")
-                            .font(.headline)
-                            .foregroundColor(appViewModel.getExperienceColor())
+                ZStack {
+                    // ULTRA banner (only when in ultra mode - experience > 43)
+                    if appViewModel.isUltraMode() {
+                        // Calculate which Ultra cycle we're in (0-based)
+                        let ultraCycle = ((appViewModel.experience - 1) / 43)
+                        
+                        // First Ultra cycle (ultraCycle = 1) shows just "ULTRA"
+                        // Second Ultra cycle (ultraCycle = 2) shows "ULTRA X"
+                        // Third Ultra cycle (ultraCycle = 3) shows "ULTRA XX" etc.
+                        let xCount = max(0, ultraCycle - 1)  // No X's for first Ultra
+                        let ultraText = xCount > 0 ? "ULTRA " + String(repeating: "X", count: xCount) : "ULTRA"
+                        
+                        Text(ultraText)
+                            .font(.system(size: 16, weight: .black))
+                            .foregroundColor(.white)
+                            .padding(.vertical, 4)
+                            .padding(.horizontal, 11)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.red)
+                            )
+                            .fixedSize(horizontal: true, vertical: false)
+                            .frame(minWidth: 80)
                     }
-                    .padding(.horizontal)
-                    
-                    Spacer()
-                    
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("XP: \(appViewModel.getCurrentBaseLevel())/43")
-                            .font(.headline)
-                            .foregroundColor(appViewModel.getExperienceColor())
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Level: \(appViewModel.getLevelLabel())")
+                                .font(.headline)
+                                .foregroundColor(appViewModel.getExperienceColor())
+                        }
+                        .padding(.horizontal)
+                        
+                        Spacer()
+                        
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text("XP: \(appViewModel.getCurrentBaseLevel())/43")
+                                .font(.headline)
+                                .foregroundColor(appViewModel.getExperienceColor())
+                        }
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity) // Ensure same width as skills section
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .strokeBorder(appViewModel.getExperienceColor(), lineWidth: 2)
+                            .padding(.horizontal, 8)
+                    )
                 }
-                .padding(.vertical, 8)
-                .frame(maxWidth: .infinity) // Ensure same width as skills section
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .strokeBorder(appViewModel.getExperienceColor(), lineWidth: 2)
-                        .padding(.horizontal, 8)
-                )
                 
                 // Experience stepper
                 HStack {
@@ -306,4 +308,5 @@ struct ActionView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(AppViewModel())
 }
