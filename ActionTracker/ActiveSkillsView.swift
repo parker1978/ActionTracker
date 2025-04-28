@@ -13,6 +13,7 @@ struct ActiveSkillsView: View {
     var character: Character
     var experience: Int
     @Binding var showSkillManager: Bool
+    @State private var isExpanded: Bool = true // Controls whether skills are shown or hidden
     
     // Create a cache of tagged skills to improve performance
     private var taggedSkills: [(id: String, name: String)] {
@@ -26,10 +27,38 @@ struct ActiveSkillsView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Header with title and manage button
+            // Header with title, toggle button and manage button
             HStack {
-                Text("Active Skills:")
-                    .font(.headline)
+                Button(action: {
+                    withAnimation(.spring(duration: 0.3)) {
+                        isExpanded.toggle()
+                    }
+                }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                        
+                        Text("Active Skills:")
+                            .font(.headline)
+                    }
+                }
+                .buttonStyle(.plain)
+                
+                if !isExpanded && !character.allActiveSkills().isEmpty {
+                    // When collapsed, show count of active skills
+                    Text("\(taggedSkills.count)")
+                        .font(.caption)
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 4)
+                        .background(
+                            Capsule()
+                                .fill(.green)
+                        )
+                        .frame(minWidth: 40)
+                }
                 
                 Spacer()
                 
@@ -39,26 +68,29 @@ struct ActiveSkillsView: View {
                 .buttonStyle(.bordered)
             }
             
-            // Simple, clean skills display
-            if character.allActiveSkills().isEmpty {
-                Text("No active skills for \(character.name)")
-                    .foregroundColor(.secondary)
-                    .padding(.vertical, 4)
-            } else {
-                // LazyVGrid layout for skills with automatic columns
-                let columns = [
-                    GridItem(.adaptive(minimum: 80, maximum: 160), spacing: 6)
-                ]
-                
-                LazyVGrid(columns: columns, alignment: .leading, spacing: 6) {
-                    // Render all skills with their proper color
-                    ForEach(taggedSkills, id: \.id) { skill in
-                        if skill.id.hasPrefix("blue_") {
-                            SkillPill(text: skill.name, color: .skillBlue)
-                        } else if skill.id.hasPrefix("orange_") {
-                            SkillPill(text: skill.name, color: .skillOrange)
-                        } else { // red skills
-                            SkillPill(text: skill.name, color: .skillRed)
+            // Only show the skills content when expanded
+            if isExpanded {
+                // Simple, clean skills display
+                if character.allActiveSkills().isEmpty {
+                    Text("No active skills for \(character.name)")
+                        .foregroundColor(.secondary)
+                        .padding(.vertical, 4)
+                } else {
+                    // LazyVGrid layout for skills with automatic columns
+                    let columns = [
+                        GridItem(.adaptive(minimum: 80, maximum: 160), spacing: 6)
+                    ]
+                    
+                    LazyVGrid(columns: columns, alignment: .leading, spacing: 6) {
+                        // Render all skills with their proper color
+                        ForEach(taggedSkills, id: \.id) { skill in
+                            if skill.id.hasPrefix("blue_") {
+                                SkillPill(text: skill.name, color: .skillBlue)
+                            } else if skill.id.hasPrefix("orange_") {
+                                SkillPill(text: skill.name, color: .skillOrange)
+                            } else { // red skills
+                                SkillPill(text: skill.name, color: .skillRed)
+                            }
                         }
                     }
                 }
