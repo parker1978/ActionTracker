@@ -70,7 +70,7 @@ struct HeaderView: View {
             Spacer()
             
             // Timer display - only show in action view
-            if (timerRunningBinding || (timerStartDate != nil && !timerRunningBinding)) && currentView == .action {
+            if currentView == .action {
                 HStack(spacing: 4) {
                     // Show icon based on timer state
                     if timerRunningBinding {
@@ -80,7 +80,9 @@ struct HeaderView: View {
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         } else {
-                            // Active state - no icon needed
+                            Image(systemName: "play.fill")
+                                .font(.caption)
+                                .foregroundColor(.green)
                         }
                     } else if timerStartDate != nil {
                         // Stopped state
@@ -1275,6 +1277,7 @@ struct HeaderView: View {
         
         var body: some View {
             ContentView()
+                .environmentObject(AppViewModel())
         }
     }
     

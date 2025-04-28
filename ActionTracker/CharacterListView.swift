@@ -412,4 +412,5 @@ struct SkillsWithDescriptionView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(AppViewModel())
 }
