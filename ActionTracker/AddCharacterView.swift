@@ -22,6 +22,7 @@ struct AddCharacterView: View {
     @State private var showingValidationAlert = false
     @State private var errorMessage = ""
     @State private var isDragging = false
+    @State private var editModeState: EditMode = .inactive
     @FocusState private var focusField: Field?
     
     var character: Character?
@@ -92,59 +93,66 @@ struct AddCharacterView: View {
     }
     
     var body: some View {
-        Form {
-            characterInfoSection
-            skillsSection
-        }
-        .navigationTitle(isEditing ? "Edit Character" : "Add Character")
-        .navigationBarTitleDisplayMode(.inline)
-        .keyboardToolbar(
-            onInsertText: { insertTextAtCursor($0) },
-            onDone: { focusField = nil }
-        )
-        .toolbar {
-            // Edit mode button in leading position
-            ToolbarItem(placement: .navigationBarTrailing) {
-                EditButton()
-            }
-            
-            cancelButton
-            saveButton
-        }
-        .alert("Missing Information", isPresented: $showingValidationAlert) {
-            Button("OK") {
-                if errorMessage.contains("name") {
-                    focusField = .name
-                } else {
-                    focusField = .skillName(0)
+        NavigationStack {
+            VStack(spacing: 0) {
+//                // DEBUG: show current editMode
+//                Text("DEBUG editMode: \(String(describing: editMode?.wrappedValue))")
+//                    .font(.caption2)
+//                    .foregroundColor(.orange)
+//                    .padding(.vertical, 4)
+//                
+                Form {
+                    characterInfoSection
+                    skillsSection
                 }
+                .navigationTitle(isEditing ? "Edit Character" : "Add Character")
+                .navigationBarTitleDisplayMode(.inline)
+                .keyboardToolbar(
+                    onInsertText: { insertTextAtCursor($0) },
+                    onDone: { focusField = nil }
+                )
             }
-        } message: {
-            Text(errorMessage)
-        }
-        .onAppear {
-            // Only set initial focus if we're adding a new character (not editing)
-            if !isEditing {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    focusField = .name
+            .toolbar {
+                // Edit mode button in leading position
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    EditButton()
                 }
+                
+                cancelButton
+                saveButton
             }
-            
-            // Make sure positions are normalized when view appears
-            normalizePositions()
-            
-            // Print out the skills for debugging
-            print("Skill count: \(skillInputs.count)")
-            for (index, skill) in skillInputs.enumerated() {
-                print("Skill \(index): \(skill.name) (Color: \(skill.color), Pos: \(skill.position))")
-            }
-        }
-        .onChange(of: editMode?.wrappedValue) { oldValue, newValue in
-            // When exiting edit mode, make sure positions are normalized
-            if newValue == .inactive {
-                withAnimation {
-                    normalizePositions()
+            .environment(\.editMode, $editModeState)
+            .alert("Missing Information", isPresented: $showingValidationAlert) {
+                Button("OK") {
+                    if errorMessage.contains("name") {
+                        focusField = .name
+                    } else {
+                        focusField = .skillName(0)
+                    }
                 }
+            } message: {
+                Text(errorMessage)
+            }
+            .onAppear {
+                // Only set initial focus if we're adding a new character (not editing)
+                if !isEditing {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        focusField = .name
+                    }
+                }
+                
+                // Make sure positions are normalized when view appears
+                normalizePositions()
+            }
+            .onChange(of: editModeState) { old, new in
+                print("⚙️ editMode changed from \(old) to \(new)")
+                if new == .inactive {
+                  withAnimation { normalizePositions() }
+                }
+              }
+            // log every change to the console
+            .onChange(of: editMode?.wrappedValue, initial: false) { oldMode, newMode in
+                print("⚙️ editMode changed from \(String(describing: oldMode)) to \(String(describing: newMode))")
             }
         }
     }
@@ -189,14 +197,18 @@ struct AddCharacterView: View {
         }
     }
     
-    // Simple skill section with all skills in one list
+    private var isEditModeEditing: Bool {
+      editMode?.wrappedValue.isEditing == true
+    }
+    
+    // MARK: Skills Section
     private var skillsSection: some View {
         Section {
             // All skills in one list, sorted by position
             ForEach(skillInputs.sorted(by: { $0.position < $1.position }), id: \.id) { skill in
                 let index = skillInputs.firstIndex { $0.id == skill.id } ?? 0
                 skillRow(for: index)
-                    .id(skill.id)
+                    .id("\(skill.id)-\(isEditModeEditing)") // Force redraw when edit mode changes
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
                             withAnimation(.spring(duration: 0.3)) {
@@ -230,39 +242,43 @@ struct AddCharacterView: View {
         }
     }
     
+    // Helper to determine if we're in edit mode
+    private var isEditModeActive: Bool {
+        return editMode?.wrappedValue == .active
+    }
+    
+    // MARK: Skill Row
+    @ViewBuilder
     private func skillRow(for index: Int) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             // Skill name field with dot indicator
             HStack {
-                // Color indicator
                 Circle()
                     .fill(colorForSkill(skillInputs[index]))
                     .frame(width: 8, height: 8)
-                
-                // Skill name field
                 TextField("Skill Name", text: $skillInputs[index].name)
                     .textInputAutocapitalization(.words)
                     .focused($focusField, equals: .skillName(index))
                     .submitLabel(.done)
             }
             
-            // Power level selector
-            Picker("Power Level", selection: $skillInputs[index].color) {
-                Text("Blue").tag(SkillColor.blue)
-                Text("Orange").tag(SkillColor.orange)
-                Text("Red").tag(SkillColor.red)
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .onChange(of: skillInputs[index].color) { oldValue, newValue in
-                // If color changed, normalize positions
-                if oldValue != newValue {
-                    withAnimation {
-                        normalizePositionsByColor()
-                    }
+            // ONLY include the picker while editing
+            if editModeState == .active {
+                Picker("Power Level", selection: $skillInputs[index].color) {
+                    Text("Blue").tag(SkillColor.blue)
+                    Text("Orange").tag(SkillColor.orange)
+                    Text("Red").tag(SkillColor.red)
                 }
+                .pickerStyle(.segmented)
+                .onChange(of: skillInputs[index].color) { _, newValue in
+                    withAnimation { normalizePositionsByColor() }
+                }
+                .transition(.opacity)
+                .animation(.easeInOut(duration: 0.1), value: editModeState)
             }
         }
         .padding(.vertical, 2)
+        .animation(.spring(duration: 0.3), value: editMode?.wrappedValue)
     }
     
     private var addSkillButton: some View {

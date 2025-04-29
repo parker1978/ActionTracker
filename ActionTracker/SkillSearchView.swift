@@ -143,10 +143,27 @@ struct SkillSearchView: View {
                                                         if newValue.isEmpty {
                                                             selectedSkills.removeSubrange(index...)
                                                         } else {
-                                                            // Update with new selection, remove all subsequent selections
+                                                            // Update with new selection
                                                             selectedSkills[index] = newValue
-                                                            if selectedSkills.count > index + 1 {
-                                                                selectedSkills.removeSubrange((index + 1)...)
+                                                            
+                                                            // Only remove subsequent selections if we're not selecting a group skill
+                                                            // or if the search results would be empty
+                                                            let wouldHaveResults = !allCharacters.filter { character in
+                                                                let characterSkills = (character.skills ?? []).map { $0.name }
+                                                                let updatedSkills = selectedSkills.prefix(index + 1)
+                                                                return updatedSkills.allSatisfy { skill in
+                                                                    if isGroupSkill(skill) {
+                                                                        return !Set(characterSkills).isDisjoint(with: skillsInGroup(skill))
+                                                                    } else {
+                                                                        return characterSkills.contains(skill)
+                                                                    }
+                                                                }
+                                                            }.isEmpty
+                                                            
+                                                            if !isGroupSkill(newValue) || !wouldHaveResults {
+                                                                if selectedSkills.count > index + 1 {
+                                                                    selectedSkills.removeSubrange((index + 1)...)
+                                                                }
                                                             }
                                                         }
                                                     } else if !newValue.isEmpty {
@@ -248,34 +265,23 @@ struct SkillSearchView: View {
         
         // Calculate how many dropdowns to show based on current selections and available skills
         var count = min(selectedSkills.count + 1, maxDropdowns)
-        var currentSkills = [String]()
-        var matching = allCharacters
-
-        // Don't show more dropdowns than needed
-        for i in 0..<count {
-            if matching.count <= 1 { 
-                count = i + 1
-                break 
-            }
-
-            if let currentSkill = selectedSkills[safe: i] {
-                currentSkills.append(currentSkill)
-                matching = matching.filter { character in 
-                    let skillNames = (character.skills ?? []).map { $0.name }
-                    return skillNames.contains(currentSkill)
-                }
-                
-                // Check if there are any remaining skills for the next dropdown
-                let usedSet = Set(currentSkills)
-                let available = Set(matching.flatMap { ($0.skills ?? []).map { $0.name } }).subtracting(usedSet)
-                
-                if available.isEmpty {
-                    count = i + 1
-                    break
-                }
+        var remainingCharacters = filteredCharacters // Use filtered characters based on all current selections
+        
+        // If we're down to 1 character and have at least one selection, don't show more dropdowns
+        if remainingCharacters.count <= 1 && !selectedSkills.isEmpty {
+            return selectedSkills.count
+        }
+        
+        // Check if there are any remaining skills for an additional dropdown
+        if !selectedSkills.isEmpty {
+            let usedSet = Set(selectedSkills)
+            let available = availableSkills(for: selectedSkills.count)
+            
+            if available.isEmpty {
+                return selectedSkills.count
             }
         }
-
+        
         return count
     }
     
