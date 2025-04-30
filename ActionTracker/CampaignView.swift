@@ -913,22 +913,49 @@ struct CharacterSelectorView: View {
     @Binding var selectedCharacter: Character?
     var dismiss: () -> Void
     
-    @Query(sort: \Character.name) var characters: [Character]
+    // Use a custom query that will let us sort by favorite status
+    @Query private var characters: [Character]
     @State private var searchText = ""
     
+    // Initialize with a custom query
+    init(selectedCharacter: Binding<Character?>, dismiss: @escaping () -> Void) {
+        self._selectedCharacter = selectedCharacter
+        self.dismiss = dismiss
+        
+        // Initialize query with default sorting 
+        // (We'll handle favorite sorting in the computed property)
+        let descriptor = FetchDescriptor<Character>(sortBy: [SortDescriptor(\.name)])
+        self._characters = Query(descriptor)
+    }
+    
+    // Sorted characters with favorites first
+    var sortedCharacters: [Character] {
+        return characters.sorted { char1, char2 in
+            // First check favorite status (favorites come first)
+            if char1.isFavorite && !char2.isFavorite {
+                return true
+            } else if !char1.isFavorite && char2.isFavorite {
+                return false
+            }
+            
+            // If both have the same favorite status, sort by name
+            return char1.name.localizedCaseInsensitiveCompare(char2.name) == .orderedAscending
+        }
+    }
+    
     var filteredCharacters: [Character] {
-        guard !searchText.isEmpty else { return characters }
+        guard !searchText.isEmpty else { return sortedCharacters }
         
         // Check for special search tokens
         if searchText.lowercased().hasPrefix("set:") {
             let setQuery = searchText.dropFirst(4).trimmingCharacters(in: .whitespaces)
-            return characters.filter { 
+            return sortedCharacters.filter { 
                 guard let set = $0.set else { return false }
                 return set.localizedCaseInsensitiveContains(setQuery)
             }
         } else if searchText.lowercased().hasPrefix("skill:") {
             let skillQuery = searchText.dropFirst(6).trimmingCharacters(in: .whitespaces)
-            return characters.filter { char in
+            return sortedCharacters.filter { char in
                 // unwrap or default to empty
                 let skills = char.skills ?? []
                 return skills.contains {
@@ -937,8 +964,7 @@ struct CharacterSelectorView: View {
             }
         } else {
             // Standard search - name or any skill
-            // → Around line 940: standard search (name OR any skill OR set)
-            return characters.filter { char in
+            return sortedCharacters.filter { char in
                 let skills = char.skills ?? []
                 return
                     char.name.localizedCaseInsensitiveContains(searchText) ||
@@ -963,12 +989,32 @@ struct CharacterSelectorView: View {
                             selectedCharacter = character
                             dismiss()
                         } label: {
-                            VStack(alignment: .leading) {
-                                Text(character.set?.isEmpty == false ? "\(character.name) (\(character.set!))" : character.name)
-                                    .font(.headline)
-                                // Display skills sorted by position
-                                if !(character.skills ?? []).isEmpty {
-                                    SkillsWithDescriptionView(skills: (character.skills ?? []).sorted { $0.position < $1.position })
+                            HStack(alignment: .top) {
+                                VStack(alignment: .leading) {
+                                    HStack {
+                                        // Show star icon for favorites
+                                        if character.isFavorite {
+                                            Image(systemName: "star.fill")
+                                                .foregroundColor(.yellow)
+                                                .font(.caption)
+                                        }
+                                    
+                                        Text(character.set?.isEmpty == false ? "\(character.name) (\(character.set!))" : character.name)
+                                            .font(.headline)
+                                    }
+                                    
+                                    // Display skills sorted by position
+                                    if !(character.skills ?? []).isEmpty {
+                                        SkillsWithDescriptionView(skills: (character.skills ?? []).sorted { $0.position < $1.position })
+                                    }
+                                }
+                                
+                                Spacer()
+                                
+                                // Add a checkmark for the currently selected character
+                                if let selectedChar = selectedCharacter, selectedChar.id == character.id {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.blue)
                                 }
                             }
                             .foregroundColor(.primary)

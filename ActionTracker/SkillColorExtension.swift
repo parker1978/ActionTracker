@@ -24,4 +24,10 @@ extension Color {
             return skillRed
         }
     }
+    
+    // Convenience method using optional SkillColor
+    static func skillColor(_ color: SkillColor?) -> Color {
+        guard let color = color else { return .gray }
+        return forSkill(color)
+    }
 }

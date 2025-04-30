@@ -49,16 +49,6 @@ class CustomContext: NSObject, UIDocumentPickerDelegate {
             let content = try String(contentsOf: url, encoding: .utf8)
             let rows = content.components(separatedBy: CharacterSet.newlines).dropFirst()
             
-            // Create a single test character with no skills first to verify basic persistence
-            print("Creating a minimal test character for verification")
-            let minimalCharacter = Character(name: "MINIMAL TEST")
-            context.insert(minimalCharacter)
-            try context.save()
-            
-            // Verify the test character was saved
-            let testVerify = try context.fetch(FetchDescriptor<Character>())
-            print("After minimal character insertion: \(testVerify.count) characters, name: \(testVerify.first?.name ?? "none")")
-            
             // Parse and insert new characters
             for line in rows {
                 guard !line.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
@@ -90,38 +80,59 @@ class CustomContext: NSObject, UIDocumentPickerDelegate {
                 
                 // Blue skills are already marked as active in the Character initializer
                 
-                // Process and create the actual Skill objects - this is now handled in the Character initializer,
-                // but we need to ensure the skills exist in the database
-                for skill in (newChar.skills ?? []) {
-                    // Check if the same skill (by name) already exists without predicate
-                    // Fetch all skills and filter manually
-                    let skillDescriptor = FetchDescriptor<Skill>()
+                // We're going to completely avoid looking up or creating relationships 
+                // with existing skills to prevent cross-contamination issues
+                
+                // Just to be safe, make sure each character has their own independent skills with no shared references
+                print("IMPORT: Character \(newChar.name) has \(newChar.skills?.count ?? 0) skills")
+                
+                // Delete any skills that this character shouldn't have (sanity check)
+                // If the skill's name is not in any of the color lists, remove it
+                if let skills = newChar.skills {
+                    var skillsToRemove = [UUID]()
                     
-                    do {
-                        let allSkills = try context.fetch(skillDescriptor)
-                        if let existingSkill = allSkills.first(where: { $0.name == skill.name && $0.id != skill.id }) {
-                            // If the skill already exists with a different ID, use the existing one
-                            // and update its relationship to include this character
-                            if existingSkill.characters == nil {
-                                existingSkill.characters = []
-                            }
-                            
-                            // Add this character to the existing skill's relationships
-                            if !((existingSkill.characters ?? []).contains(where: { $0.id == newChar.id })) {
-                                existingSkill.characters?.append(newChar)
-                            }
-                            
-                            // Remove the new skill from the character and replace with existing one
-                            if let skills = newChar.skills, let index = skills.firstIndex(where: { $0.id == skill.id }) {
-                                newChar.skills?.remove(at: index)
-                                newChar.skills?.append(existingSkill)
-                                
-                                // Delete the duplicate skill
-                                context.delete(skill)
+                    for skill in skills {
+                        let skillName = skill.name
+                        let skillColor = skill.color
+                        
+                        // Check if this skill should belong to this character
+                        var shouldKeep = false
+                        
+                        switch skillColor {
+                        case .blue:
+                            shouldKeep = newChar.blueSkills.contains(skillName)
+                        case .orange:
+                            shouldKeep = newChar.orangeSkills.contains(skillName)
+                        case .red:
+                            shouldKeep = newChar.redSkills.contains(skillName)
+                        case .none:
+                            shouldKeep = false
+                        }
+                        
+                        if !shouldKeep {
+                            print("REMOVING INVALID SKILL: \(skillName) (\(String(describing: skillColor))) from \(newChar.name)")
+                            skillsToRemove.append(skill.id)
+                        }
+                    }
+                    
+                    // Remove invalid skills
+                    for skillID in skillsToRemove {
+                        if let index = newChar.skills?.firstIndex(where: { $0.id == skillID }) {
+                            let skillToRemove = newChar.skills?[index]
+                            newChar.skills?.remove(at: index)
+                            if let skillToRemove = skillToRemove {
+                                context.delete(skillToRemove)
                             }
                         }
-                    } catch {
-                        print("Error checking for existing skill: \(error)")
+                    }
+                }
+                
+                // Final verification
+                print("IMPORT: After cleanup, \(newChar.name) has \(newChar.skills?.count ?? 0) skills")
+                
+                if let skills = newChar.skills {
+                    for skill in skills {
+                        print("IMPORT: \(newChar.name) has skill: \(skill.name) (color: \(String(describing: skill.color)), position: \(skill.position))")
                     }
                 }
             }

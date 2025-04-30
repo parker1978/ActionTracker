@@ -401,9 +401,34 @@ struct CharacterListView: View {
 struct SkillsWithDescriptionView: View {
     let skills: [Skill]
     
+    // Group skills by color to maintain consistent blue->orange->red order
+    // Preserve duplicates by using the EXACT skills array in original order
+    var orderedSkillNames: String {
+        // Create arrays of skills by color while maintaining EXACT order
+        let blueSkills = skills.filter { $0.color == .blue }
+                               .sorted { $0.position < $1.position }
+        let orangeSkills = skills.filter { $0.color == .orange }
+                                 .sorted { $0.position < $1.position }
+        let redSkills = skills.filter { $0.color == .red }
+                              .sorted { $0.position < $1.position }
+        
+        // Combine in proper order (blue, orange, red)
+        let allOrderedSkills = blueSkills + orangeSkills + redSkills
+        
+        // Map to names preserving ALL entries including duplicates
+        // We use enumerated to help debug position issues
+        let skillNames = allOrderedSkills.enumerated().map { index, skill -> String in
+            // You can uncomment this line to debug positions if needed
+            // return "\(skill.name)[\(skill.position)]"
+            return skill.name
+        }
+        
+        return skillNames.joined(separator: ", ")
+    }
+    
     var body: some View {
-        // Show just the skill names with proper wrapping
-        Text(skills.map { $0.name }.joined(separator: ", "))
+        // Show the skill names in proper color order with wrapping
+        Text(orderedSkillNames)
             .font(.caption)
             .foregroundColor(.secondary)
             .fixedSize(horizontal: false, vertical: true) // Ensure proper wrapping

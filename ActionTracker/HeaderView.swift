@@ -1097,6 +1097,11 @@ struct HeaderView: View {
             
             // 3. Save changes
             try context.save()
+            
+            // 4. Post notification to refresh views
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                NotificationCenter.default.post(name: NSNotification.Name("RefreshCharacterData"), object: nil)
+            }
         } catch {
             print("Error wiping characters: \(error)")
             
@@ -1144,6 +1149,11 @@ struct HeaderView: View {
             }
             
             try context.save()
+            
+            // Post notification to refresh views
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                NotificationCenter.default.post(name: NSNotification.Name("RefreshCharacterData"), object: nil)
+            }
         } catch {
             print("Error wiping campaigns: \(error)")
             
@@ -1198,6 +1208,11 @@ struct HeaderView: View {
             
             // 4. Save changes
             try context.save()
+            
+            // 5. Post notification to refresh views
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                NotificationCenter.default.post(name: NSNotification.Name("RefreshCharacterData"), object: nil)
+            }
         } catch {
             print("Error wiping skills: \(error)")
             
@@ -1252,6 +1267,11 @@ struct HeaderView: View {
             
             // 3. Save changes
             try context.save()
+            
+            // 4. Post notification to refresh views
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                NotificationCenter.default.post(name: NSNotification.Name("RefreshCharacterData"), object: nil)
+            }
         } catch {
             print("Error wiping all data: \(error)")
             

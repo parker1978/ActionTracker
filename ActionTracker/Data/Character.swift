@@ -35,39 +35,61 @@ class Character {
         self.set = set
         self.notes = notes
         self.isFavorite = isFavorite
+        
+        print("CHARACTER INITIALIZATION")
+        print("Creating new character: \(name) with blue: \(blueSkills.count), orange: \(orangeSkills.count), red: \(redSkills.count) skills")
+        
+        // Store skill lists exactly as provided - no modification
         self.blueSkills = blueSkills
         self.orangeSkills = orangeSkills
         self.redSkills = redSkills
         
         // Blue skills start active by default
-        self.activeBlueSkills = blueSkills
+        self.activeBlueSkills = self.blueSkills
+        
+        // Make sure skills array is empty to start with
+        skills = []
         
         // Only create skill objects if we have actual skills
         if !blueSkills.isEmpty || !orangeSkills.isEmpty || !redSkills.isEmpty {
-            // Ensure skills array is initialized
-            if skills == nil {
-                skills = []
-            }
+            // Create a brand new skills array for this character
+            // with absolutely no existing entries
+            skills = []
             
             // Convert string skills to Skill objects
             var skillPosition = 0
-    
+            
+            // Create skills in color order - blue, orange, red
+            // Use the exact lists provided with no deduplication
             for skillName in blueSkills {
                 let skill = Skill(name: skillName, position: skillPosition, manual: true, color: .blue)
                 skills?.append(skill)
+                print("Created skill: \(skillName) (Color: blue, Position: \(skillPosition))")
                 skillPosition += 1
             }
     
             for skillName in orangeSkills {
                 let skill = Skill(name: skillName, position: skillPosition, manual: true, color: .orange)
                 skills?.append(skill)
+                print("Created skill: \(skillName) (Color: orange, Position: \(skillPosition))")
                 skillPosition += 1
             }
     
             for skillName in redSkills {
                 let skill = Skill(name: skillName, position: skillPosition, manual: true, color: .red)
                 skills?.append(skill)
+                print("Created skill: \(skillName) (Color: red, Position: \(skillPosition))")
                 skillPosition += 1
+            }
+            
+            print("Created \(skills?.count ?? 0) skills for character \(name)")
+        }
+        
+        // Verify skills
+        if let skillList = skills {
+            print("Found \(skillList.count) skills for character \(name)")
+            for skill in skillList {
+                print("Loaded skill: \(skill.name) (Color: \(String(describing: skill.color)), Position: \(skill.position))")
             }
         }
     }
