@@ -19,6 +19,8 @@ struct ActionView: View {
     @State private var trayContinuation: CheckedContinuation<ActionItem?, Never>? = nil
     @State private var addBounce: Bool = false
     @State private var shouldRotate: Bool = false
+    @State private var showBulkXPInput: Bool = false
+    @State private var bulkXPAmount: String = ""
     
     var availableActions: Int {
         actionItems.filter { !$0.isUsed }.count
@@ -195,6 +197,16 @@ struct ActionView: View {
                     
                     Spacer()
                     
+                    Button(action: {
+                        bulkXPAmount = ""
+                        showBulkXPInput = true
+                    }) {
+                        Image(systemName: "plus.square.fill")
+                            .foregroundColor(appViewModel.getExperienceColor())
+                            .font(.system(size: 22))
+                    }
+                    .padding(.trailing, 4)
+                    
                     Stepper(value: Binding(
                         get: { appViewModel.experience },
                         set: { appViewModel.updateExperience($0) }
@@ -206,6 +218,23 @@ struct ActionView: View {
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
+                .alert("Add Experience", isPresented: $showBulkXPInput) {
+                    TextField("1-99", text: $bulkXPAmount)
+                        .keyboardType(.numberPad)
+                    
+                    Button("Cancel", role: .cancel) {
+                        bulkXPAmount = ""
+                    }
+                    
+                    Button("Add") {
+                        if let amount = Int(bulkXPAmount), amount >= 1, amount <= 99 {
+                            appViewModel.updateExperience(appViewModel.experience + amount)
+                        }
+                        bulkXPAmount = ""
+                    }
+                } message: {
+                    Text("Enter amount (1-99)")
+                }
                 
                 // Button controls
                 HStack {
