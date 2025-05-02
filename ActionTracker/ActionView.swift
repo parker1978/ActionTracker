@@ -12,7 +12,7 @@ import TipKit
 struct ActionView: View {
     // Central app state model
     @EnvironmentObject private var appViewModel: AppViewModel
-    
+    @Environment(\.dismiss) var dismiss
     @Binding var actionItems: [ActionItem]
     @Binding var timerIsRunning: Bool
     @State private var showActions: Bool = false
@@ -21,6 +21,7 @@ struct ActionView: View {
     @State private var shouldRotate: Bool = false
     @State private var showBulkXPInput: Bool = false
     @State private var bulkXPAmount: String = ""
+    @State var duration: String = ""
     
     var availableActions: Int {
         actionItems.filter { !$0.isUsed }.count
@@ -206,6 +207,9 @@ struct ActionView: View {
                             .font(.system(size: 22))
                     }
                     .padding(.trailing, 4)
+                    .systemTrayView($showBulkXPInput) {
+                        KeyPadView()
+                    }
                     
                     Stepper(value: Binding(
                         get: { appViewModel.experience },
@@ -218,23 +222,24 @@ struct ActionView: View {
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
-                .alert("Add Experience", isPresented: $showBulkXPInput) {
-                    TextField("1-99", text: $bulkXPAmount)
-                        .keyboardType(.numberPad)
-                    
-                    Button("Cancel", role: .cancel) {
-                        bulkXPAmount = ""
-                    }
-                    
-                    Button("Add") {
-                        if let amount = Int(bulkXPAmount), amount >= 1, amount <= 99 {
-                            appViewModel.updateExperience(appViewModel.experience + amount)
-                        }
-                        bulkXPAmount = ""
-                    }
-                } message: {
-                    Text("Enter amount (1-99)")
-                }
+//                .alert("Add Experience", isPresented: $showBulkXPInput) {
+//                    TextField("1-99", text: $bulkXPAmount)
+//                        .keyboardType(.numberPad)
+//                    
+//                    Button("Cancel", role: .cancel) {
+//                        bulkXPAmount = ""
+//                    }
+//                    
+//                    Button("Add") {
+//                        if let amount = Int(bulkXPAmount), amount >= 1, amount <= 99 {
+//                            appViewModel.updateExperience(appViewModel.experience + amount)
+//                        }
+//                        bulkXPAmount = ""
+//                    }
+//                } message: {
+//                    Text("Enter amount (1-99)")
+//                }
+                
                 
                 // Button controls
                 HStack {
@@ -332,6 +337,95 @@ struct ActionView: View {
             }
             expectedNumber += 1
         }
+    }
+    
+    /// View for keyboard
+    @ViewBuilder
+    func KeyPadView() -> some View {
+        VStack(spacing: 12) {
+            HStack {
+                Text("Bulk AP")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                
+                Spacer(minLength: 0)
+                
+                Button {
+                    withAnimation(.bouncy) {
+                        showBulkXPInput = false
+                    }
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title)
+                        .foregroundStyle(Color.gray, Color.primary.opacity(0.1))
+                }
+            }
+            .padding(.bottom, 10)
+            
+            VStack(spacing: 6) {
+                Text(duration.isEmpty ? "0" : duration)
+                    .font(.system(size: 60, weight: .black))
+                    .contentTransition(.numericText())
+                
+                Text("Action Points")
+                    .font(.caption)
+                    .foregroundStyle(.gray)
+            }
+            .padding(.vertical, 20)
+            
+            /// Custom Keypad View
+            LazyVGrid(columns: Array(repeating: GridItem(), count: 3), spacing: 15) {
+                ForEach(keypadValues) { keyValue in
+                    if keyValue.value == 0 {
+                        Spacer()
+                    }
+                    
+                    Group {
+                        if keyValue.isBack {
+                            Image(systemName: keyValue.title)
+                        } else {
+                            Text(keyValue.title)
+                        }
+                    }
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 60)
+                    .contentShape(.rect)
+                    .onTapGesture {
+                        withAnimation(.snappy) {
+                            if keyValue.isBack {
+                                if !duration.isEmpty {
+                                    duration.removeLast()
+                                }
+                            } else if duration.count < 2 {
+                                print(duration)
+                                duration.append(keyValue.title)
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, -15)
+            
+            Button {
+                withAnimation(.bouncy) {
+                    if let amount = Int(duration), amount >= 1, amount <= 99 {
+                        appViewModel.updateExperience(appViewModel.experience + amount)
+                    }
+                    duration = ""
+                    showBulkXPInput = false
+                }
+            } label: {
+                Text("Continue")
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 15)
+                    .foregroundStyle(.white)
+                    .background(.blue, in: .capsule)
+            }
+        }
+        .padding(20)
     }
 }
 
