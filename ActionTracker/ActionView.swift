@@ -222,24 +222,6 @@ struct ActionView: View {
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
-//                .alert("Add Experience", isPresented: $showBulkXPInput) {
-//                    TextField("1-99", text: $bulkXPAmount)
-//                        .keyboardType(.numberPad)
-//                    
-//                    Button("Cancel", role: .cancel) {
-//                        bulkXPAmount = ""
-//                    }
-//                    
-//                    Button("Add") {
-//                        if let amount = Int(bulkXPAmount), amount >= 1, amount <= 99 {
-//                            appViewModel.updateExperience(appViewModel.experience + amount)
-//                        }
-//                        bulkXPAmount = ""
-//                    }
-//                } message: {
-//                    Text("Enter amount (1-99)")
-//                }
-                
                 
                 // Button controls
                 HStack {
