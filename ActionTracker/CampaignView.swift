@@ -472,6 +472,7 @@ struct AddCampaignView: View {
 struct AddMissionView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
+    @EnvironmentObject private var appViewModel: AppViewModel
     
     var campaign: Campaign
     
@@ -483,6 +484,7 @@ struct AddMissionView: View {
     @State private var newObjective = ""
     @State private var objectivesList: [String] = []
     @State private var notes = ""
+    @State private var missionSaved = false
     @FocusState private var focusedField: MissionField?
     
     enum MissionField: Hashable {
@@ -570,6 +572,7 @@ struct AddMissionView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         saveMission()
+                        missionSaved = true
                     }
                     .disabled(missionName.isEmpty)
                 }
@@ -578,6 +581,23 @@ struct AddMissionView: View {
                 onInsertText: { insertTextAtCursor($0) }, 
                 onDone: { focusedField = nil }
             )
+            .alert("Start New Mission", isPresented: $missionSaved) {
+                Button("Yes, Start Timer") {
+                    // Start the timer by posting a notification
+                    NotificationCenter.default.post(name: NSNotification.Name("StartNewMissionTimer"), object: nil)
+                    
+                    // Set the active view tab to action and navigate away
+                    UserDefaults.standard.set("action", forKey: "activeViewTab")
+                    dismiss()
+                }
+                Button("No, Just Prepare") {
+                    // Set the active view tab to action and navigate away without starting timer
+                    UserDefaults.standard.set("action", forKey: "activeViewTab")
+                    dismiss()
+                }
+            } message: {
+                Text("Do you want to start the timer for the new mission?")
+            }
         }
     }
     
@@ -612,6 +632,58 @@ struct AddMissionView: View {
         }
     }
     
+    private func resetMissionState() {
+        // 1. Set the selected character to the campaign's character
+        if let character = findCampaignCharacter() {
+            appViewModel.selectCharacter(character)
+        }
+        
+        // 2. Reset experience to 0
+        appViewModel.resetExperience()
+        
+        // 3. Reset actions
+        // This is handled through a notification that ActionView will listen to
+        NotificationCenter.default.post(name: NSNotification.Name("ResetExperience"), object: nil)
+    }
+    
+    private func findCampaignCharacter() -> Character? {
+        // Try to find a character matching the survivor name and set
+        let descriptor = FetchDescriptor<Character>()
+        do {
+            let characters = try context.fetch(descriptor)
+            
+            // First try to find an exact match with both name and set
+            // Note: Campaign doesn't store the set, so we need to look for the character
+            // that was most likely used when creating the campaign
+            
+            // Strategy 1: First look for exact name match with any character that has a set
+            let exactNameWithSet = characters.filter { 
+                $0.name == campaign.survivorName && $0.set != nil && !$0.set!.isEmpty 
+            }
+            
+            if !exactNameWithSet.isEmpty {
+                // If we found characters with the name and a set, use the first one
+                // More precise matching would require storing the set in the campaign
+                return exactNameWithSet.first
+            }
+            
+            // Strategy 2: Find character with exact name and no set
+            let exactNameNoSet = characters.filter {
+                $0.name == campaign.survivorName && ($0.set == nil || $0.set!.isEmpty)
+            }
+            
+            if !exactNameNoSet.isEmpty {
+                return exactNameNoSet.first
+            }
+            
+            // Strategy 3: Find any character with the name
+            return characters.first { $0.name == campaign.survivorName }
+        } catch {
+            print("Error fetching characters: \(error)")
+            return nil
+        }
+    }
+    
     private func saveMission() {
         let mission = Mission(
             missionName: missionName,
@@ -639,7 +711,14 @@ struct AddMissionView: View {
         }
         
         try? context.save()
-        dismiss()
+        
+        // Start tracking the new mission
+        if let missionID = mission.id.uuidString as String? {
+            appViewModel.startTrackingMission(missionID: missionID)
+        }
+        
+        // Reset the mission state before showing the alert
+        resetMissionState()
     }
 }
 

@@ -32,12 +32,13 @@ struct HeaderView: View {
     @State private var elapsedTime: TimeInterval = 0
     @State private var showResetConfirmation: Bool = false
     @State private var showStopConfirmation: Bool = false
-    @State private var showGameSummary: Bool = false
-    @State private var gameEndDate: Date? = nil
     @State private var displayPaused: Bool = false
     
     // Binding to share timer state with parent and siblings
     @Binding var timerRunningBinding: Bool
+    
+    // Direct access to AppViewModel
+    @EnvironmentObject private var appViewModel: AppViewModel
     
     @Query(sort: \Character.name) var characters: [Character]
     @Environment(\.modelContext) private var context
@@ -182,6 +183,8 @@ struct HeaderView: View {
                         Divider ()
                         
                         Button(role: .destructive) {
+                            // Update mission notes before resetting
+                            updateMissionNotes()
                             resetActions()
                         } label: {
                             HStack {
@@ -345,13 +348,13 @@ struct HeaderView: View {
         .sheet(isPresented: $showingSkillLibrary) {
             SkillView()
         }
-        .confirmationDialog("Reset Timer?", isPresented: $showResetConfirmation) {
-            Button("Reset", role: .destructive) {
+        .onChange(of: showResetConfirmation) { oldValue, newValue in
+            if newValue {
+                // Instead of showing dialog, immediately reset the timer
                 resetTimer()
+                // Immediately toggle it back to false
+                showResetConfirmation = false
             }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Are you sure you want to reset the timer? This will restart the timer at 00:00:00.")
         }
         .confirmationDialog("Stop Timer?", isPresented: $showStopConfirmation) {
             Button("Stop", role: .destructive) {
@@ -360,31 +363,6 @@ struct HeaderView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Are you sure you want to stop the timer? This will end the current game session.")
-        }
-        .alert("Game Summary", isPresented: $showGameSummary) {
-            Button("OK") {}
-        } message: {
-            if let startDate = timerStartDate, let endDate = gameEndDate {
-                let startFormatter = DateFormatter()
-                startFormatter.dateStyle = .none
-                startFormatter.timeStyle = .short  // HH:MM format
-                
-                let endFormatter = DateFormatter()
-                endFormatter.dateStyle = .none
-                endFormatter.timeStyle = .short    // HH:MM format
-                
-                let durationHours = Int(elapsedTime) / 3600
-                let durationMinutes = (Int(elapsedTime) % 3600) / 60
-                
-                // Get current experience and total gained
-                let currentXP = UserDefaults.standard.integer(forKey: "playerExperience")
-                let totalXP = UserDefaults.standard.integer(forKey: "totalExperienceGained")
-                
-                // Include experience info in summary
-                return Text("Game session started at \(startFormatter.string(from: startDate)) and ended at \(endFormatter.string(from: endDate)).\n\nTotal game time: \(durationHours)h \(durationMinutes)m\n\nCurrent Experience: \(currentXP)\nTotal Experience Gained: \(totalXP)")
-            } else {
-                return Text("Game session ended.")
-            }
         }
         .onReceive(Timer.publish(every: 60, on: .main, in: .common).autoconnect()) { _ in
             // Update once per minute to keep timer showing the right time
@@ -405,6 +383,11 @@ struct HeaderView: View {
                 }
             }
         }
+        // Listen for the notification to start a new mission timer
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("StartNewMissionTimer"))) { _ in
+            // Start a new timer for the mission
+            startTimer()
+        }
     }
     
     // Timer functions - simplified
@@ -418,6 +401,9 @@ struct HeaderView: View {
     }
     
     private func resetTimer() {
+        // Update mission notes before resetting, if a mission is being tracked
+        updateMissionNotes()
+        
         // Reset the timer to current time
         timerStartDate = Date()
         timerRunningBinding = true
@@ -428,8 +414,17 @@ struct HeaderView: View {
     
     private func stopTimer() {
         timerRunningBinding = false
-        gameEndDate = Date()
-        showGameSummary = true
+        
+        // Update mission notes instead of showing game summary
+        updateMissionNotes()
+    }
+    
+    private func updateMissionNotes() {
+        print("DEBUG HeaderView: Updating mission notes, elapsed time: \(elapsedTime)")
+        
+        // Now using the direct EnvironmentObject reference
+        let success = appViewModel.updateMissionNotes(elapsedTime: elapsedTime)
+        print("DEBUG HeaderView: Update mission notes result: \(success)")
     }
     
     // Helper functions for timer display
@@ -1023,9 +1018,16 @@ struct HeaderView: View {
     }
     
     private func executeResetActions() {
-        // First stop the timer if it's running
+        print("DEBUG HeaderView: Executing reset actions")
+        
+        // First update mission notes if there's a timer running
         if timerRunningBinding {
+            print("DEBUG HeaderView: Timer is running, updating mission notes before reset")
+            updateMissionNotes()
             stopTimer()
+        } else if timerStartDate != nil {
+            print("DEBUG HeaderView: Timer was started but not running, updating mission notes")
+            updateMissionNotes()
         }
         
         // Reset the actions
@@ -1033,36 +1035,15 @@ struct HeaderView: View {
             actionItems = ActionItem.defaultActions()
         }
         
-        // Get the current experience for the summary alert
-        let currentExperience = UserDefaults.standard.integer(forKey: "playerExperience")
-        let totalXP = UserDefaults.standard.integer(forKey: "totalExperienceGained")
-        
         // Reset experience to 0
-        UserDefaults.standard.set(0, forKey: "playerExperience")
-        UserDefaults.standard.set(0, forKey: "ultraRedCount")
-        // Also reset total experience gained
-        UserDefaults.standard.set(0, forKey: "totalExperienceGained")
+        appViewModel.resetExperience()
         
         // Post a notification to tell ActionView to update its experience value
         NotificationCenter.default.post(name: NSNotification.Name("ResetExperience"), object: nil)
         
-        // Show a summary alert with experience data
-        let experienceSummary = UIAlertController(
-            title: "Game Session Summary",
-            message: "Game session ended.\n\nExperience reset from \(currentExperience) to 0.\nTotal experience gained during your adventure: \(totalXP).",
-            preferredStyle: .alert
-        )
+        print("DEBUG HeaderView: Experience and actions reset completed")
         
-        experienceSummary.addAction(UIAlertAction(title: "OK", style: .default))
-        
-        // Present the summary after a short delay
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootVC = windowScene.windows.first?.rootViewController {
-            // Use a slight delay to show this after any timer summary
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                rootVC.present(experienceSummary, animated: true)
-            }
-        }
+        // Don't show any summary dialog
     }
     
     private func wipeAllCharacters() {

@@ -44,6 +44,14 @@ class AppViewModel: ObservableObject {
         willSet { objectWillChange.send() }
     }
     
+    // Mission tracking
+    @AppStorage("currentMissionID") var currentMissionID: String = "" {
+        willSet { objectWillChange.send() }
+    }
+    @AppStorage("missionStartXP") var missionStartXP: Int = 0 {
+        willSet { objectWillChange.send() }
+    }
+    
     // UI state
     @Published var showCharacterPicker = false
     @Published var showSkillManager = false
@@ -325,5 +333,148 @@ class AppViewModel: ObservableObject {
         totalExperienceGained = 0
         
         logger.debug("Reset all experience values")
+    }
+    
+    // MARK: - Mission Tracking
+    
+    /// Start tracking a new mission
+    func startTrackingMission(missionID: String) {
+        self.currentMissionID = missionID
+        self.missionStartXP = experience
+        logger.debug("Started tracking mission: \(missionID), starting XP: \(self.missionStartXP)")
+    }
+    
+    /// Update mission notes with the gameplay information
+    func updateMissionNotes(elapsedTime: TimeInterval) -> Bool {
+        print("DEBUG: Updating mission notes, elapsed time: \(elapsedTime)")
+        print("DEBUG: Current mission ID: \(self.currentMissionID), has context: \(modelContext != nil)")
+        
+        guard !self.currentMissionID.isEmpty, let context = modelContext else {
+            logger.error("Cannot update mission notes: no current mission or context")
+            print("DEBUG: Failed to update mission notes - missing mission ID or context")
+            return false
+        }
+        
+        // Find the mission using the UUID string
+        guard let missionUUID = UUID(uuidString: self.currentMissionID) else {
+            logger.error("Invalid mission UUID: \(self.currentMissionID)")
+            print("DEBUG: Failed to parse UUID from: \(self.currentMissionID)")
+            return false
+        }
+        
+        print("DEBUG: Looking for mission with UUID: \(missionUUID)")
+        
+        do {
+            // Create a predicate to find the mission
+            let missionDescriptor = FetchDescriptor<Mission>(predicate: #Predicate<Mission> { mission in
+                mission.id == missionUUID
+            })
+            
+            let missions = try context.fetch(missionDescriptor)
+            print("DEBUG: Found \(missions.count) missions matching UUID")
+            
+            guard let mission = missions.first else {
+                logger.error("Mission not found: \(self.currentMissionID)")
+                print("DEBUG: No mission found with UUID: \(missionUUID)")
+                return false
+            }
+            
+            print("DEBUG: Found mission: \(mission.missionName)")
+            
+            // Calculate time played
+            let hours = Int(elapsedTime) / 3600
+            let minutes = (Int(elapsedTime) % 3600) / 60
+            let timeString = "\(hours) hour\(hours == 1 ? "" : "s") \(minutes) minute\(minutes == 1 ? "" : "s") played"
+            print("DEBUG: Time string: \(timeString)")
+            
+            // Calculate XP gained during mission
+            let xpGained = self.experience - self.missionStartXP
+            print("DEBUG: XP gained during mission: \(xpGained) (start: \(self.missionStartXP), current: \(self.experience))")
+            
+            // Format the current level with Ultra information if applicable
+            let baseLevel = getCurrentBaseLevel()
+            let totalAP = experience // Use total AP (experience) rather than base level
+            let levelName = getLevelLabel()
+            
+            // For display in notes, we want to add ULTRA information for levels > 43
+            let displayLevelName: String
+            if isUltraMode() {
+                // Calculate which Ultra cycle we're in (1-based)
+                let cycle = ((experience - 1) / 43) + 1
+                // First Ultra cycle (cycle = 2) shows just "ULTRA"
+                // Second Ultra cycle (cycle = 3) shows "ULTRA X"
+                // Third Ultra cycle (cycle = 4) shows "ULTRA XX" etc.
+                let xCount = max(0, cycle - 2)  // No X's for first Ultra
+                let ultraSuffix = xCount > 0 ? " ULTRA " + String(repeating: "X", count: xCount) : " ULTRA"
+                displayLevelName = "\(levelName)\(ultraSuffix)"
+            } else {
+                displayLevelName = levelName
+            }
+            
+            print("DEBUG: Current level: \(displayLevelName) (\(totalAP) AP)")
+            
+            // Create or update notes - use total AP (experience) not base level
+            let missionInfo = "\n\(timeString)\nLevel: \(displayLevelName) (\(totalAP) AP)"
+            print("DEBUG: Mission info to add: \(missionInfo)")
+            
+            // Check existing notes
+            if let existingNotes = mission.notes, !existingNotes.isEmpty {
+                print("DEBUG: Existing notes: \(existingNotes)")
+                
+                // Check if the mission note already has timing information (to avoid duplications)
+                if existingNotes.contains(" played\n") {
+                    print("DEBUG: Notes already contain play time, updating...")
+                    // Note already has timing info, likely going to update it
+                    // Find the position to update
+                    if let playedRange = existingNotes.range(of: " played\n") {
+                        // Find the starting position of the play time info
+                        // We search backwards for a newline before the "played" string
+                        let searchStart = existingNotes.startIndex
+                        let searchEnd = playedRange.lowerBound
+                        let searchRange = searchStart..<searchEnd
+                        
+                        if let lastNewline = existingNotes[searchRange].lastIndex(of: "\n") {
+                            // Extract the part before the timing info
+                            let notesWithoutTiming = existingNotes[..<lastNewline]
+                            mission.notes = String(notesWithoutTiming) + missionInfo
+                            print("DEBUG: Updated existing play time info")
+                        } else {
+                            // Can't find where to update, append
+                            mission.notes = existingNotes + missionInfo
+                            print("DEBUG: Couldn't find exact play time section start, appending")
+                        }
+                    } else {
+                        // Can't find where to update, append
+                        mission.notes = existingNotes + missionInfo
+                        print("DEBUG: Couldn't find play time section to update, appending")
+                    }
+                } else {
+                    // Append to existing notes
+                    mission.notes = existingNotes + missionInfo
+                    print("DEBUG: Appending play time to existing notes")
+                }
+            } else {
+                // Create new notes with just the session info - remove leading newline for new notes
+                mission.notes = timeString + "\nLevel: \(displayLevelName) (\(totalAP) AP)"
+                print("DEBUG: Creating new notes with play time")
+            }
+            
+            print("DEBUG: Final notes: \(mission.notes ?? "nil")")
+            
+            try context.save()
+            print("DEBUG: Successfully saved mission notes")
+            
+            // Reset mission tracking
+            currentMissionID = ""
+            missionStartXP = 0
+            print("DEBUG: Reset mission tracking variables")
+            
+            logger.debug("Updated mission notes for \(missionUUID) with play time and level info")
+            return true
+        } catch {
+            logger.error("Failed to update mission notes: \(error.localizedDescription)")
+            print("DEBUG ERROR: Failed to update mission notes: \(error)")
+            return false
+        }
     }
 }

@@ -12,7 +12,7 @@ struct TrayView: View {
     @State private var selectedAction: Action?
     @Environment(\.dismiss) var dismiss
     
-    let onActionSelected: (ActionItem) -> Void
+    let onActionSelected: (ActionItem?) -> Void
     
     var body: some View {
         VStack(spacing: 20) {
@@ -27,6 +27,7 @@ struct TrayView: View {
                         
                         Button {
                             /// Dismissing Sheet
+                            onActionSelected(nil)
                             dismiss()
                         } label: {
                             Image(systemName: "xmark.circle.fill")
@@ -69,7 +70,11 @@ struct TrayView: View {
             
             /// Continue Button
             Button {
-                onActionSelected(ActionItem(id: UUID(), label: selectedAction!.title, isUsed: false))
+                if let action = selectedAction {
+                    onActionSelected(ActionItem(id: UUID(), label: action.title, isUsed: false))
+                } else {
+                    onActionSelected(nil)
+                }
                 dismiss()
             } label: {
                 Text("Continue")
@@ -83,5 +88,10 @@ struct TrayView: View {
             .padding(.top, 15)
         }
         .padding(20)
+        .onDisappear {
+            if selectedAction == nil {
+                onActionSelected(nil)
+            }
+        }
     }
 }
