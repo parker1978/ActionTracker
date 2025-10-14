@@ -1,0 +1,41 @@
+﻿Number,Type,Rush,Blue,Yellow,Orange,Red,Note
+001,Walkers,FALSE,1,2,4,6,
+002,Walkers,FALSE,2,3,5,7,
+003,Walkers,FALSE,3,5,7,9,
+004,Walkers,FALSE,4,6,8,10,
+005,Walkers,TRUE,1,2,4,6,"Spawn, then Activate."
+006,Walkers,TRUE,2,3,5,7,"Spawn, then Activate."
+007,Walkers,TRUE,3,5,7,9,"Spawn, then Activate."
+008,Walkers,TRUE,4,6,8,10,"Spawn, then Activate."
+009,Brutes,FALSE,1,1,2,3,
+010,Brutes,FALSE,2,3,4,4,
+011,Brutes,TRUE,0,1,2,3,"Spawn, then Activate."
+012,Brutes,TRUE,1,2,3,4,"Spawn, then Activate."
+013,Runners,FALSE,0,1,2,3,
+014,Runners,FALSE,1,1,2,3,
+015,Runners,FALSE,1,2,3,4,
+016,Runners,FALSE,2,3,4,4,
+017,Abomination,FALSE,0,1,1,1,
+018,Abomination,FALSE,0,1,1,1,
+019,Walkers,FALSE,2,4,6,8,
+020,Walkers,FALSE,3,5,7,9,
+021,Walkers,FALSE,4,6,8,10,
+022,Walkers,FALSE,6,8,10,12,
+023,Walkers,TRUE,2,4,6,8,"Spawn, then Activate."
+024,Walkers,TRUE,3,5,7,9,"Spawn, then Activate."
+025,Walkers,TRUE,4,6,8,10,"Spawn, then Activate."
+026,Walkers,TRUE,6,8,10,12,"Spawn, then Activate."
+027,Brutes,FALSE,1,2,3,4,
+028,Brutes,FALSE,3,4,5,6,
+029,Brutes,TRUE,1,2,3,4,"Spawn, then Activate."
+030,Brutes,TRUE,2,3,4,5,"Spawn, then Activate."
+031,Runners,FALSE,1,2,3,4,
+032,Runners,FALSE,1,2,3,4,
+033,Runners,FALSE,2,3,4,5,
+034,Runners,FALSE,3,4,5,6,
+035,Abomination,FALSE,1,1,1,1,
+036,Abomination,FALSE,1,1,1,1,
+037,Extra Activation,FALSE,No One,All Walkers,All Walkers,All Walkers,
+038,Extra Activation,FALSE,No One,All Walkers,All Walkers,All Walkers,
+039,Extra Activation,FALSE,No One,All Brutes,All Brutes,All Brutes,
+040,Extra Activation,FALSE,No One,All Runners,All Runners,All Runners,

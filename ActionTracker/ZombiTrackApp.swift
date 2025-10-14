@@ -19,6 +19,11 @@ struct ZombiTrackApp: App {
             let context = ModelContext(container)
             DataSeeder.seedIfNeeded(context: context)
 
+            // Run spawn deck tests (can be commented out after verification)
+//            #if DEBUG
+//            SpawnDeckManager.runTests()
+//            #endif
+
             return container
         } catch {
             fatalError("Could not create ModelContainer: \(error)")

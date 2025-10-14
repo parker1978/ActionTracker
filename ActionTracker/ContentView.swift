@@ -9,12 +9,16 @@ struct ContentView: View {
                 Tab("Actions", systemImage: "bolt.fill", value: 0) {
                     ActionsScreen()
                 }
-                
+
                 Tab("Characters", systemImage: "person.3.fill", value: 1) {
                     CharactersScreen()
                 }
-                
-                Tab(value: 2, role: .search) {
+
+                Tab("Spawn Deck", systemImage: "rectangle.stack.fill", value: 2) {
+                    SpawnDeckView()
+                }
+
+                Tab(value: 3, role: .search) {
                     CharactersSearchScreen()
                 }
             }
@@ -27,14 +31,18 @@ struct ContentView: View {
                 ActionsScreen()
                     .tabItem { Label("Actions", systemImage: "bolt.fill") }
                     .tag(0)
-                
+
                 CharactersScreen()
                     .tabItem { Label("Characters", systemImage: "person.3.fill") }
                     .tag(1)
-                
+
+                SpawnDeckView()
+                    .tabItem { Label("Spawn Deck", systemImage: "rectangle.stack.fill") }
+                    .tag(2)
+
                 CharactersSearchScreen()
                     .tabItem { Label("Search", systemImage: "magnifyingglass") }
-                    .tag(2)
+                    .tag(3)
             }
         }
     }
