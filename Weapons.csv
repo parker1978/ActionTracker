@@ -1,0 +1,73 @@
+﻿Name,Expansion,Deck,Count,Category,Ammo Type,Open Door,Door Noise,Kill Noise,Dual,Overload,Range Min,Range Max,Range,Dice,Accuracy,Damage,Overload Dice,Special
+Pistol,,Starting,3,Ranged,Bullets,FALSE,FALSE,TRUE,TRUE,FALSE,0,1,,1,3+,1,,
+Pistol,Fort Hendrix,Starting,,Ranged,Bullets,FALSE,FALSE,TRUE,TRUE,TRUE,0,1,,1,3+,1,1,
+Ka-Bar,Fort Hendrix,Starting,,Melee,,FALSE,FALSE,FALSE,TRUE,TRUE,,,0,1,3+,1,1,Add +1 die to another equipped Melee weapon.
+Fire Axe,,Starting,,Melee,,TRUE,TRUE,FALSE,FALSE,FALSE,,,0,1,4+,2,,
+Rifle,Fort Hendrix,Starting,2,Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,TRUE,1,3,,1,3+,1,1,
+Baseball Bat,,Starting,,Melee,,FALSE,FALSE,FALSE,FALSE,FALSE,,,0,2,3+,1,,
+Crowbar,,Starting,,Melee,,TRUE,FALSE,FALSE,FALSE,FALSE,,,0,1,4+,1,,
+Crowbar,Fort Hendrix,Starting,,Melee,,TRUE,FALSE,FALSE,FALSE,TRUE,,,0,1,4+,1,1,
+Fire Axe,Fort Hendrix,Starting,,Melee,,TRUE,TRUE,FALSE,FALSE,TRUE,,,0,1,4+,2,1,
+Rifle,Fort Hendrix,Starting,,Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,TRUE,1,3,,1,3+,1,1,
+Moltov,,Regular,10,Ranged,,FALSE,FALSE,TRUE,FALSE,FALSE,1,1,,,,,,Discard from Hand: Eliminate all Actors in the Targeted Zone
+Sub-Mg,,Regular,2,Ranged,Bullets,FALSE,FALSE,TRUE,TRUE,FALSE,0,1,,3,5+,1,,
+Shotgun,,Regular,2,Ranged,Shells,FALSE,FALSE,TRUE,FALSE,FALSE,0,1,,2,4+,2,,
+Sniper Rifle,,Regular,2,Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,FALSE,1,3,,1,3+,2,,Sniper.
+Sniper Rifle,Fort Hendrix,Regular,2,Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,TRUE,1,3,,1,3+,2,1,Sniper.
+Kukri,,Regular,2,Melee,,FALSE,FALSE,FALSE,FALSE,FALSE,,,0,2,4+,2,,
+Kukri,Fort Hendrix,Regular,2,Melee,,FALSE,FALSE,FALSE,FALSE,TRUE,,,0,2,4+,2,2,
+Chainsaw,,Regular,4,Melee,,TRUE,TRUE,TRUE,FALSE,FALSE,,,0,5,5+,2,,
+Chainsaw,Fort Hendrix,Regular,2,Melee,,TRUE,TRUE,TRUE,FALSE,TRUE,,,0,5,5+,2,3,
+Katana,,Regular,2,Melee,,FALSE,FALSE,FALSE,TRUE,FALSE,,,0,2,4+,1,,
+Katana,Fort Hendrix,Regular,2,Melee,,FALSE,FALSE,FALSE,TRUE,TRUE,,,0,2,4+,1,2,
+Fire Axe,,Regular,1,Melee,,TRUE,TRUE,FALSE,FALSE,FALSE,,,0,1,4+,2,,
+Fire Axe,Fort Hendrix,Regular,1,Melee,,TRUE,TRUE,FALSE,FALSE,TRUE,,,0,1,4+,2,1,
+Crowbar,,Regular,1,Melee,,TRUE,FALSE,FALSE,TRUE,FALSE,,,0,1,4+,1,,
+Machete,,Regular,4,Melee,,FALSE,FALSE,FALSE,TRUE,FALSE,,,0,1,3+,2,,
+Machete,Fort Hendrix,Regular,2,Melee,,FALSE,FALSE,FALSE,TRUE,TRUE,,,0,1,3+,2,1,
+Sawed-Off,,Regular,4,Ranged,Shells,FALSE,FALSE,TRUE,TRUE,FALSE,0,1,,2,3+,1,,Reload.
+Sawed-Off,Fort Hendrix,Regular,4,Ranged,Shells,FALSE,FALSE,TRUE,TRUE,TRUE,0,1,,2,3+,1,2,Reload.
+Pistol,,Regular,1,Ranged,Bullets,FALSE,FALSE,TRUE,TRUE,FALSE,0,1,,1,3+,1,,
+Pistol,Fort Hendrix,Regular,1,Ranged,Bullets,FALSE,FALSE,TRUE,TRUE,TRUE,0,1,,1,3+,1,1,
+Water,,Regular,4,Bonus,,,,,,,,,,,,,,Discard: Gain 3 AP. May be used in the backpack.
+Bag of Ride,,Regular,2,Bonus,,,,,,,,,,,,,,Discard: Gain 3 AP. May be used in the backpack.
+Canned Food,,Regular,4,Bonus,,,,,,,,,,,,,,Discard: Gain 3 AP. May be used in the backpack.
+Flashlight,,Regular,2,Bonus,,,,,,,,,,,,,,Search: Draw 2 cards. May be used in the backpack.
+Flashlight,Fort Hendrix,Regular,2,Bonus,,,,,,,,,,,,,,Search: Draw 2 cards. Light Source. May be used in the backpack.
+Plenty of Bullets,,Regular,3,Bonus,,,,,,,,,,,,,,You may re-roll all Attacks with bullet weapons once. The new result takes the place of the previous one. May be used in the backpack.
+Plenty of Shells,,Regular,3,Bonus,,,,,,,,,,,,,,You may re-roll all Attacks with shell weapons once. The new result takes the place of the previous one. May be used in the backpack.
+AAAHH!!,,Regular,8,Zombie,,,,,,,,,,,,,,Place a Walker in the Zone immediately and discard this card.
+Gunblade,,Regular,2,Melee Ranged,Bullets,FALSE,FALSE,TRUE,TRUE,FALSE,0,1,0,1,4+,2,,For Melee: Roll 2 dice. No kill noise.
+Pa's Gun,,Regular,1,Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,FALSE,0,1,,1,4+,3,,
+Concrete Saw,,Regular,1,Melee,,TRUE,TRUE,TRUE,FALSE,FALSE,,,0,3,5+,3,,
+Mjolnir,Supernatural,Ultrared,1,Ranged,,TRUE,TRUE,TRUE,FALSE,FALSE,0,1,,4,5+,2,,"For each hit, deals 2 damage to another target in the same zone."
+Archangel Blade,Supernatural,Ultrared,1,Melee,,FALSE,FALSE,FALSE,FALSE,FALSE,,,0,2,4+,2,,"If this eliminates at least 1 Zombie, +1 Action this Turn. +1 Damage against Abominations."
+Ruby's Knife,Supernatural,Ultrared,1,Melee,,FALSE,FALSE,FALSE,FALSE,FALSE,,,0,3,5+,2,,"If this rolls any 6s, +1 damage."
+The First Blade,Supernatural,Ultrared,1,Melee,,FALSE,FALSE,FALSE,FALSE,FALSE,,,0,2,5+,1,,"Once per Player Phase, if this eliminates at least 1 Zombie, you cannot be targeted during the Zombie Phase."
+Death's Scythe,Supernatural,Ultrared,1,Melee,,FALSE,FALSE,FALSE,FALSE,FALSE,,,0,3,6,3,,+1 die againt Abominations. This weapon can eliminate any enemy regardless of restrictions.
+Angel Blade,Supernatural,Ultrared,1,Melee,,FALSE,FALSE,FALSE,FALSE,FALSE,,,0,2,3+,2,,"Once per Player Phase, if at least one enemy is eliminated in a zone, lay down all Zombies in that zone. When laid down zombies would activate, instead lay them up."
+Prototype Assault Shotgun,Fort Hendrix,Ultrared,1,Ranged,Shells,FALSE,FALSE,TRUE,FALSE,TRUE,1,2,,3,3+,1,2,
+Army Sniper Rifle,Fort Hendrix,Ultrared,1,Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,TRUE,1,4,,2,3+,2,1,Sniper.
+Army Sniper Rifle,,Ultrared,1,Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,FALSE,1,4,,2,3+,2,,Sniper.
+Patton's .45 Long Colt,Fort Hendrix,Ultrared,1,Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,TRUE,0,1,,3,3+,1,2,Add +2 dice if Patton's .357 Magnum is equipped.
+Patton's .357 Magnum,Fort Hendrix,Ultrared,1,Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,TRUE,0,1,,2,4+,2,2,Add +2 dice if Patton's .45 Long Colt is equipped.
+Siege Hammer,Pariz,Ultrared,1,Melee,,TRUE,TRUE,FALSE,FALSE,TRUE,,,0,3,4+,2,2,
+Prized Katana,Pariz,Ultrared,1,Melee,,FALSE,FALSE,FALSE,FALSE,TRUE,,,0,4,3+,1,2,
+Wristbreaker,Pariz,Ultrared,1,Melee,,FALSE,FALSE,FALSE,FALSE,TRUE,,,0,6,5+,2,2,
+Golden Kukri,Pariz,Ultrared,1,Melee,,FALSE,FALSE,FALSE,FALSE,TRUE,,,0,4,4+,2,2,
+Golden Kukri,,Ultrared,1,Melee,,FALSE,FALSE,FALSE,FALSE,FALSE,,,0,4,4+,2,,
+Ma's Shotgun,,Ultrared,1,Melee Ranged,Shells,FALSE,FALSE,TRUE,FALSE,FALSE,0,1,0,1,3+,2,,For Melee: Roll 2 dice. No kill noise. Reload.
+Automatic Shotgun,,Ultrared,1,Ranged,Shells,FALSE,FALSE,TRUE,FALSE,FALSE,0,1,,3,4+,2,,
+Nailbat,,Ultrared,1,Melee,,FALSE,FALSE,FALSE,FALSE,FALSE,,,0,2,3+,2,,
+Gunblade,,Ultrared,1,Melee Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,FALSE,0,1,0,2,4+,2,,For Melee: Roll 4 dice. No kill noise.
+Golden AK-47,,Ultrared,1,Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,FALSE,1,2,,3,4+,2,,
+Golden AK-47,Fort Hendrix,Ultrared,1,Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,TRUE,1,2,,3,4+,2,3,
+Zantetsuken,,Ultrared,1,Melee,,FALSE,FALSE,FALSE,FALSE,FALSE,,,0,5,4+,1,,
+Evil Twins,,Ultrared,1,Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,FALSE,0,1,,2,3+,1,,
+Ned's Atomic Flashlight,,Ultrared,1,Melee,,TRUE,TRUE,TRUE,FALSE,FALSE,,,0,5,4+,3,,
+Sweet Sisters,,Ultrared,1,Melee Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,FALSE,0,1,0,4,3+,2,,For Melee: Roll 6 dice. No kill noise.
+Betty,,Ultrared,1,Melee,,TRUE,TRUE,TRUE,FALSE,FALSE,,,0,7,4+,2,,
+Doug's Dream,,Ultrared,1,Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,FALSE,0,1,,8,4+,1,,
+Jack & Jill,,Ultrared,1,Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,FALSE,0,1,,6,3+,2,,1 action to reload. Free reload in end phase.
+911 Special,,Ultrared,1,Ranged,Bullets,FALSE,FALSE,TRUE,FALSE,FALSE,0,2,,5,3+,1,,
+AAAHH!!,,Ultrared,4,Zombie,,,,,,,,,,,,,,Place a Walker in the Zone immediately and discard this card.

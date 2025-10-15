@@ -92,6 +92,9 @@ struct ActiveGameView: View {
                 // Action tracking card (with edit mode for deletion)
                 ActionsCard(session: session)
 
+                // Inventory card (weapons)
+                InventoryCard(session: session)
+
                 // Experience and skill tracking card
                 ExperienceCard(session: session)
 
@@ -557,6 +560,541 @@ struct FlowLayout: Layout {
             }
 
             self.size = CGSize(width: maxWidth, height: currentY + lineHeight)
+        }
+    }
+}
+
+// MARK: - Inventory Card
+
+/// Card for managing character weapon inventory
+/// Players self-manage weapons with simple text input
+struct InventoryCard: View {
+    @Environment(\.modelContext) private var modelContext
+    @Bindable var session: GameSession
+    @State private var showingInventorySheet = false
+    @State private var showingWeaponDetail = false
+    @State private var selectedWeapon: Weapon?
+
+    // Parse weapon names from stored strings
+    private var activeWeaponsList: [String] {
+        InventoryFormatter.parse(session.activeWeapons)
+    }
+
+    private var inactiveWeaponsList: [String] {
+        InventoryFormatter.parse(session.inactiveWeapons)
+    }
+
+    // Helper to find weapon by name
+    private func findWeapon(byName name: String) -> Weapon? {
+        WeaponRepository.shared.allWeapons.first { $0.name == name }
+    }
+
+    var body: some View {
+        VStack(spacing: 16) {
+            // Header
+            HStack {
+                Label("Inventory", systemImage: "shield.lefthalf.filled")
+                    .font(.headline)
+
+                Spacer()
+
+                // Weapon count
+                let totalWeapons = activeWeaponsList.count + inactiveWeaponsList.count
+                Text("\(totalWeapons) weapons")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                // Manage button
+                Button {
+                    showingInventorySheet = true
+                } label: {
+                    Image(systemName: "square.and.pencil")
+                        .font(.title3)
+                }
+            }
+
+            // Quick Summary
+            if activeWeaponsList.isEmpty && inactiveWeaponsList.isEmpty {
+                Text("No weapons equipped")
+                    .foregroundStyle(.secondary)
+                    .font(.subheadline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                VStack(alignment: .leading, spacing: 12) {
+                    // Active Weapons
+                    if !activeWeaponsList.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack {
+                                Image(systemName: "hand.raised.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.blue)
+                                Text("Active (\(activeWeaponsList.count)/2)")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                            }
+
+                            ForEach(Array(activeWeaponsList.prefix(2).enumerated()), id: \.offset) { _, weaponName in
+                                if let weapon = findWeapon(byName: weaponName) {
+                                    Button {
+                                        selectedWeapon = weapon
+                                        showingWeaponDetail = true
+                                    } label: {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            HStack {
+                                                Text(weaponName)
+                                                    .font(.subheadline)
+                                                    .fontWeight(.medium)
+                                                    .foregroundStyle(.primary)
+                                                Spacer()
+                                                Image(systemName: "info.circle")
+                                                    .font(.caption)
+                                                    .foregroundStyle(.blue)
+                                            }
+
+                                            // Combat stats row
+                                            HStack(spacing: 8) {
+                                                if weapon.range != nil || weapon.rangeMin != nil {
+                                                    HStack(spacing: 2) {
+                                                        Image(systemName: "arrow.right")
+                                                            .font(.caption2)
+                                                        Text(weapon.rangeDisplay)
+                                                            .font(.caption2)
+                                                    }
+                                                    .foregroundStyle(.secondary)
+                                                }
+
+                                                if let dice = weapon.dice {
+                                                    HStack(spacing: 2) {
+                                                        Image(systemName: "dice")
+                                                            .font(.caption2)
+                                                        Text("\(dice)")
+                                                            .font(.caption2)
+                                                    }
+                                                    .foregroundStyle(.secondary)
+                                                }
+
+                                                if let accuracy = weapon.accuracy {
+                                                    HStack(spacing: 2) {
+                                                        Image(systemName: "target")
+                                                            .font(.caption2)
+                                                        Text(accuracy)
+                                                            .font(.caption2)
+                                                    }
+                                                    .foregroundStyle(.secondary)
+                                                }
+
+                                                if let damage = weapon.damage {
+                                                    HStack(spacing: 2) {
+                                                        Image(systemName: "bolt.fill")
+                                                            .font(.caption2)
+                                                        Text("\(damage)")
+                                                            .font(.caption2)
+                                                    }
+                                                    .foregroundStyle(.secondary)
+                                                }
+                                            }
+                                        }
+                                        .padding(.vertical, 2)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Inactive Weapons
+                    if !inactiveWeaponsList.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack {
+                                Image(systemName: "backpack.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.orange)
+                                Text("Backpack (\(inactiveWeaponsList.count)/\(3 + session.extraInventorySlots))")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                            }
+
+                            ForEach(Array(inactiveWeaponsList.prefix(3).enumerated()), id: \.offset) { _, weaponName in
+                                if let weapon = findWeapon(byName: weaponName) {
+                                    Button {
+                                        selectedWeapon = weapon
+                                        showingWeaponDetail = true
+                                    } label: {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            HStack {
+                                                Text(weaponName)
+                                                    .font(.subheadline)
+                                                    .fontWeight(.medium)
+                                                    .foregroundStyle(.primary)
+                                                Spacer()
+                                                Image(systemName: "info.circle")
+                                                    .font(.caption)
+                                                    .foregroundStyle(.blue)
+                                            }
+
+                                            // Combat stats row
+                                            HStack(spacing: 8) {
+                                                if weapon.range != nil || weapon.rangeMin != nil {
+                                                    HStack(spacing: 2) {
+                                                        Image(systemName: "arrow.right")
+                                                            .font(.caption2)
+                                                        Text(weapon.rangeDisplay)
+                                                            .font(.caption2)
+                                                    }
+                                                    .foregroundStyle(.secondary)
+                                                }
+
+                                                if let dice = weapon.dice {
+                                                    HStack(spacing: 2) {
+                                                        Image(systemName: "dice")
+                                                            .font(.caption2)
+                                                        Text("\(dice)")
+                                                            .font(.caption2)
+                                                    }
+                                                    .foregroundStyle(.secondary)
+                                                }
+
+                                                if let accuracy = weapon.accuracy {
+                                                    HStack(spacing: 2) {
+                                                        Image(systemName: "target")
+                                                            .font(.caption2)
+                                                        Text(accuracy)
+                                                            .font(.caption2)
+                                                    }
+                                                    .foregroundStyle(.secondary)
+                                                }
+
+                                                if let damage = weapon.damage {
+                                                    HStack(spacing: 2) {
+                                                        Image(systemName: "bolt.fill")
+                                                            .font(.caption2)
+                                                        Text("\(damage)")
+                                                            .font(.caption2)
+                                                    }
+                                                    .foregroundStyle(.secondary)
+                                                }
+                                            }
+                                        }
+                                        .padding(.vertical, 2)
+                                    }
+                                }
+                            }
+
+                            if inactiveWeaponsList.count > 3 {
+                                Button {
+                                    showingInventorySheet = true
+                                } label: {
+                                    Text("+ \(inactiveWeaponsList.count - 3) more...")
+                                        .font(.caption)
+                                        .foregroundStyle(.blue)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .sheet(isPresented: $showingInventorySheet) {
+            InventoryManagementSheet(session: session)
+        }
+        .sheet(isPresented: $showingWeaponDetail) {
+            if let weapon = selectedWeapon {
+                NavigationStack {
+                    ScrollView {
+                        WeaponCardView(weapon: weapon)
+                            .padding()
+                    }
+                    .navigationTitle(weapon.name)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Done") {
+                                showingWeaponDetail = false
+                            }
+                        }
+                    }
+                }
+                .presentationDetents([.medium, .large])
+            }
+        }
+    }
+}
+
+// MARK: - Inventory Management Sheet
+
+struct InventoryManagementSheet: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    @Bindable var session: GameSession
+
+    @State private var activeWeapons: [String] = []
+    @State private var inactiveWeapons: [String] = []
+    @State private var showingAddActiveWeapon = false
+    @State private var showingAddInactiveWeapon = false
+    @State private var showingWeaponDetail = false
+    @State private var selectedWeapon: Weapon?
+
+    // Get all weapon names from repository, excluding zombie cards
+    private var allWeaponNames: [String] {
+        Array(Set(WeaponRepository.shared.allWeapons
+            .filter { !$0.isZombieCard }
+            .map { $0.name }))
+            .sorted()
+    }
+
+    // Helper to find weapon by name
+    private func findWeapon(byName name: String) -> Weapon? {
+        WeaponRepository.shared.allWeapons.first { $0.name == name }
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                // Active Weapons Section
+                Section {
+                    if activeWeapons.isEmpty {
+                        Text("No active weapons")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(activeWeapons.indices, id: \.self) { index in
+                            HStack(spacing: 8) {
+                                Image(systemName: "hand.raised.fill")
+                                    .foregroundStyle(.blue)
+                                    .font(.caption)
+
+                                Text(activeWeapons[index])
+                                    .foregroundStyle(.primary)
+
+                                Spacer()
+
+                                Button {
+                                    if let weapon = findWeapon(byName: activeWeapons[index]) {
+                                        selectedWeapon = weapon
+                                        showingWeaponDetail = true
+                                    }
+                                } label: {
+                                    Image(systemName: "info.circle")
+                                        .font(.body)
+                                        .foregroundStyle(.blue)
+                                }
+                                .buttonStyle(.borderless)
+
+                                Button(role: .destructive) {
+                                    activeWeapons.remove(at: index)
+                                } label: {
+                                    Image(systemName: "minus.circle.fill")
+                                        .font(.body)
+                                        .foregroundStyle(.red)
+                                }
+                                .buttonStyle(.borderless)
+                            }
+                        }
+                    }
+
+                    Button {
+                        showingAddActiveWeapon = true
+                    } label: {
+                        Label("Add Weapon", systemImage: "plus.circle")
+                    }
+                    .disabled(activeWeapons.count >= 2)
+
+                    Text("Capacity: \(activeWeapons.count)/2 slots")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } header: {
+                    Label("Active Weapons (Hands)", systemImage: "hand.raised.fill")
+                }
+
+                // Inactive Weapons Section
+                Section {
+                    if inactiveWeapons.isEmpty {
+                        Text("No inactive weapons")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(inactiveWeapons.indices, id: \.self) { index in
+                            HStack(spacing: 8) {
+                                Image(systemName: "backpack.fill")
+                                    .foregroundStyle(.orange)
+                                    .font(.caption)
+
+                                Text(inactiveWeapons[index])
+                                    .foregroundStyle(.primary)
+
+                                Spacer()
+
+                                Button {
+                                    if let weapon = findWeapon(byName: inactiveWeapons[index]) {
+                                        selectedWeapon = weapon
+                                        showingWeaponDetail = true
+                                    }
+                                } label: {
+                                    Image(systemName: "info.circle")
+                                        .font(.body)
+                                        .foregroundStyle(.blue)
+                                }
+                                .buttonStyle(.borderless)
+
+                                Button(role: .destructive) {
+                                    inactiveWeapons.remove(at: index)
+                                } label: {
+                                    Image(systemName: "minus.circle.fill")
+                                        .font(.body)
+                                        .foregroundStyle(.red)
+                                }
+                                .buttonStyle(.borderless)
+                            }
+                        }
+                    }
+
+                    Button {
+                        showingAddInactiveWeapon = true
+                    } label: {
+                        Label("Add Weapon", systemImage: "plus.circle")
+                    }
+                    .disabled(inactiveWeapons.count >= (3 + session.extraInventorySlots))
+
+                    HStack {
+                        Text("Capacity: \(inactiveWeapons.count)/\(3 + session.extraInventorySlots) slots")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        Spacer()
+
+                        Stepper("Bonus: \(session.extraInventorySlots)", value: $session.extraInventorySlots, in: 0...10)
+                            .font(.caption)
+                    }
+                } header: {
+                    Label("Inactive Weapons (Backpack)", systemImage: "backpack.fill")
+                }
+
+                // Modifiers Section
+                Section {
+                    Toggle("All Inventory Counts as Active", isOn: $session.allInventoryActive)
+                } header: {
+                    Text("Modifiers")
+                } footer: {
+                    Text("Enable this if a skill or ability makes all weapons in your inventory count as active.")
+                }
+            }
+            .navigationTitle("Manage Inventory")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        saveInventory()
+                        dismiss()
+                    }
+                }
+
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+            .onAppear {
+                loadInventory()
+            }
+            .sheet(isPresented: $showingAddActiveWeapon) {
+                WeaponPickerSheet(
+                    allWeapons: allWeaponNames,
+                    selectedWeapons: $activeWeapons,
+                    title: "Add Active Weapon"
+                )
+            }
+            .sheet(isPresented: $showingAddInactiveWeapon) {
+                WeaponPickerSheet(
+                    allWeapons: allWeaponNames,
+                    selectedWeapons: $inactiveWeapons,
+                    title: "Add Inactive Weapon"
+                )
+            }
+            .sheet(isPresented: $showingWeaponDetail) {
+                if let weapon = selectedWeapon {
+                    NavigationStack {
+                        ScrollView {
+                            WeaponCardView(weapon: weapon)
+                                .padding()
+                        }
+                        .navigationTitle(weapon.name)
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .topBarTrailing) {
+                                Button("Done") {
+                                    showingWeaponDetail = false
+                                }
+                            }
+                        }
+                    }
+                    .presentationDetents([.medium, .large])
+                }
+            }
+        }
+    }
+
+    private func loadInventory() {
+        activeWeapons = InventoryFormatter.parse(session.activeWeapons)
+        inactiveWeapons = InventoryFormatter.parse(session.inactiveWeapons)
+    }
+
+    private func saveInventory() {
+        session.activeWeapons = InventoryFormatter.join(activeWeapons)
+        session.inactiveWeapons = InventoryFormatter.join(inactiveWeapons)
+        try? modelContext.save()
+    }
+}
+
+// MARK: - Weapon Picker Sheet
+
+struct WeaponPickerSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let allWeapons: [String]
+    @Binding var selectedWeapons: [String]
+    let title: String
+
+    @State private var searchText = ""
+
+    private var filteredWeapons: [String] {
+        if searchText.isEmpty {
+            return allWeapons
+        } else {
+            return allWeapons.filter { $0.localizedCaseInsensitiveContains(searchText) }
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(filteredWeapons, id: \.self) { weapon in
+                    Button {
+                        selectedWeapons.append(weapon)
+                        dismiss()
+                    } label: {
+                        HStack {
+                            Text(weapon)
+                                .foregroundStyle(.primary)
+
+                            Spacer()
+
+                            if selectedWeapons.contains(weapon) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.blue)
+                            }
+                        }
+                    }
+                }
+            }
+            .searchable(text: $searchText, prompt: "Search weapons")
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 }

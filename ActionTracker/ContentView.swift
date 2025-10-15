@@ -18,7 +18,11 @@ struct ContentView: View {
                     SpawnDeckView()
                 }
 
-                Tab(value: 3, role: .search) {
+                Tab("Weapons", systemImage: "shield.lefthalf.filled", value: 3) {
+                    WeaponsScreen()
+                }
+
+                Tab(value: 4, role: .search) {
                     CharactersSearchScreen()
                 }
             }
@@ -40,9 +44,13 @@ struct ContentView: View {
                     .tabItem { Label("Spawn Deck", systemImage: "rectangle.stack.fill") }
                     .tag(2)
 
+                WeaponsScreen()
+                    .tabItem { Label("Weapons", systemImage: "shield.lefthalf.filled") }
+                    .tag(3)
+
                 CharactersSearchScreen()
                     .tabItem { Label("Search", systemImage: "magnifyingglass") }
-                    .tag(3)
+                    .tag(4)
             }
         }
     }

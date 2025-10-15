@@ -225,6 +225,14 @@ final class GameSession {
     var currentExperience: Int
     var elapsedSeconds: Int  // Game duration in seconds
 
+    // MARK: - Inventory
+    // Weapons stored as JSON-encoded array of weapon names
+    // Players self-manage inventory; no strict enforcement
+    var activeWeapons: String = ""  // 2 active slots (hands)
+    var inactiveWeapons: String = ""  // 3+ inactive slots (backpack)
+    var extraInventorySlots: Int = 0  // Bonus slots from skills/items
+    var allInventoryActive: Bool = false  // All weapons count as active
+
     // MARK: - Skill Selection
     // Tracks which skills the player has chosen during this session
 
@@ -520,6 +528,25 @@ final class GameSession {
         } else {
             selectedRedSkills += ";" + skill
         }
+    }
+}
+
+// MARK: - Inventory Helpers
+
+enum InventoryFormatter {
+    private static let separators = CharacterSet(charactersIn: ",;")
+
+    /// Convert a persisted inventory string into an array of weapon names.
+    static func parse(_ inventory: String) -> [String] {
+        inventory
+            .components(separatedBy: separators)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+
+    /// Convert an array of weapon names into the canonical persisted format.
+    static func join(_ weapons: [String]) -> String {
+        weapons.joined(separator: "; ")
     }
 }
 
