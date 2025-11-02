@@ -3,22 +3,48 @@ import SwiftData
 
 struct SkillPickerView: View {
     @Environment(\.dismiss) private var dismiss
-    @Query(sort: \Skill.name) private var allSkills: [Skill]
+    @Environment(\.modelContext) private var modelContext
 
-    let currentSkills: [String]
-    let colorTier: String
-    let onSelect: (String) -> Void
+    // Support both patterns: binding for NewCharacterView, callback for CharacterDetailView
+    @Binding var selectedSkills: [String]
+    let excludedSkills: [String]
+    let allSkills: [Skill]
+
+    // Optional callback pattern for backward compatibility
+    var currentSkills: [String]?
+    var colorTier: String?
+    var onSelect: ((String) -> Void)?
 
     @State private var searchText = ""
+    @State private var showingNewSkill = false
+
+    init(selectedSkills: Binding<[String]>, excludedSkills: [String], allSkills: [Skill]) {
+        self._selectedSkills = selectedSkills
+        self.excludedSkills = excludedSkills
+        self.allSkills = allSkills
+        self.currentSkills = nil
+        self.colorTier = nil
+        self.onSelect = nil
+    }
+
+    init(currentSkills: [String], colorTier: String, onSelect: @escaping (String) -> Void) {
+        self._selectedSkills = .constant([])
+        self.excludedSkills = currentSkills
+        self.allSkills = []
+        self.currentSkills = currentSkills
+        self.colorTier = colorTier
+        self.onSelect = onSelect
+    }
 
     var filteredSkills: [Skill] {
         let filtered = searchText.isEmpty ? allSkills : allSkills.filter { skill in
-            skill.name.localizedCaseInsensitiveContains(searchText)
+            skill.name.localizedCaseInsensitiveContains(searchText) ||
+            skill.skillDescription.localizedCaseInsensitiveContains(searchText)
         }
 
-        // Filter out skills already in this tier
+        // Filter out skills already selected/excluded
         return filtered.filter { skill in
-            !currentSkills.contains(skill.name)
+            !excludedSkills.contains(skill.name)
         }
     }
 
@@ -30,15 +56,21 @@ struct SkillPickerView: View {
                         Label("No Skills Found", systemImage: "magnifyingglass")
                     } description: {
                         if searchText.isEmpty {
-                            Text("All available skills have been added to this tier.")
+                            Text("All available skills have been added.")
                         } else {
-                            Text("Try a different search term.")
+                            Text("Try a different search term or create a new skill.")
                         }
                     }
                 } else {
                     ForEach(filteredSkills, id: \.id) { skill in
                         Button {
-                            onSelect(skill.name)
+                            if let onSelect = onSelect {
+                                // Legacy callback pattern
+                                onSelect(skill.name)
+                            } else {
+                                // New binding pattern
+                                selectedSkills.append(skill.name)
+                            }
                             dismiss()
                         } label: {
                             VStack(alignment: .leading, spacing: 4) {
@@ -58,7 +90,7 @@ struct SkillPickerView: View {
                     }
                 }
             }
-            .navigationTitle("Add \(colorTier) Skill")
+            .navigationTitle(colorTier ?? "Add Skill")
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $searchText, prompt: "Search skills")
             .toolbar {
@@ -67,6 +99,17 @@ struct SkillPickerView: View {
                         dismiss()
                     }
                 }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showingNewSkill = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingNewSkill) {
+                NewSkillView()
             }
         }
     }

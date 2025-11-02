@@ -4,16 +4,24 @@ import SwiftData
 struct NewCharacterView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Query private var allSkills: [Skill]
 
     @State private var name = ""
-    @State private var set = ""
     @State private var notes = ""
     @State private var isFavorite = false
-    @State private var blueSkills = ""
-    @State private var orangeSkills = ""
-    @State private var redSkills = ""
+
+    // Skills stored as arrays for easier manipulation
+    @State private var blueSkills: [String] = []
+    @State private var orangeSkills: [String] = []
+    @State private var redSkills: [String] = []
+
     @State private var showDetails = false
     @State private var appear = false
+
+    // Skill picker states
+    @State private var showingBlueSkillPicker = false
+    @State private var showingOrangeSkillPicker = false
+    @State private var showingRedSkillPicker = false
 
     var body: some View {
         VStack {
@@ -22,46 +30,82 @@ struct NewCharacterView: View {
                     TextField("Character Name", text: $name)
                         .textInputAutocapitalization(.words)
 
-                    TextField("Set (Optional)", text: $set)
-                        .textInputAutocapitalization(.words)
-
                     Toggle("Favorite", isOn: $isFavorite.animation())
                 }
 
+                // Blue Skills Section
                 Section {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Label("Blue Skills", systemImage: "circle.fill")
-                            .foregroundStyle(.blue)
-                            .font(.subheadline)
-
-                        TextField("Skill 1;Skill 2;Skill 3", text: $blueSkills, axis: .vertical)
-                            .textFieldStyle(.roundedBorder)
-                            .lineLimit(2...4)
+                    ForEach(blueSkills, id: \.self) { skill in
+                        HStack {
+                            Text(skill)
+                            Spacer()
+                            Button {
+                                blueSkills.removeAll { $0 == skill }
+                            } label: {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundStyle(.red)
+                            }
+                        }
                     }
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Label("Orange Skills", systemImage: "circle.fill")
-                            .foregroundStyle(.orange)
-                            .font(.subheadline)
-
-                        TextField("Skill 1;Skill 2;Skill 3", text: $orangeSkills, axis: .vertical)
-                            .textFieldStyle(.roundedBorder)
-                            .lineLimit(2...4)
-                    }
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        Label("Red Skills", systemImage: "circle.fill")
-                            .foregroundStyle(.red)
-                            .font(.subheadline)
-
-                        TextField("Skill 1;Skill 2;Skill 3", text: $redSkills, axis: .vertical)
-                            .textFieldStyle(.roundedBorder)
-                            .lineLimit(2...4)
+                    Button {
+                        showingBlueSkillPicker = true
+                    } label: {
+                        Label("Add Blue Skill", systemImage: "plus.circle.fill")
                     }
                 } header: {
-                    Text("Skills")
-                } footer: {
-                    Text("Separate multiple skills with semicolons (;)")
+                    Label("Blue Skills", systemImage: "circle.fill")
+                        .foregroundStyle(.blue)
+                }
+
+                // Orange Skills Section
+                Section {
+                    ForEach(orangeSkills, id: \.self) { skill in
+                        HStack {
+                            Text(skill)
+                            Spacer()
+                            Button {
+                                orangeSkills.removeAll { $0 == skill }
+                            } label: {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundStyle(.red)
+                            }
+                        }
+                    }
+
+                    Button {
+                        showingOrangeSkillPicker = true
+                    } label: {
+                        Label("Add Orange Skill", systemImage: "plus.circle.fill")
+                    }
+                } header: {
+                    Label("Orange Skills", systemImage: "circle.fill")
+                        .foregroundStyle(.orange)
+                }
+
+                // Red Skills Section
+                Section {
+                    ForEach(redSkills, id: \.self) { skill in
+                        HStack {
+                            Text(skill)
+                            Spacer()
+                            Button {
+                                redSkills.removeAll { $0 == skill }
+                            } label: {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundStyle(.red)
+                            }
+                        }
+                    }
+
+                    Button {
+                        showingRedSkillPicker = true
+                    } label: {
+                        Label("Add Red Skill", systemImage: "plus.circle.fill")
+                    }
+                } header: {
+                    Label("Red Skills", systemImage: "circle.fill")
+                        .foregroundStyle(.red)
                 }
 
                 DisclosureGroup(isExpanded: $showDetails.animation(.easeInOut)) {
@@ -94,18 +138,39 @@ struct NewCharacterView: View {
         .navigationTitle("New Character")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { appear = true }
+        .sheet(isPresented: $showingBlueSkillPicker) {
+            SkillPickerView(
+                selectedSkills: $blueSkills,
+                excludedSkills: blueSkills,
+                allSkills: allSkills
+            )
+        }
+        .sheet(isPresented: $showingOrangeSkillPicker) {
+            SkillPickerView(
+                selectedSkills: $orangeSkills,
+                excludedSkills: orangeSkills,
+                allSkills: allSkills
+            )
+        }
+        .sheet(isPresented: $showingRedSkillPicker) {
+            SkillPickerView(
+                selectedSkills: $redSkills,
+                excludedSkills: redSkills,
+                allSkills: allSkills
+            )
+        }
     }
 
     private func save() {
         let character = Character(
-            name: name,
-            set: set,
-            notes: notes,
+            name: name.trimmingCharacters(in: .whitespacesAndNewlines),
+            set: "User Created", // All user-created characters have this set
+            notes: notes.trimmingCharacters(in: .whitespacesAndNewlines),
             isFavorite: isFavorite,
-            isBuiltIn: false, // User-created characters are not built-in
-            blueSkills: blueSkills,
-            orangeSkills: orangeSkills,
-            redSkills: redSkills
+            isBuiltIn: false,
+            blueSkills: blueSkills.joined(separator: ";"),
+            orangeSkills: orangeSkills.joined(separator: ";"),
+            redSkills: redSkills.joined(separator: ";")
         )
         modelContext.insert(character)
         try? modelContext.save()

@@ -10,8 +10,8 @@ struct ContentView: View {
                     ActionsScreen()
                 }
 
-                Tab("Characters", systemImage: "person.3.fill", value: 1) {
-                    CharactersScreen()
+                Tab("Skills", systemImage: "sparkles", value: 1) {
+                    SkillsScreen()
                 }
 
                 Tab("Spawn Deck", systemImage: "rectangle.stack.fill", value: 2) {
@@ -36,8 +36,8 @@ struct ContentView: View {
                     .tabItem { Label("Actions", systemImage: "bolt.fill") }
                     .tag(0)
 
-                CharactersScreen()
-                    .tabItem { Label("Characters", systemImage: "person.3.fill") }
+                SkillsScreen()
+                    .tabItem { Label("Skills", systemImage: "sparkles") }
                     .tag(1)
 
                 SpawnDeckView()

@@ -33,21 +33,12 @@ struct CharacterDetailView: View {
                     }
                 }
 
-                // Set field
-                if isEditing && !character.isBuiltIn {
-                    HStack {
-                        Text("Set")
-                            .foregroundStyle(.secondary)
-                        TextField("Set/Expansion", text: $editedSet)
-                            .multilineTextAlignment(.trailing)
-                    }
-                } else {
-                    HStack {
-                        Text("Set")
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text(character.set.isEmpty ? "Core" : character.set)
-                    }
+                // Set field (read-only for user-created characters)
+                HStack {
+                    Text("Set")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text(character.set.isEmpty ? "Core" : character.set)
                 }
 
                 // Favorite toggle (always enabled, even when not editing)
@@ -195,7 +186,7 @@ struct CharacterDetailView: View {
         // Only update fields if character is custom (not built-in)
         if !character.isBuiltIn {
             character.name = editedName.trimmingCharacters(in: .whitespaces)
-            character.set = editedSet.trimmingCharacters(in: .whitespaces)
+            // Note: Set is not editable for user-created characters
             character.blueSkills = editedBlueSkills.joined(separator: "; ")
             character.orangeSkills = editedOrangeSkills.joined(separator: "; ")
             character.redSkills = editedRedSkills.joined(separator: "; ")
@@ -224,9 +215,8 @@ struct CharacterDetailView: View {
             // For built-in characters, only notes can change
             return editedNotes.trimmingCharacters(in: .whitespaces) != character.notes
         } else {
-            // For custom characters, check all fields
+            // For custom characters, check all fields except set (which is not editable)
             return editedName.trimmingCharacters(in: .whitespaces) != character.name ||
-                   editedSet.trimmingCharacters(in: .whitespaces) != character.set ||
                    editedNotes.trimmingCharacters(in: .whitespaces) != character.notes ||
                    editedBlueSkills != character.blueSkillsList ||
                    editedOrangeSkills != character.orangeSkillsList ||
