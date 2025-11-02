@@ -357,7 +357,7 @@ struct WeaponsScreen: View {
             // Draw 2 Toggle (Regular deck only)
             if selectedDeck == .regular {
                 HStack {
-                    Toggle("Draw 2 Mode", isOn: $enableDrawTwo)
+                    Toggle("Flashlight Mode", isOn: $enableDrawTwo)
                         .font(.subheadline)
                 }
                 .padding(.horizontal)
