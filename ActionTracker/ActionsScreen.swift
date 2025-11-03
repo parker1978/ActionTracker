@@ -261,13 +261,12 @@ struct HealthCard: View {
                         .frame(minWidth: 100)
                         .foregroundStyle(healthColor)
 
-                    // Health bar indicator - grows/shrinks with health
+                    // Health bar - shows all segments with color change for filled vs empty
                     HStack(spacing: 4) {
-                        ForEach(0..<session.currentHealth, id: \.self) { index in
+                        ForEach(0..<maxHealthSegments, id: \.self) { index in
                             RoundedRectangle(cornerRadius: 3)
-                                .fill(healthColor)
-                                .frame(width: 24, height: 8)
-                                .transition(.scale.combined(with: .opacity))
+                                .fill(index < session.currentHealth ? healthColor : emptySegmentColor)
+                                .frame(width: 40, height: 10)
                         }
                     }
                     .animation(.spring(response: 0.3, dampingFraction: 0.6), value: session.currentHealth)
@@ -314,6 +313,18 @@ struct HealthCard: View {
         default:
             return .green  // 3+ is healthy/normal (including bonus health)
         }
+    }
+
+    /// Number of segments to display in health bar
+    /// Shows segments up to the character's max health, or current health if higher (for bonus health)
+    private var maxHealthSegments: Int {
+        guard let character = session.character else { return session.currentHealth }
+        return max(character.health, session.currentHealth)
+    }
+
+    /// Color for empty health segments - visible against .ultraThinMaterial background
+    private var emptySegmentColor: Color {
+        Color(.systemGray4)
     }
 }
 
