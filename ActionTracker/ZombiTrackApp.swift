@@ -26,7 +26,30 @@ struct ZombiTrackApp: App {
 
             return container
         } catch {
-            fatalError("Could not create ModelContainer: \(error)")
+            // If migration fails, try to delete and recreate the store
+            print("⚠️ ModelContainer creation failed: \(error)")
+            print("🔄 Attempting to delete and recreate the data store...")
+
+            do {
+                // Delete the existing store
+                let url = modelConfiguration.url
+                if FileManager.default.fileExists(atPath: url.path) {
+                    try FileManager.default.removeItem(at: url)
+                    print("✅ Deleted existing store at: \(url.path)")
+                }
+
+                // Try creating container again
+                let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
+
+                // Reseed data
+                let context = ModelContext(container)
+                DataSeeder.seedIfNeeded(context: context)
+
+                print("✅ Successfully recreated ModelContainer")
+                return container
+            } catch {
+                fatalError("Could not create ModelContainer even after deleting store: \(error)")
+            }
         }
     }()
 
