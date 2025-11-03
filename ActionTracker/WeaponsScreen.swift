@@ -10,7 +10,7 @@ import SwiftUI
 import SwiftData
 
 struct WeaponsScreen: View {
-    @State private var weaponsManager: WeaponsManager
+    @Bindable var weaponsManager: WeaponsManager
     @State private var selectedDeck: DeckType = .regular
     @State private var showDifficultyConfirmation = false
     @State private var pendingDifficulty: DifficultyMode?
@@ -20,7 +20,6 @@ struct WeaponsScreen: View {
     @State private var showDiscardPile = false
     @State private var showDeckSettings = false
     @State private var showInventoryReplacement = false
-    @State private var showDrawHistory = false
     @State private var weaponToAdd: Weapon?
 
     // Access to active game session for inventory management
@@ -30,20 +29,6 @@ struct WeaponsScreen: View {
 
     private var activeSession: GameSession? {
         activeSessions.first
-    }
-
-    init() {
-        // Load expansion filter from UserDefaults
-        let allExpansions = WeaponRepository.shared.expansions
-        let savedExpansions = UserDefaults.standard.array(forKey: "selectedExpansions") as? [String]
-        let selectedExpansions = Set(savedExpansions ?? allExpansions)
-
-        // Filter weapons based on selected expansions
-        let allWeapons = WeaponRepository.shared.allWeapons
-        let filteredWeapons = selectedExpansions.isEmpty ? allWeapons : allWeapons.filter { selectedExpansions.contains($0.expansion) }
-
-        // Initialize with filtered weapons
-        _weaponsManager = State(initialValue: WeaponsManager(weapons: filteredWeapons, difficulty: .medium))
     }
 
     var body: some View {
@@ -105,7 +90,13 @@ struct WeaponsScreen: View {
             } message: {
                 Text("Changing difficulty will reset and reshuffle all three decks. Continue?")
             }
-            .sheet(isPresented: $showCardDetail) {
+            .sheet(isPresented: $showCardDetail, onDismiss: {
+                // Auto-discard all remaining drawn cards when sheet is dismissed
+                for card in drawnCards {
+                    currentDeck.discardCard(card)
+                }
+                drawnCards.removeAll()
+            }) {
                 NavigationStack {
                     VStack(spacing: 0) {
                         ScrollView {
@@ -134,23 +125,6 @@ struct WeaponsScreen: View {
                                             .foregroundStyle(.blue)
                                     }
                                 }
-
-                                // Discard Button (only show for non-zombie cards)
-                                if drawnCards.count > 1 || (drawnCards.count == 1 && !drawnCards.first!.isZombieCard) {
-                                    Button(action: {
-                                        // Discard all drawn cards
-                                        for card in drawnCards {
-                                            currentDeck.discardCard(card)
-                                        }
-                                        showCardDetail = false
-                                    }) {
-                                        Label("Discard \(drawnCards.count == 1 ? "Card" : "All Cards")", systemImage: "tray.and.arrow.down")
-                                            .frame(maxWidth: .infinity)
-                                            .padding()
-                                            .background(Color.orange.opacity(0.1))
-                                            .foregroundStyle(.orange)
-                                    }
-                                }
                             }
                             .padding(.horizontal)
                             .padding(.vertical, 8)
@@ -162,10 +136,6 @@ struct WeaponsScreen: View {
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
                             Button("Done") {
-                                // Auto-discard zombie cards
-                                for card in drawnCards where card.isZombieCard {
-                                    currentDeck.discardCard(card)
-                                }
                                 showCardDetail = false
                             }
                         }
@@ -187,17 +157,17 @@ struct WeaponsScreen: View {
             .sheet(isPresented: $showDeckSettings) {
                 DeckSettingsSheet(weaponsManager: weaponsManager)
             }
-            .sheet(isPresented: $showDrawHistory) {
-                DrawHistoryView(deckState: currentDeck)
-            }
             .sheet(isPresented: $showInventoryReplacement) {
                 if let weapon = weaponToAdd, let session = activeSession {
                     InventoryReplacementSheet(
                         weaponToAdd: weapon,
                         session: session,
                         onReplace: { replacedWeapon in
-                            // Discard the replaced weapon
+                            // Discard both the replaced weapon and the added weapon
                             currentDeck.discardCard(replacedWeapon)
+                            currentDeck.discardCard(weapon)
+                            // Remove the added weapon from drawn cards
+                            drawnCards.removeAll { $0.id == weapon.id }
                             // Close the drawn card sheet
                             showCardDetail = false
                         }
@@ -220,8 +190,9 @@ struct WeaponsScreen: View {
         if activeWeapons.count < 2 {
             activeWeapons.append(weapon.name)
             session.activeWeapons = InventoryFormatter.join(activeWeapons)
-            // Discard the card and close sheet
+            // Discard the card, remove from drawn cards, and close sheet
             currentDeck.discardCard(weapon)
+            drawnCards.removeAll { $0.id == weapon.id }
             showCardDetail = false
             return
         }
@@ -231,8 +202,9 @@ struct WeaponsScreen: View {
         if inactiveWeapons.count < maxInactive {
             inactiveWeapons.append(weapon.name)
             session.inactiveWeapons = InventoryFormatter.join(inactiveWeapons)
-            // Discard the card and close sheet
+            // Discard the card, remove from drawn cards, and close sheet
             currentDeck.discardCard(weapon)
+            drawnCards.removeAll { $0.id == weapon.id }
             showCardDetail = false
             return
         }
@@ -318,12 +290,6 @@ struct WeaponsScreen: View {
                 // Draw Buttons
                 drawButtonsSection
                     .padding(.horizontal)
-
-                // Recent Draws
-                if !currentDeck.recentDraws.isEmpty {
-                    recentDrawsSection
-                        .padding(.horizontal)
-                }
             }
             .padding(.bottom)
         }
@@ -377,39 +343,6 @@ struct WeaponsScreen: View {
         }
     }
 
-    // MARK: - Recent Draws
-
-    private var recentDrawsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Recent Draws")
-                    .font(.headline)
-                Spacer()
-                Button(action: {
-                    showDrawHistory = true
-                }) {
-                    Text("View All")
-                        .font(.subheadline)
-                        .foregroundStyle(.blue)
-                }
-            }
-            .padding(.horizontal)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(currentDeck.recentDraws) { weapon in
-                        CompactWeaponCard(weapon: weapon)
-                            .onTapGesture {
-                                drawnCards = [weapon]
-                                showCardDetail = true
-                            }
-                    }
-                }
-                .padding(.horizontal)
-            }
-        }
-    }
-
     // MARK: - Deck Header
 
     private func deckHeader(for deck: WeaponDeckState) -> some View {
@@ -447,83 +380,6 @@ struct WeaponsScreen: View {
         )
     }
 
-}
-
-// MARK: - Compact Weapon Card
-
-struct CompactWeaponCard: View {
-    let weapon: Weapon
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Header
-            HStack {
-                Text(weapon.name)
-                    .font(.headline)
-                    .lineLimit(2)
-
-                Spacer()
-
-                Image(systemName: weapon.category.icon)
-                    .font(.title3)
-                    .foregroundStyle(weapon.category.color)
-            }
-
-            // Key stats
-            HStack(spacing: 12) {
-                if let dice = weapon.dice {
-                    HStack(spacing: 2) {
-                        Image(systemName: "dice")
-                            .font(.caption2)
-                        Text("\(dice)")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-                    .foregroundStyle(.secondary)
-                }
-
-                if let accuracy = weapon.accuracy {
-                    HStack(spacing: 2) {
-                        Image(systemName: "target")
-                            .font(.caption2)
-                        Text(accuracy)
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-                    .foregroundStyle(.secondary)
-                }
-
-                if let damage = weapon.damage {
-                    HStack(spacing: 2) {
-                        Image(systemName: "bolt.fill")
-                            .font(.caption2)
-                        Text("\(damage)")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-                    .foregroundStyle(.secondary)
-                }
-            }
-
-            // Deck badge
-            Text(weapon.deck.displayName)
-                .font(.caption2)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 3)
-                .background(Capsule().fill(weapon.deck.color.opacity(0.2)))
-                .foregroundStyle(weapon.deck.color)
-        }
-        .padding()
-        .frame(width: 200)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.secondarySystemGroupedBackground))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(weapon.deck.color.opacity(0.3), lineWidth: 1)
-                )
-        )
-    }
 }
 
 // MARK: - Deck Settings Sheet
@@ -949,134 +805,6 @@ struct DeckContentsView: View {
     }
 }
 
-// MARK: - Draw History View
-struct DrawHistoryView: View {
-    @Environment(\.dismiss) private var dismiss
-    @Bindable var deckState: WeaponDeckState
-    @State private var selectedWeapon: Weapon?
-
-    var body: some View {
-        NavigationStack {
-            List {
-                if deckState.drawHistory.isEmpty {
-                    Section {
-                        HStack {
-                            Image(systemName: "square.stack.3d.up.slash")
-                                .foregroundStyle(.secondary)
-                            Text("No cards drawn yet")
-                                .foregroundStyle(.secondary)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .center)
-                    }
-                } else {
-                    Section {
-                        ForEach(deckState.drawHistory) { weapon in
-                            Button {
-                                selectedWeapon = weapon
-                            } label: {
-                                HStack(spacing: 12) {
-                                    Image(systemName: weapon.category.icon)
-                                        .foregroundStyle(weapon.category.color)
-                                        .font(.title3)
-                                        .frame(width: 30)
-
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(weapon.name)
-                                            .font(.subheadline)
-                                            .fontWeight(.medium)
-                                            .foregroundStyle(.primary)
-
-                                        HStack(spacing: 8) {
-                                            if weapon.range != nil || weapon.rangeMin != nil {
-                                                HStack(spacing: 2) {
-                                                    Image(systemName: "arrow.right")
-                                                        .font(.caption2)
-                                                    Text(weapon.rangeDisplay)
-                                                        .font(.caption2)
-                                                }
-                                            }
-
-                                            if let dice = weapon.dice {
-                                                HStack(spacing: 2) {
-                                                    Image(systemName: "dice")
-                                                        .font(.caption2)
-                                                    Text("\(dice)")
-                                                        .font(.caption2)
-                                                }
-                                            }
-
-                                            if let accuracy = weapon.accuracy {
-                                                HStack(spacing: 2) {
-                                                    Image(systemName: "target")
-                                                        .font(.caption2)
-                                                    Text(accuracy)
-                                                        .font(.caption2)
-                                                }
-                                            }
-
-                                            if let damage = weapon.damage {
-                                                HStack(spacing: 2) {
-                                                    Image(systemName: "bolt.fill")
-                                                        .font(.caption2)
-                                                    Text("\(damage)")
-                                                        .font(.caption2)
-                                                }
-                                            }
-                                        }
-                                        .foregroundStyle(.secondary)
-                                    }
-
-                                    Spacer()
-
-                                    Image(systemName: "info.circle")
-                                        .foregroundStyle(.blue)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    } header: {
-                        HStack {
-                            Text("Draw History")
-                            Spacer()
-                            Text("\(deckState.drawHistory.count) cards")
-                                .foregroundStyle(.secondary)
-                        }
-                    } footer: {
-                        Text("Most recent draw appears at the top. History clears when the deck resets.")
-                    }
-                }
-            }
-            .navigationTitle("\(deckState.deckType.displayName) Draws")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
-            .sheet(item: $selectedWeapon) { weapon in
-                NavigationStack {
-                    ScrollView {
-                        WeaponCardView(weapon: weapon)
-                            .padding()
-                    }
-                    .navigationTitle(weapon.name)
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            Button("Done") {
-                                selectedWeapon = nil
-                            }
-                        }
-                    }
-                }
-                .presentationDetents([.medium, .large])
-            }
-        }
-    }
-}
-
 // MARK: - Inventory Replacement Sheet
 
 struct InventoryReplacementSheet: View {
@@ -1210,5 +938,8 @@ struct InventoryReplacementSheet: View {
 }
 
 #Preview {
-    WeaponsScreen()
+    WeaponsScreen(weaponsManager: WeaponsManager(
+        weapons: WeaponRepository.shared.allWeapons,
+        difficulty: .medium
+    ))
 }

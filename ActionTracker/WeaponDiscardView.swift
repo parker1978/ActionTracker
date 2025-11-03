@@ -11,7 +11,6 @@ import SwiftUI
 struct WeaponDiscardView: View {
     @Bindable var deckState: WeaponDeckState
     @Environment(\.dismiss) private var dismiss
-    @State private var showClearConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -47,13 +46,6 @@ struct WeaponDiscardView: View {
                                 Label("Shuffle All Back to Deck", systemImage: "shuffle")
                                     .foregroundStyle(.blue)
                             }
-
-                            // Clear All (dev/debug)
-                            Button(role: .destructive, action: {
-                                showClearConfirmation = true
-                            }) {
-                                Label("Clear All", systemImage: "trash")
-                            }
                         } header: {
                             Text("Actions")
                         }
@@ -68,14 +60,6 @@ struct WeaponDiscardView: View {
                         dismiss()
                     }
                 }
-            }
-            .alert("Clear Discard Pile?", isPresented: $showClearConfirmation) {
-                Button("Cancel", role: .cancel) {}
-                Button("Clear All", role: .destructive) {
-                    deckState.clearDiscard()
-                }
-            } message: {
-                Text("This will permanently remove all cards from the discard pile. This action cannot be undone.")
             }
         }
     }

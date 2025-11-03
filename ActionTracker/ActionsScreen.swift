@@ -16,6 +16,7 @@ import SwiftData
 /// Main screen for the Actions tab
 /// Displays either a "start game" view or the active game session
 struct ActionsScreen: View {
+    var weaponsManager: WeaponsManager
     @Environment(\.modelContext) private var modelContext
 
     // Query for active (non-ended) game sessions
@@ -29,7 +30,7 @@ struct ActionsScreen: View {
         NavigationStack {
             if let session = activeSessions.first {
                 // Show active game
-                ActiveGameView(session: session)
+                ActiveGameView(session: session, weaponsManager: weaponsManager)
             } else {
                 // Show "start game" view
                 StartGameView(showingCharacterPicker: $showingCharacterPicker)
@@ -75,6 +76,7 @@ struct StartGameView: View {
 struct ActiveGameView: View {
     @Environment(\.modelContext) private var modelContext
     @Bindable var session: GameSession
+    var weaponsManager: WeaponsManager
 
     // Timer state
     @State private var timer: Timer?
@@ -93,7 +95,7 @@ struct ActiveGameView: View {
                 ActionsCard(session: session)
 
                 // Inventory card (weapons)
-                InventoryCard(session: session)
+                InventoryCard(session: session, weaponsManager: weaponsManager)
 
                 // Experience and skill tracking card
                 ExperienceCard(session: session)
@@ -571,6 +573,7 @@ struct FlowLayout: Layout {
 struct InventoryCard: View {
     @Environment(\.modelContext) private var modelContext
     @Bindable var session: GameSession
+    var weaponsManager: WeaponsManager
     @State private var showingInventorySheet = false
     @State private var showingWeaponDetail = false
     @State private var selectedWeapon: Weapon?
@@ -796,7 +799,7 @@ struct InventoryCard: View {
         .padding()
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
         .sheet(isPresented: $showingInventorySheet) {
-            InventoryManagementSheet(session: session)
+            InventoryManagementSheet(session: session, weaponsManager: weaponsManager)
         }
         .sheet(isPresented: $showingWeaponDetail) {
             if let weapon = selectedWeapon {
@@ -827,6 +830,7 @@ struct InventoryManagementSheet: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Bindable var session: GameSession
+    var weaponsManager: WeaponsManager
 
     @State private var activeWeapons: [String] = []
     @State private var inactiveWeapons: [String] = []
@@ -881,6 +885,11 @@ struct InventoryManagementSheet: View {
                                 .buttonStyle(.borderless)
 
                                 Button(role: .destructive) {
+                                    let weaponName = activeWeapons[index]
+                                    // Find weapon and discard to appropriate deck
+                                    if let weapon = WeaponRepository.shared.allWeapons.first(where: { $0.name == weaponName }) {
+                                        weaponsManager.getDeck(weapon.deck).discardCard(weapon)
+                                    }
                                     activeWeapons.remove(at: index)
                                 } label: {
                                     Image(systemName: "minus.circle.fill")
@@ -936,6 +945,11 @@ struct InventoryManagementSheet: View {
                                 .buttonStyle(.borderless)
 
                                 Button(role: .destructive) {
+                                    let weaponName = inactiveWeapons[index]
+                                    // Find weapon and discard to appropriate deck
+                                    if let weapon = WeaponRepository.shared.allWeapons.first(where: { $0.name == weaponName }) {
+                                        weaponsManager.getDeck(weapon.deck).discardCard(weapon)
+                                    }
                                     inactiveWeapons.remove(at: index)
                                 } label: {
                                     Image(systemName: "minus.circle.fill")

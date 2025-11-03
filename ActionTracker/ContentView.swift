@@ -2,12 +2,16 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var selectedTab = 0
+    @State private var weaponsManager = WeaponsManager(
+        weapons: WeaponRepository.shared.allWeapons,
+        difficulty: .medium
+    )
 
     var body: some View {
         if #available(iOS 26.0, *) {
             TabView(selection: $selectedTab) {
                 Tab("Actions", systemImage: "bolt.fill", value: 0) {
-                    ActionsScreen()
+                    ActionsScreen(weaponsManager: weaponsManager)
                 }
 
                 Tab("Skills", systemImage: "sparkles", value: 1) {
@@ -19,7 +23,7 @@ struct ContentView: View {
                 }
 
                 Tab("Weapons", systemImage: "shield.lefthalf.filled", value: 3) {
-                    WeaponsScreen()
+                    WeaponsScreen(weaponsManager: weaponsManager)
                 }
 
                 Tab(value: 4, role: .search) {
@@ -32,7 +36,7 @@ struct ContentView: View {
             // Fallback on earlier versions: Use a basic TabView without iOS 26-only modifiers
             TabView(selection: $selectedTab) {
                 // Use legacy tab item style for compatibility
-                ActionsScreen()
+                ActionsScreen(weaponsManager: weaponsManager)
                     .tabItem { Label("Actions", systemImage: "bolt.fill") }
                     .tag(0)
 
@@ -44,7 +48,7 @@ struct ContentView: View {
                     .tabItem { Label("Spawn Deck", systemImage: "rectangle.stack.fill") }
                     .tag(2)
 
-                WeaponsScreen()
+                WeaponsScreen(weaponsManager: weaponsManager)
                     .tabItem { Label("Weapons", systemImage: "shield.lefthalf.filled") }
                     .tag(3)
 
