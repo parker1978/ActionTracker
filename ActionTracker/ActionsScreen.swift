@@ -956,6 +956,8 @@ struct InventoryManagementSheet: View {
     @State private var showingAddInactiveWeapon = false
     @State private var showingWeaponDetail = false
     @State private var selectedWeapon: Weapon?
+    @State private var showingCapacityAlert = false
+    @State private var capacityAlertMessage = ""
 
     // Get all weapon names from repository, excluding zombie cards
     private var allWeaponNames: [String] {
@@ -1001,7 +1003,24 @@ struct InventoryManagementSheet: View {
                                         .foregroundStyle(.blue)
                                 }
                                 .buttonStyle(.borderless)
-
+                            }
+                            .swipeActions(edge: .leading) {
+                                Button {
+                                    // Check if backpack has capacity
+                                    if inactiveWeapons.count < (3 + session.extraInventorySlots) {
+                                        let weaponName = activeWeapons[index]
+                                        activeWeapons.remove(at: index)
+                                        inactiveWeapons.append(weaponName)
+                                    } else {
+                                        capacityAlertMessage = "Backpack is full. Maximum capacity is \(3 + session.extraInventorySlots) slots."
+                                        showingCapacityAlert = true
+                                    }
+                                } label: {
+                                    Label("To Backpack", systemImage: "backpack.fill")
+                                }
+                                .tint(.orange)
+                            }
+                            .swipeActions(edge: .trailing) {
                                 Button(role: .destructive) {
                                     let weaponName = activeWeapons[index]
                                     // Find weapon and discard to appropriate deck
@@ -1010,11 +1029,8 @@ struct InventoryManagementSheet: View {
                                     }
                                     activeWeapons.remove(at: index)
                                 } label: {
-                                    Image(systemName: "minus.circle.fill")
-                                        .font(.body)
-                                        .foregroundStyle(.red)
+                                    Label("Delete", systemImage: "trash")
                                 }
-                                .buttonStyle(.borderless)
                             }
                         }
                     }
@@ -1061,7 +1077,24 @@ struct InventoryManagementSheet: View {
                                         .foregroundStyle(.blue)
                                 }
                                 .buttonStyle(.borderless)
-
+                            }
+                            .swipeActions(edge: .leading) {
+                                Button {
+                                    // Check if hands have capacity
+                                    if activeWeapons.count < 2 {
+                                        let weaponName = inactiveWeapons[index]
+                                        inactiveWeapons.remove(at: index)
+                                        activeWeapons.append(weaponName)
+                                    } else {
+                                        capacityAlertMessage = "Active weapons slots are full. Maximum capacity is 2 slots."
+                                        showingCapacityAlert = true
+                                    }
+                                } label: {
+                                    Label("To Hands", systemImage: "hand.raised.fill")
+                                }
+                                .tint(.blue)
+                            }
+                            .swipeActions(edge: .trailing) {
                                 Button(role: .destructive) {
                                     let weaponName = inactiveWeapons[index]
                                     // Find weapon and discard to appropriate deck
@@ -1070,11 +1103,8 @@ struct InventoryManagementSheet: View {
                                     }
                                     inactiveWeapons.remove(at: index)
                                 } label: {
-                                    Image(systemName: "minus.circle.fill")
-                                        .font(.body)
-                                        .foregroundStyle(.red)
+                                    Label("Delete", systemImage: "trash")
                                 }
-                                .buttonStyle(.borderless)
                             }
                         }
                     }
@@ -1108,6 +1138,29 @@ struct InventoryManagementSheet: View {
                 } footer: {
                     Text("Enable this if a skill or ability makes all weapons in your inventory count as active.")
                 }
+
+                // Swipe Instructions Section
+                Section {
+                    HStack(spacing: 12) {
+                        Image(systemName: "arrow.left")
+                            .foregroundStyle(.blue)
+                            .font(.caption)
+                        Text("Swipe left to move items between lists")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    HStack(spacing: 12) {
+                        Image(systemName: "arrow.right")
+                            .foregroundStyle(.red)
+                            .font(.caption)
+                        Text("Swipe right to delete items")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } header: {
+                    Text("Swipe Actions")
+                }
             }
             .navigationTitle("Manage Inventory")
             .navigationBarTitleDisplayMode(.inline)
@@ -1127,6 +1180,11 @@ struct InventoryManagementSheet: View {
             }
             .onAppear {
                 loadInventory()
+            }
+            .alert("No Capacity Available", isPresented: $showingCapacityAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(capacityAlertMessage)
             }
             .sheet(isPresented: $showingAddActiveWeapon) {
                 WeaponPickerSheet(
