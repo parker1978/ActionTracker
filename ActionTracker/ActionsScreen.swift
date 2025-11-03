@@ -1397,7 +1397,7 @@ struct ExperienceCard: View {
                 )
                 XPLevelBadge(
                     level: "Red",
-                    range: "43+",
+                    range: "43",
                     isActive: session.currentExperience >= 43,
                     color: .red
                 )
@@ -1656,13 +1656,13 @@ struct SkillSelectionSheet: View {
         let selected = session.selectedRedSkillsList.count
 
         if cycle == 1 {
-            return "Red Skills (Choose 1 at 43+ XP)"
+            return "Red Skills (Choose 1 at 43 XP)"
         } else if cycle == 2 && selected < 2 {
             return "Red Skills (Choose 2nd)"
         } else if cycle == 3 && selected < 3 {
             return "Red Skills (Gain Last)"
         } else {
-            return "Red Skills (Active at 43+ XP)"
+            return "Red Skills (Active at 43 XP)"
         }
     }
 }
