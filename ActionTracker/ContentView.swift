@@ -14,20 +14,20 @@ struct ContentView: View {
                     ActionsScreen(weaponsManager: weaponsManager)
                 }
 
-                Tab("Skills", systemImage: "sparkles", value: 1) {
+                Tab("Characters", systemImage: "person.3.fill", value: 1) {
+                    CharactersSearchScreen()
+                }
+
+                Tab("Skills", systemImage: "sparkles", value: 2) {
                     SkillsScreen()
                 }
 
-                Tab("Spawn Deck", systemImage: "rectangle.stack.fill", value: 2) {
+                Tab("Spawn Deck", systemImage: "rectangle.stack.fill", value: 3) {
                     SpawnDeckView()
                 }
 
-                Tab("Weapons", systemImage: "shield.lefthalf.filled", value: 3) {
+                Tab("Weapons", systemImage: "shield.lefthalf.filled", value: 4) {
                     WeaponsScreen(weaponsManager: weaponsManager)
-                }
-
-                Tab(value: 4, role: .search) {
-                    CharactersSearchScreen()
                 }
             }
             .tabBarMinimizeBehavior(.onScrollDown)
@@ -40,20 +40,20 @@ struct ContentView: View {
                     .tabItem { Label("Actions", systemImage: "bolt.fill") }
                     .tag(0)
 
+                CharactersSearchScreen()
+                    .tabItem { Label("Characters", systemImage: "person.3.fill") }
+                    .tag(1)
+
                 SkillsScreen()
                     .tabItem { Label("Skills", systemImage: "sparkles") }
-                    .tag(1)
+                    .tag(2)
 
                 SpawnDeckView()
                     .tabItem { Label("Spawn Deck", systemImage: "rectangle.stack.fill") }
-                    .tag(2)
+                    .tag(3)
 
                 WeaponsScreen(weaponsManager: weaponsManager)
                     .tabItem { Label("Weapons", systemImage: "shield.lefthalf.filled") }
-                    .tag(3)
-
-                CharactersSearchScreen()
-                    .tabItem { Label("Search", systemImage: "magnifyingglass") }
                     .tag(4)
             }
         }
