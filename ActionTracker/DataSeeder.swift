@@ -6,24 +6,36 @@ import SwiftData
 struct DataSeeder {
     /// Seeds the database with built-in characters and skills if not already seeded
     static func seedIfNeeded(context: ModelContext) {
-        // Check if data already exists
-        let descriptor = FetchDescriptor<Character>(
-            predicate: #Predicate { $0.isBuiltIn == true }
-        )
-
-        if let count = try? context.fetchCount(descriptor), count > 0 {
-            // Data already seeded
-            return
-        }
-
-        // Seed skills first
+        // Seed skills first (always check)
         seedSkills(context: context)
 
-        // Seed characters
+        // Seed characters with versioning
         seedCharacters(context: context)
 
         // Save context
         try? context.save()
+    }
+
+    /// Check if characters need to be reseeded based on version
+    private static func shouldReseedCharacters(context: ModelContext) -> Bool {
+        // Check for version mismatch using UserDefaults
+        let currentVersion = CharacterRepository.CHARACTERS_DATA_VERSION
+        let storedVersion = UserDefaults.standard.string(forKey: "CharactersDataVersion")
+
+        if storedVersion != currentVersion {
+            return true
+        }
+
+        // Check if any built-in characters exist
+        let descriptor = FetchDescriptor<Character>(
+            predicate: #Predicate { $0.isBuiltIn == true }
+        )
+
+        if let count = try? context.fetchCount(descriptor), count == 0 {
+            return true
+        }
+
+        return false
     }
 
     // MARK: - Seed Skills
@@ -168,176 +180,46 @@ struct DataSeeder {
     // MARK: - Seed Characters
 
     private static func seedCharacters(context: ModelContext) {
-        let characters: [(String, String, String, String, String)] = [
-            // Name, Set, Blue Skills, Orange Skills, Red Skills
-            ("Achille", "", "Zombie Link", "Distributor;+1 To Dice Roll: Melee", "+1 Damage: Combat;+1 Free Action: Combat;Born Leader"),
-            ("Adam", "", "+1 Die: Melee", "+1 Die: Combat;Webbing", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Hoard"),
-            ("Adriana", "", "Taunt", "+1 Free Action: Combat;Lifesaver", "+1 Free Action: Move;+1 To Dice Roll: Combat;Steady Hand"),
-            ("Amy", "", "+1 Free Action: Move", "+1 Free Action: Melee;+1 Free Action: Ranged", "+1 Die: Combat;+1 To Dice Roll: Combat;Medic"),
-            ("Amy", "Ultimate", "+1 Free Action: Move;Medic", "+1 Free Action: Combat;+1 Free Action: Move", "+1 Die: Combat;+1 To Dice Roll: Combat;Bloodlust: Combat"),
-            ("Angry Mary", "", "Reaper: Ranged", "+1 Free Action: Ranged;Hit & Run", "+1 Die: Combat;+1 Free Action: Move;+1 To Dice Roll: Combat"),
-            ("Audrey", "", "Zombie Link", "+1 Die: Ranged;+1 To Dice Roll: Melee", "+1 Free Action: Combat;Bloodlust: Combat;Hit & Run"),
-            ("Azaghal", "", "Swordmaster", "+1 Die: Combat;Barbarian", "+1 Free Action: Combat;Dreadnought: Walker;Slippery"),
-            ("Bastian", "", "Matching Set", "+1 Die: Combat;+1 Free Action: Combat", "+1 Die: Combat;+1 Free Action: Combat;+1 To Dice Roll: Combat"),
-            ("Bear", "", "Shove", "+1 Free Action: Melee;+1 To Dice Roll: Melee", "+1 Damage: Melee;+1 Die: Combat;Lifesaver"),
-            ("Belle", "", "+1 Free Action: Move", "+1 Free Action: Melee;+1 To Dice Roll: Ranged", "+1 Die: Combat;+1 Free Action: Move;Ambidextrous"),
-            ("Benny", "", "+1 Die: Ranged", "+1 Die: Ranged;Lifesaver", "+1 Die: Ranged;+1 Free Action: Combat;Born Leader"),
-            ("Bill", "", "+1 Damage: Ranged", "+1 Die: Combat;Distributor", "+1 Free Action: Combat;Born Leader;Point-Blank"),
-            ("Bobby Singer", "Supernatural", "Sniper", "+1 Free Action: Ranged;Hoard", "+1 Damage: Ranged;+1 Free Action: Combat;Blitz"),
-            ("Bones", "", "Tactician", "+1 To Dice Roll: Ranged;Slippery", "+1 Die: Combat;+1 Free Action: Combat;Lucky"),
-            ("Brad", "", "Starts With: A Shotgun", "+1 Free Action: Ranged;Lucky", "+1 Damage: Ranged;+1 To Dice Roll: Combat;Steady Hand"),
-            ("Brother Max", "", "Dreadnought: Walker", "Barbarian;Full Auto", "+1 Damage: Melee;+1 Damage: Ranged;+1 Free Action: Combat"),
-            ("Bunny G", "", "Lucky", "+1 To Dice Roll: Melee;Jump", "+1 Damage: Melee;+1 Free Action: Combat;Roll 6: +1 Die Combat"),
-            ("Carson", "", "Slippery", "+1 Free Action: Ranged;Dreadnought: Walker", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Lifesaver"),
-            ("Castiel", "Supernatural", "Medic", "Blitz;Dreadnought: Walker", "+1 Free Action: Combat;Regeneration;Super Strength"),
-            ("Cat", "", "+1 Free Action: Move", "+1 Die: Combat;+1 Free Action: Melee", "+1 Free Action: Combat;+1 Zone Per Move;Slippery"),
-            ("Cathy", "", "Sprint", "+1 Free Action: Melee;Jump", "+1 To Dice Roll: Combat;Bloodlust: Combat;Lifesaver"),
-            ("Chaz", "", "+1 Free Action: Melee", "+1 Free Action: Melee;+1 To Dice Roll: Melee", "+1 Damage: Melee;+1 Free Action: Melee;Born Leader"),
-            ("Chaz", "Ultimate", "+1 Free Action: Melee;+1 Damage: Melee", "+1 To Dice Roll: Melee;Bloodlust: Melee", "+1 Free Action: Melee;Barbarian;Born Leader"),
-            ("Chuck", "", "Low Profile", "+1 Free Action: Melee;Taunt", "+1 Free Action: Combat;Lucky;Tough"),
-            ("Claudia", "", "+1 To Dice Roll: Melee", "+1 Free Action: Move;Low Profile", "+1 Die: Combat;+1 Free Action: Combat;Slippery"),
-            ("Claudia", "Ultimate", "+1 To Dice Roll: Melee;+1 Die: Ranged", "+1 Free Action: Move;Webbing", "+1 Die: Combat;+1 Free Action: Combat;Shove"),
-            ("Crowley", "Supernatural", "Tactician", "Hit & Run;Zombie Link", "+1 Free Action: Melee;Charge;Super Strength"),
-            ("Curro", "", "Is That All You Got?", "+1 Free Action: Ranged;Reaper: Combat", "+1 Free Action: Combat;+1 To Dice Roll: Ranged;Full Auto"),
-            ("Dakota", "", "Taunt", "+1 Die: Ranged;Point-Blank", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Born Leader"),
-            ("Dan", "", "Lifesaver", "+1 Free Action: Move;Jump", "+1 Damage: Melee;+1 Free Action: Combat;Tactician"),
-            ("Dave", "", "2 Cocktails Are Better Than 1", "Lucky;Slippery", "+1 Die: Ranged;+1 To Dice Roll: Ranged;Lucky"),
-            ("Dave", "Ultimate", "2 Cocktails Are Better Than 1;Starts With: 2 Molotov", "+1 Free Action: Combat;Webbing", "+1 Free Action: Combat;+1 Die: Combat;+1 To Dice Roll: Combat"),
-            ("Dean Winchester", "Supernatural", "B.I.A: Tough", "Is That All You Got?;Taunt", "+1 Free Action: Ranged;Bloodlust: Melee;Regeneration"),
-            ("Derek", "", "+1 Max Range", "+1 Free Action: Melee;Tough", "+1 Free Action: Move;+1 To Dice Roll: Combat;Slippery"),
-            ("Dick", "", "Lucky", "+1 Die: Combat;Zombie Link", "+1 Free Action: Combat;Distributor;Hit & Run"),
-            ("Doc", "", "Medic", "+1 To Dice Roll: Melee;Reaper: Melee", "+1 Damage: Melee;+1 Free Action: Combat;Roll 6: +1 Die Melee"),
-            ("Don", "", "Born Leader", "+1 Die: Ranged;Distributor", "+1 Free Action: Combat;+1 Max Range;Tactician"),
-            ("Donna", "", "+1 To Dice Roll: Melee", "+1 Free Action: Melee;Swordmaster", "+1 Die: Melee;Hit & Run;Shove"),
-            ("Doud", "", "Scavenger", "+1 Free Action: Combat;Webbing", "+1 Die: Ranged;Bloodlust: Combat;Dreadnought: Walker"),
-            ("Doug", "", "Matching Set", "+1 Die: Ranged;+1 Free Action: Combat", "+1 To Dice Roll: Combat;Ambidextrous;Slippery"),
-            ("Doug", "Ultimate", "Matching Set;Hoard", "+1 Die: Combat;+1 Free Action: Combat", "+1 To Dice Roll: Combat;Ambidextrous;Full Auto"),
-            ("Dylan", "", "Lifesaver", "+1 Free Action: Melee;Born Leader", "+1 Die: Combat;+1 To Dice Roll: Combat;Shove"),
-            ("El Cholo", "", "Starts With: 2 Machetes", "+1 Die: Melee;+1 Free Action: Combat", "+1 Damage With Machete;+1 Free Action: Combat;+1 To Dice Roll: Combat"),
-            ("El Cholo", "Ultimate", "Starts With: 2 Machetes;Bloodlust: Melee", "+1 Die: Melee;+1 Free Action: Combat", "+1 Damage: Combat;+1 Free Action: Combat;+1 To Dice Roll: Combat"),
-            ("Elena", "", "Swordmaster", "+1 Die: Melee;+1 To Dice Roll: Melee", "+1 Die: Melee;+1 Free Action: Melee;Bloodlust: Melee"),
-            ("Elle", "", "Sniper", "+1 Die: Combat;+1 Free Action: Ranged", "+1 Die: Ranged;+1 Free Action: Combat;+1 To Dice Roll: Ranged"),
-            ("Elsa", "", "Break-In", "+1 Free Action: Ranged;Slippery", "+1 Free Action: Combat;+1 Free Action: Move;Sprint"),
-            ("Eva", "", "+1 To Dice Roll: Ranged", "+1 Free Action: Combat;Gunslinger", "+1 Die: Ranged;+1 Free Action: Move;Slippery"),
-            ("Frank", "", "Starts With: A Fire Axe", "+1 Damage: Melee;+1 Free Action: Search", "+1 Die: Combat;+1 Free Action: Combat;Steady Hand"),
-            ("Fred", "", "Reaper: Combat", "+1 Free Action: Combat;Dreadnought: Walker", "+1 Die: Combat;+1 Free Action: Combat;+1 To Dice Roll: Combat"),
-            ("Fred", "Pariz", "Lifesaver", "Combat Reflexes;Field Medic", "+1 Free Action: Combat;+1 To Dice Roll: Melee;Escalation: Combat"),
-            ("Gary", "", "Slippery", "+1 Free Action: Move;Lucky", "+1 To Dice Roll: Melee;+1 Free Action: Combat;Roll 6: +1 Die Combat"),
-            ("Gilly", "", "Shove", "+1 Free Action: Ranged;Steady Hand", "+1 Free Action: Move;+1 To Dice Roll: Combat;Slippery"),
-            ("Grindlock", "", "Taunt", "+1 Free Action: Melee;Slippery", "+1 Damage: Melee;Is That All You Got?;Roll 6: +1 Die Combat"),
-            ("Helen", "", "Starts With: A Flashlight", "+1 To Dice Roll: Ranged;Destiny", "+1 Die: Combat;Low Profile;Slippery"),
-            ("Igor", "", "Bloodlust: Melee", "+1 To Dice Roll: Melee;Dreadnought: Walker", "Ambidextrous;Barbarian;Roll 6: +1 Die Combat"),
-            ("Ivy", "", "Sniper", "+1 Die: Combat;+1 Free Action: Ranged", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Lucky"),
-            ("Ivy", "Ultimate", "Sniper;Starts With: A Sniper Rifle", "+1 Damage: Ranged;+1 Free Action: Ranged", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Reaper: Combat"),
-            ("Jack Kline", "Supernatural", "Can Search More Than Once", "Distributor;Shove", "+1 Free Action: Combat;Slippery;Super Strength"),
-            ("Jacquin", "Pariz", "+1 Free All-Out Combat Action", "Ignore 1 Break;Night Vision", "+1 Die: Combat;+1 Free Action: Move;Ambidextrous"),
-            ("James", "", "+1 Max Range", "+1 Free Action: Ranged;Sniper", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Reaper: Combat"),
-            ("Jane", "", "+1 Die: Ranged", "+1 Die: Ranged;Lucky", "+1 Free Action: Combat;+1 Free Action: Move;Gunslinger"),
-            ("Javier", "Fort Hendrix", "All-Out: Ranged: Damage 2", "+1 Free Action: Ranged;Double All-Out Dice", "+1 Free Move Action;Hit & Run;Ignore 1 Break"),
-            ("Jeff", "", "Sniper", "+1 Die: Ranged;+1 Max Range", "+1 Free Action: Ranged;Reaper: Combat;Tactician"),
-            ("Jesse", "", "Born Leader", "+1 To Dice Roll: Melee;Swordmaster", "+1 Free Action: Melee;+1 Die: Melee;+1 To Dice Roll: Melee"),
-            ("Joe", "", "Scavenger", "+1 Die: Combat;Reaper: Combat", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Ambidextrous"),
-            ("John Winchester", "Supernatural", "Born Leader", "+1 Free Action: Melee;+1 Free Action: Ranged", "+1 Free Action: Combat;Charge;Regeneration"),
-            ("Josh", "", "Slippery", "+1 Die: Melee;+1 Free Action: Combat", "+1 Free Action: Move;+1 To Dice Roll: Combat;Lucky"),
-            ("Josh", "Ultimate", "Slippery;Jump", "+1 Die: Combat;Lucky", "+1 Free Action: Move;+1 Free Action: Combat;+1 To Dice Roll: Combat"),
-            ("Joshua", "", "Lifesaver", "+1 Free Action: Ranged;+1 To Dice Roll: Melee", "+1 Free Action: Combat;+1 To Dice Roll: Ranged;Born Leader"),
-            ("Jovem Nerd", "", "Steady Hand", "+1 Free Action: Ranged;+1 To Dice Roll: Melee", "+1 Damage: Combat;+1 Free Action: Combat;Roll 6: +1 Die Combat"),
-            ("Julien", "", "Steady Hand", "+1 To Dice Roll: Ranged;Hit & Run", "+1 Die: Combat;+1 Free Action: Combat;Point-Blank"),
-            ("Kabir", "", "Slippery", "+1 Free Action: Move;+1 To Dice Roll: Melee", "+1 Die: Combat;+1 Free Action: Combat;Reaper: Combat"),
-            ("Karl", "Fort Hendrix", "Sniper", "+1 Free Action: Ranged;All-Out: +1 Die: Combat", "+1 Die: Combat;+1 Free Action: Combat;Reaper: Combat"),
-            ("Kevin", "", "Taunt", "+1 Die: Combat;Tough", "+1 Free Action: Melee;+1 Free Action: Move;+1 To Dice Roll: Ranged"),
-            ("Kim", "", "Lucky", "Roll 6: +1 Die Ranged;Webbing", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Roll 6: +1 Die Melee"),
-            ("Kirk", "", "Melee: Damage 2", "+1 Free Action: Melee;Slippery", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Tough"),
-            ("Kris", "", "Point-Blank", "+1 Die: Ranged;+1 Free Action: Move", "+1 Free Action: Combat;+1 To Dice Roll: Ranged;Roll 6: +1 Die Combat"),
-            ("Kyoko", "", "+1 Free Action: Search", "+1 To Dice Roll: Melee;Destiny", "+1 Die: Combat;+1 Free Action: Combat;Slippery"),
-            ("Laurie", "", "Free Reload", "+1 Free Action: Ranged;Webbing", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Hit & Run"),
-            ("Lea", "", "Slippery", "+1 Free Action: Melee;Webbing", "+1 Free Action: Move;+1 To Dice Roll: Combat;Ambidextrous"),
-            ("Leroy", "", "Tough", "+1 Damage: Combat;Shove", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Reaper: Combat"),
-            ("Lili", "", "+1 Max Range", "+1 Die: Ranged;Sprint", "+1 Free Action: Combat;+1 Free Action: Move;+1 To Dice Roll: Combat"),
-            ("Lou", "", "Charge", "+1 Die: Combat;+1 Free Action: Melee", "+1 Free Action: Move;+1 Free Action: Ranged;Medic"),
-            ("Louise", "", "Search: 2 Cards", "+1 Damage: Combat;+1 To Dice Roll: Ranged", "+1 Die: Combat;+1 Free Action: Combat;Sniper"),
-            ("Louise", "Pariz", "Camaraderie", "Roll 6: +1 Damage Combat;Taunt", "+1 Free Action: Combat;Full Auto;Shove"),
-            ("Lucius", "", "+1 To Dice Roll: Ranged", "+1 Free Action: Ranged;+1 To Dice Roll: Melee", "+1 Die: Combat;+1 Free Action: Combat;Reaper: Combat"),
-            ("M. Phal", "", "Taunt", "+1 Free Action: Move;Reaper: Combat", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Bloodlust: Combat"),
-            ("Mack", "", "Starts With: 2 Kukris", "+1 Die: Melee;Steady Hand", "+1 To Dice Roll: Combat;Reaper: Combat;Slippery"),
-            ("Maddie", "", "Bloodlust: Melee", "+1 To Dice Roll: Melee;Taunt", "+1 Free Action: Combat;Hit & Run;Roll 6: +1 Die Combat"),
-            ("Maki", "", "Swordmaster", "+1 Die: Melee;Slippery", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Low Profile"),
-            ("Marian", "Fort Hendrix", "Field Medic", "+1 Free Melee Action;All-Out: +1 Damage: Melee", "+1 Free Combat Action;+1 To Dice Roll: Melee;Lifesaver"),
-            ("Marianne", "Pariz", "+1 Die: Melee", "Born Leader;Charge", "+1 Die: Combat;Ambidextrous;B.I.A.: +1 Free Action: Combat"),
-            ("Marvin", "", "Destiny", "Lucky;Taunt", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Born Leader"),
-            ("Marvin", "Ultimate", "Destiny;Search: 2 Cards", "+1 Free Action: Ranged;Lifesaver", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Lucky"),
-            ("Matt", "", "Born Leader", "+1 Free Action: Ranged;Gunslinger", "+1 Die: Combat;+1 Free Action: Combat;Distributor"),
-            ("Michelle", "Fort Hendrix", "Spare Parts", "Charge;Double All-Out Dice", "+1 Free Action: Combat;Roll 6: +1 Damage;Taunt"),
-            ("Mike", "", "Starts With: A Chainsaw", "+1 Free Action: Melee;Lucky", "+1 Free Action: Move;+1 To Dice Roll: Combat;Taunt"),
-            ("Miss Trish", "", "Full Auto", "+1 Free Action: Ranged;Tough", "+1 To Dice Roll: Combat;Hit & Run;Sniper"),
-            ("Mitch", "", "+1 Free Action: Move", "+1 To Dice Roll: Combat;Slippery", "+1 Free Action: Combat;+1 Free Action: Move;Lifesaver"),
-            ("Nadia", "Pariz", "Night Vision", "+1 To Dice Roll: Ranged;Lucky", "+1 Damage: Ranged;+1 Free All-Out Combat Action;Reaper: Combat"),
-            ("Ned", "", "+1 Free Action: Search", "+1 Die: Ranged;+1 Free Action: Combat", "+1 Die: Combat;+1 To Dice Roll: Combat;Shove"),
-            ("Ned", "Ultimate", "+1 Free Action: Search;Scavenger", "+1 Die: Combat;+1 Free Action: Combat", "+1 Die: Combat;+1 To Dice Roll: Combat;Shove"),
-            ("Neema", "", "Born Leader", "+1 Free Action: Combat;Is That All You Got?", "+1 Free Action: Melee;+1 Free Action: Ranged;Tough"),
-            ("Nick", "", "Tough", "+1 Die: Combat;Slippery", "+1 Free Action: Combat;+1 Free Action: Move;Born Leader"),
-            ("Nick", "Ultimate", "Tough;Lucky", "+1 Die: Combat;+1 Free Action: Ranged", "+1 Free Action: Combat;Distributor;Roll 6: +1 Die Combat"),
-            ("Nikki", "", "+1 Free Action: Ranged", "+1 Free Action: Ranged;Point-Blank", "+1 Free Action: Ranged;+1 To Dice Roll: Ranged;Hit & Run"),
-            ("Odin", "", "+1 Die: Melee", "+1 Free Action: Melee;+1 Free Action: Move", "+1 Die: Melee;+1 Die: Ranged;+1 Free Action: Combat"),
-            ("Oksana", "", "Bloodlust: Combat", "+1 Free Action: Combat;Free Reload", "+1 Die: Combat;+1 Free Action: Combat;Hit & Run"),
-            ("Ostara", "", "Can Search More Than Once", "+1 Die: Ranged;+1 Free Action: Move", "+1 Free Action: Combat;+1 To Dice Roll: Ranged;Slippery"),
-            ("Padre Johnson", "", "Super Strength", "+1 Free Action: Melee;Medic", "+1 To Dice Roll: Combat;Lifesaver;Tough"),
-            ("Parker", "", "Medic", "+1 Free Action: Move;Free Reload", "+1 Free Action: Combat;+1 Max Range;Shove"),
-            ("Patrick", "", "Lucky", "+1 Die: Combat;+1 Free Action: Move", "+1 Free Action: Combat;Roll 6: +1 Die Combat;Slippery"),
-            ("Paul", "", "Swordmaster", "+1 Die: Melee;+1 Free Action: Melee", "+1 Damage: Melee;+1 To Dice Roll: Melee;Bloodlust: Melee"),
-            ("Peach", "", "Jump", "+1 Free Action: Ranged;+1 Max Range", "+1 Free Action: Combat;+1 Free Action: Move;Slippery"),
-            ("Phil", "", "Ranged: Damage 2", "+1 Free Action: Combat;+1 To Dice Roll: Ranged", "+1 Die: Combat;B.I.A.: +1 Free Action: Combat;Sniper"),
-            ("Phil", "Ultimate", "Starts With: A Shotgun;Lifesaver", "+1 To Dice Roll: Ranged;Born Leader", "+1 Die: Ranged;+1 Free Action: Combat;Sniper"),
-            ("President 16", "Presidents", "+1 Free Action: Combat", "Blitz;Hit & Run", "+1 Die: Combat;+1 To Dice Roll: Melee;+1 To Dice Roll: Ranged"),
-            ("President 40", "Presidents", "Ronald's Ray Gun", "+1 Die: Ranged;+1 Free Action: Ranged", "+1 Die: Ranged;+1 To Dice Roll: Ranged;Tough"),
-            ("President 42", "Presidents", "Hoard", "+1 Free Action: Melee;Webbing", "+1 Damage: Melee;+1 Free Action: Ranged;Charge"),
-            ("President 43", "Presidents", "Blitz", "+1 Die: Ranged;Hit & Run", "+1 Die: Ranged;+1 Free Action: Ranged;Reaper: Ranged"),
-            ("President 44", "Presidents", "B.I.A.: Field Medic", "+1 Free Action: Ranged;Tactician", "+1 Die: Combat;+1 Free Action: Combat;B.I.A.: Born Leader"),
-            ("President 45", "Presidents", "Trump Card", "+1 Free Action: Ranged;Taunt", "+1 Damage: Ranged;+1 Die: Combat;Escalation: Combat"),
-            ("Ralph", "", "Steady Hand", "+1 Free Action: Ranged;Lifesaver", "+1 Die: Combat;+1 To Dice Roll: Combat;Shove"),
-            ("Raoul", "", "Webbing", "Hoard;Medic", "+1 Free Action: Melee;+1 Free Action: Ranged;+1 To Dice Roll: Ranged"),
-            ("Red Cap Ben", "", "Hit & Run", "+1 Die: Melee;+1 To Dice Roll: Ranged", "+1 Free Action: Combat;+1 Free Action: Move;Slippery"),
-            ("Rick", "", "Steady Hand", "+1 To Dice Roll: Ranged;Tough", "+1 Free Action: Combat;+1 Free Action: Move;Tactician"),
-            ("Riley", "Fort Hendrix", "All-Out: +1 Die: Melee", "+1 Free Action: Move;All-Out: +1 Free Action: Ranged", "+1 Free Action: Melee;+1 Max Range;All-Out: +1 To Dice Roll: Combat"),
-            ("Rob", "", "Break-In", "+1 Free Action: Ranged;Steady Hand", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Roll 6: +1 Die Combat"),
-            ("Rose", "", "2 Cocktails Are Better Than 1", "Bloodlust: Combat;Medic", "+1 Free Action: Ranged;Born Leader;Steady Hand"),
-            ("Ross", "", "+1 Die: Ranged", "+1 Die: Ranged;+1 Free Action: Ranged", "+1 Die: Combat;+1 Free Action: Combat;+1 To Dice Roll: Combat"),
-            ("Sam Winchester", "Supernatural", "B.I.A.: Lucky", "Hold Your Nose;Lifesaver", "+1 Free Action: Combat;Reaper: Ranged;Regeneration"),
-            ("Seth", "", "Hit & Run", "+1 Free Action: Melee;Steady Hand", "+1 To Dice Roll: Combat;Lifesaver;Reaper: Combat"),
-            ("Shannon", "", "Point-Blank", "+1 Free Action: Ranged;Lucky", "+1 Die: Combat;+1 Free Action: Combat;Slippery"),
-            ("Smith", "", "+1 Free Action: Combat", "+1 Free Action: Move;Lucky", "+1 Die: Combat;+1 To Dice Roll: Combat;Webbing"),
-            ("Spencer", "", "+1 Free Action: Ranged", "2 Cocktails Are Better Than 1;Zombie Link", "+1 Free Action: Combat;+1 Max Range;+1 To Dice Roll: Combat"),
-            ("Terry", "", "Born Leader", "+1 Free Action: Combat;Distributor", "+1 Free Action: Combat;Is That All You Got?;Steady Hand"),
-            ("Thaissa", "", "+1 Free Action: Search", "+1 Free Action: Ranged;Destiny", "+1 To Dice Roll: Combat;Born Leader;Webbing"),
-            ("The Carboard Tube Samurai", "", "Starts With: A Katana", "+1 Free Action: Melee;Slippery", "+1 Damage With Katana;+1 Die: Combat;Low Profile"),
-            ("Thiago", "", "Reaper: Melee", "+1 Free Action: Melee;Taunt", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Slippery"),
-            ("Tiff", "", "Starts With: A Sub-MG", "+1 Free Action: Ranged;Sniper", "+1 Die: Ranged;+1 Free Action: Ranged;Gunslinger"),
-            ("Tiger Sam", "", "+1 Die: Ranged", "+1 Free Action: Move;Sniper", "+1 Damage: Ranged;+1 Free Action: Combat;Shove"),
-            ("Tomiko", "", "Taunt", "+1 Die: Melee;Hit & Run", "+1 To Dice Roll: Combat;Ambidextrous;Reaper: Combat"),
-            ("Travis", "", "Reaper: Combat", "+1 To Dice Roll: Ranged;Hit & Run", "+1 Die: Combat;+1 Free Action: Combat;Point-Blank"),
-            ("Troy", "", "Starts With: A Sawed-Off", "+1 To Dice Roll: Combat;Tough", "+1 Free Action: Melee;+1 Free Action: Ranged;Webbing"),
-            ("Troy", "Ultimate", "Starts With: A Sawed-Off;+1 Free Reload", "+1 To Dice Roll: Combat;Shove", "+1 Free Action: Melee;+1 Free Action: Ranged;Webbing"),
-            ("Uncle Honk", "", "Taunt", "+1 Free Action: Melee;Bloodlust: Melee", "+1 Damage: Melee;+1 Free Action: Combat;Reaper: Combat"),
-            ("Union Worker #42", "", "+1 Free Action: Melee", "+1 To Dice Roll: Melee;Shove", "+1 Damage: Melee;+1 Die: Melee;Lifesaver"),
-            ("Wanda", "", "Sprint", "+1 To Dice Roll: Melee;Slippery", "+1 Die: Combat;+1 Free Action: Melee;+1 Free Action: Move"),
-            ("Wanda", "Ultimate", "Sprint;Bloodlust: Melee", "+1 To Dice Roll: Melee;Hit & Run", "+1 Damage: Melee;+1 Die: Combat;+1 Free Action: Move"),
-            ("Watts", "", "Starts With: A Fire Axe", "+1 Die: Melee;Shove", "+1 Free Action: Combat;+1 To Dice Roll: Combat;Sprint"),
-            ("Wayne", "Fort Hendrix", "Shove", "All-Out: +1 Die: Combat;Charge", "+1 Free Action: Melee;Ambidextrous;Taunt"),
-            ("Will", "", "+1 Damage: Ranged", "Gunslinger;Slippery", "+1 Die: Combat;+1 Free Action: Combat;Dual Expert"),
-            ("Yanis", "Pariz", "Parrying Blow", "Jump;Reaper: Melee", "+1 Damage: Melee;Ignore 1 Break;Slippery"),
-            ("Yuri", "", "Distributor", "+1 Free Action: Ranged;Steady Hand", "+1 Free Action: Combat;+1 To Dice Roll: Ranged;Tactician"),
-        ]
+        // Check if reseeding is needed
+        guard shouldReseedCharacters(context: context) else {
+            return
+        }
 
-        for (name, set, blue, orange, red) in characters {
+        // Delete existing built-in characters
+        let descriptor = FetchDescriptor<Character>(
+            predicate: #Predicate { $0.isBuiltIn == true }
+        )
+
+        if let existingCharacters = try? context.fetch(descriptor) {
+            for character in existingCharacters {
+                context.delete(character)
+            }
+        }
+
+        // Load characters from repository
+        let repository = CharacterRepository.shared
+        let characterDataList = repository.allCharacters
+
+        // Insert characters into database
+        for data in characterDataList {
             let character = Character(
-                name: name,
-                set: set,
+                name: data.name,
+                set: data.set ?? "",
+                notes: data.notes ?? "",
                 isBuiltIn: true,
-                blueSkills: blue,
-                orangeSkills: orange,
-                redSkills: red
+                teen: data.isTeen,
+                health: data.healthValue,
+                blueSkills: data.blue,
+                yellowSkills: "+1 Action",  // Standard yellow skill
+                orangeSkills: data.orange,
+                redSkills: data.red
             )
             context.insert(character)
         }
+
+        // Update version in UserDefaults
+        UserDefaults.standard.set(CharacterRepository.CHARACTERS_DATA_VERSION, forKey: "CharactersDataVersion")
+
+        print("✅ Seeded \(characterDataList.count) characters (v\(CharacterRepository.CHARACTERS_DATA_VERSION))")
     }
 }

@@ -111,6 +111,8 @@ final class Character {
     var notes: String
     var isFavorite: Bool
     var isBuiltIn: Bool  // True for preloaded characters, false for user-created
+    var teen: Bool  // True if character is a teen survivor
+    var health: Int  // Starting health value for the character
     var createdAt: Date
     var updatedAt: Date
 
@@ -142,6 +144,8 @@ final class Character {
         notes: String = "",
         isFavorite: Bool = false,
         isBuiltIn: Bool = false,
+        teen: Bool = false,
+        health: Int = 3,
         blueSkills: String = "",
         yellowSkills: String = "",
         orangeSkills: String = "",
@@ -155,6 +159,8 @@ final class Character {
         self.notes = notes
         self.isFavorite = isFavorite
         self.isBuiltIn = isBuiltIn
+        self.teen = teen
+        self.health = health
         self.blueSkills = blueSkills
         self.yellowSkills = yellowSkills
         self.orangeSkills = orangeSkills
@@ -223,6 +229,7 @@ final class GameSession {
     var startedAt: Date
     var endedAt: Date?  // Nil while game is active
     var currentExperience: Int
+    var currentHealth: Int  // Current health during game (0-10, starts at character's health)
     var elapsedSeconds: Int  // Game duration in seconds
 
     // MARK: - Inventory
@@ -272,6 +279,7 @@ final class GameSession {
         self.character = character
         self.characterName = character.name
         self.currentExperience = currentExperience
+        self.currentHealth = character.health  // Start with character's base health
         self.startedAt = startedAt
         self.endedAt = endedAt
         self.elapsedSeconds = elapsedSeconds

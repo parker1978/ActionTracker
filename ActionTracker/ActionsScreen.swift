@@ -91,6 +91,9 @@ struct ActiveGameView: View {
                 // Character information card
                 CharacterInfoCard(session: session)
 
+                // Health tracking card
+                HealthCard(session: session)
+
                 // Action tracking card (with edit mode for deletion)
                 ActionsCard(session: session)
 
@@ -208,6 +211,109 @@ struct CharacterInfoCard: View {
         }
         .padding()
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+// MARK: - Health Card
+
+/// Card for tracking character health during gameplay
+/// Health starts at character's base health value and can be incremented/decremented
+/// Minimum health: 0, Maximum health: 10
+struct HealthCard: View {
+    @Environment(\.modelContext) private var modelContext
+    @Bindable var session: GameSession
+
+    var body: some View {
+        VStack(spacing: 16) {
+            // Header
+            HStack {
+                Label("Health", systemImage: "heart.fill")
+                    .font(.headline)
+                    .foregroundStyle(.red)
+
+                Spacer()
+            }
+
+            // Health counter with increment/decrement buttons
+            HStack(spacing: 20) {
+                // Decrement button
+                Button {
+                    var transaction = Transaction()
+                    transaction.disablesAnimations = true
+                    withTransaction(transaction) {
+                        if session.currentHealth > 0 {
+                            session.currentHealth -= 1
+                        }
+                        try? modelContext.save()
+                    }
+                } label: {
+                    Image(systemName: "minus.circle.fill")
+                        .font(.title)
+                        .foregroundStyle(session.currentHealth > 0 ? .red : .gray)
+                }
+                .disabled(session.currentHealth <= 0)
+
+                // Health display
+                VStack(spacing: 4) {
+                    Text("\(session.currentHealth)")
+                        .font(.system(size: 56, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .frame(minWidth: 100)
+                        .foregroundStyle(.red)
+
+                    // Health bar indicator
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            // Background bar
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(height: 8)
+
+                            // Filled portion based on current health
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(healthBarColor)
+                                .frame(width: geometry.size.width * CGFloat(session.currentHealth) / 10.0, height: 8)
+                        }
+                    }
+                    .frame(height: 8)
+
+                    Text("/ 10")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                // Increment button
+                Button {
+                    var transaction = Transaction()
+                    transaction.disablesAnimations = true
+                    withTransaction(transaction) {
+                        if session.currentHealth < 10 {
+                            session.currentHealth += 1
+                        }
+                        try? modelContext.save()
+                    }
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title)
+                        .foregroundStyle(session.currentHealth < 10 ? .red : .gray)
+                }
+                .disabled(session.currentHealth >= 10)
+            }
+        }
+        .padding()
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    /// Color for health bar based on current health percentage
+    private var healthBarColor: Color {
+        let percentage = Double(session.currentHealth) / 10.0
+        if percentage > 0.5 {
+            return .green
+        } else if percentage > 0.25 {
+            return .orange
+        } else {
+            return .red
+        }
     }
 }
 
