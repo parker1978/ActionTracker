@@ -232,6 +232,13 @@ struct HealthCard: View {
                     .foregroundStyle(.red)
 
                 Spacer()
+
+                // Max health indicator
+                if let character = session.character {
+                    Text("Max: \(character.health)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             // Health counter with increment/decrement buttons
@@ -270,12 +277,6 @@ struct HealthCard: View {
                         }
                     }
                     .animation(.spring(response: 0.3, dampingFraction: 0.6), value: session.currentHealth)
-
-                    if let character = session.character {
-                        Text("Max: \(character.health)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
                 }
 
                 // Increment button
