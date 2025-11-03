@@ -123,11 +123,9 @@ struct WeaponsScreen: View {
 
                             VStack(spacing: 8) {
                                 // Add to Inventory Button (only show if there's an active session and single card)
-                                if drawnCards.count == 1, let _ = activeSession {
+                                if drawnCards.count == 1, let _ = activeSession, let weapon = drawnCards.first, !weapon.isZombieCard {
                                     Button(action: {
-                                        if let weapon = drawnCards.first {
-                                            addWeaponToInventory(weapon)
-                                        }
+                                        addWeaponToInventory(weapon)
                                     }) {
                                         Label("Add to Inventory", systemImage: "bag.badge.plus")
                                             .frame(maxWidth: .infinity)
@@ -137,19 +135,21 @@ struct WeaponsScreen: View {
                                     }
                                 }
 
-                                // Discard Button
-                                Button(action: {
-                                    // Discard all drawn cards
-                                    for card in drawnCards {
-                                        currentDeck.discardCard(card)
+                                // Discard Button (only show for non-zombie cards)
+                                if drawnCards.count > 1 || (drawnCards.count == 1 && !drawnCards.first!.isZombieCard) {
+                                    Button(action: {
+                                        // Discard all drawn cards
+                                        for card in drawnCards {
+                                            currentDeck.discardCard(card)
+                                        }
+                                        showCardDetail = false
+                                    }) {
+                                        Label("Discard \(drawnCards.count == 1 ? "Card" : "All Cards")", systemImage: "tray.and.arrow.down")
+                                            .frame(maxWidth: .infinity)
+                                            .padding()
+                                            .background(Color.orange.opacity(0.1))
+                                            .foregroundStyle(.orange)
                                     }
-                                    showCardDetail = false
-                                }) {
-                                    Label("Discard \(drawnCards.count == 1 ? "Card" : "All Cards")", systemImage: "tray.and.arrow.down")
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color.orange.opacity(0.1))
-                                        .foregroundStyle(.orange)
                                 }
                             }
                             .padding(.horizontal)
@@ -162,12 +162,24 @@ struct WeaponsScreen: View {
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
                             Button("Done") {
+                                // Auto-discard zombie cards
+                                for card in drawnCards where card.isZombieCard {
+                                    currentDeck.discardCard(card)
+                                }
                                 showCardDetail = false
                             }
                         }
                     }
                 }
-                .presentationDetents(drawnCards.count > 1 ? [.large] : [.medium, .large])
+                .presentationDetents({
+                    if drawnCards.count > 1 {
+                        [.large]
+                    } else if let weapon = drawnCards.first, !weapon.isBonus && !weapon.isZombieCard {
+                        [.fraction(0.75), .large]
+                    } else {
+                        [.medium, .large]
+                    }
+                }())
             }
             .sheet(isPresented: $showDiscardPile) {
                 WeaponDiscardView(deckState: currentDeck)
