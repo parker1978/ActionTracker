@@ -249,37 +249,34 @@ struct HealthCard: View {
                 } label: {
                     Image(systemName: "minus.circle.fill")
                         .font(.title)
-                        .foregroundStyle(session.currentHealth > 0 ? .red : .gray)
+                        .foregroundStyle(session.currentHealth > 0 ? healthColor : .gray)
                 }
                 .disabled(session.currentHealth <= 0)
 
                 // Health display
-                VStack(spacing: 4) {
+                VStack(spacing: 8) {
                     Text("\(session.currentHealth)")
                         .font(.system(size: 56, weight: .bold, design: .rounded))
                         .monospacedDigit()
                         .frame(minWidth: 100)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(healthColor)
 
-                    // Health bar indicator
-                    GeometryReader { geometry in
-                        ZStack(alignment: .leading) {
-                            // Background bar
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.gray.opacity(0.2))
-                                .frame(height: 8)
-
-                            // Filled portion based on current health
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(healthBarColor)
-                                .frame(width: geometry.size.width * CGFloat(session.currentHealth) / 10.0, height: 8)
+                    // Health bar indicator - grows/shrinks with health
+                    HStack(spacing: 4) {
+                        ForEach(0..<session.currentHealth, id: \.self) { index in
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(healthColor)
+                                .frame(width: 24, height: 8)
+                                .transition(.scale.combined(with: .opacity))
                         }
                     }
-                    .frame(height: 8)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.6), value: session.currentHealth)
 
-                    Text("/ 10")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    if let character = session.character {
+                        Text("Max: \(character.health)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 // Increment button
@@ -295,7 +292,7 @@ struct HealthCard: View {
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .font(.title)
-                        .foregroundStyle(session.currentHealth < 10 ? .red : .gray)
+                        .foregroundStyle(session.currentHealth < 10 ? healthColor : .gray)
                 }
                 .disabled(session.currentHealth >= 10)
             }
@@ -304,15 +301,18 @@ struct HealthCard: View {
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 
-    /// Color for health bar based on current health percentage
-    private var healthBarColor: Color {
-        let percentage = Double(session.currentHealth) / 10.0
-        if percentage > 0.5 {
-            return .green
-        } else if percentage > 0.25 {
-            return .orange
-        } else {
-            return .red
+    /// Color for health display based on absolute health value
+    /// Most characters start with 3 health (their normal max)
+    private var healthColor: Color {
+        switch session.currentHealth {
+        case 0:
+            return .gray  // Dead/unconscious
+        case 1:
+            return .red   // Critical
+        case 2:
+            return .orange // Damaged
+        default:
+            return .green  // 3+ is healthy/normal (including bonus health)
         }
     }
 }
