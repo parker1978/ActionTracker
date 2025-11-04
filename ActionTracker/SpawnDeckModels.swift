@@ -78,7 +78,7 @@ enum DifficultyLevel: String, Codable, CaseIterable {
 /// Easy mode uses cards 001-018, Hard mode uses all 40 cards
 enum SpawnDeckMode: String, Codable, CaseIterable {
     case easy = "Easy"
-    case hard = "Hard"
+    case hard = "Normal"
 
     var displayName: String { rawValue }
 

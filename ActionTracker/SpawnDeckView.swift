@@ -55,7 +55,44 @@ struct SpawnDeckView: View {
                     .disabled(deckManager.discardPile.isEmpty)
                     .opacity(deckManager.discardPile.isEmpty ? 0.5 : 1.0)
                     .padding(.top, -5)
-                    
+
+                    // Swipe/Tap hint - tappable to discard
+                    if deckManager.currentCard != nil {
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                isAnimatingDiscard = true
+                                dragOffset = CGSize(width: -1000, height: 0)
+                            }
+
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                deckManager.drawCard()
+                                dragOffset = .zero
+                                isAnimatingDiscard = false
+
+                                // Trigger checkmark animation
+                                showCheckmark = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                                    showCheckmark = false
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "arrow.left")
+                                    .font(.title3)
+                                Text("Swipe or Tap to Discard")
+                                    .font(.headline)
+                                Image(systemName: "arrow.right")
+                                    .font(.title3)
+                            }
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 12)
+                            .background(Color.black.opacity(0.7), in: Capsule())
+                            .shadow(radius: 4)
+                        }
+                        .disabled(isAnimatingDiscard)
+                    }
+
                     // Main Card Display with Drag Gesture
                     ZStack {
                         if let card = deckManager.currentCard {
@@ -103,48 +140,15 @@ struct SpawnDeckView: View {
                                             }
                                         }
                                 )
-                        } else if !deckManager.hasCardsRemaining {
+                        } else if deckManager.hasCardsRemaining {
+                            // Show initial state placeholder when cards available but none drawn yet
+                            initialStatePlaceholder
+                        } else {
+                            // Show empty placeholder when deck is fully exhausted
                             emptyCardPlaceholder
                         }
                     }
                     .frame(height: 500)
-
-                    // Swipe/Tap hint - tappable to discard
-                    if deckManager.currentCard != nil {
-                        Button {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                isAnimatingDiscard = true
-                                dragOffset = CGSize(width: -1000, height: 0)
-                            }
-
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                deckManager.drawCard()
-                                dragOffset = .zero
-                                isAnimatingDiscard = false
-
-                                // Trigger checkmark animation
-                                showCheckmark = true
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                                    showCheckmark = false
-                                }
-                            }
-                        } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: "arrow.left")
-                                    .font(.title3)
-                                Text("Swipe or Tap to Discard")
-                                    .font(.headline)
-                                Image(systemName: "arrow.right")
-                                    .font(.title3)
-                            }
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 12)
-                            .background(Color.black.opacity(0.7), in: Capsule())
-                            .shadow(radius: 4)
-                        }
-                        .disabled(isAnimatingDiscard)
-                    }
                 }
                 .padding()
             }
@@ -153,18 +157,25 @@ struct SpawnDeckView: View {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
                         withAnimation {
+                            // Return current card to draw pile if exists
+                            if let currentCard = deckManager.currentCard {
+                                deckManager.drawPile.append(currentCard)
+                                deckManager.currentCard = nil
+                            }
                             deckManager.shuffleDeck()
+                            // Reset animation states
+                            dragOffset = .zero
+                            isAnimatingDiscard = false
                         }
                     } label: {
                         Label("Shuffle", systemImage: "shuffle")
                     }
-                    .disabled(!deckManager.hasCardsRemaining)
+                    .disabled(!deckManager.hasCardsRemaining && deckManager.currentCard == nil)
 
                     Button {
                         withAnimation {
                             deckManager.resetDeck()
-                            // Draw first card after reset
-                            deckManager.drawCard()
+                            // Reset animation states
                             dragOffset = .zero
                             isAnimatingDiscard = false
                         }
@@ -182,8 +193,6 @@ struct SpawnDeckView: View {
             .onAppear {
                 if deckManager.drawPile.isEmpty && deckManager.currentCard == nil {
                     deckManager.loadDeck()
-                    // Draw the first card
-                    deckManager.drawCard()
                 }
             }
         }
@@ -200,8 +209,6 @@ struct SpawnDeckView: View {
         .pickerStyle(.segmented)
         .onChange(of: deckManager.mode) { oldValue, newValue in
             deckManager.switchMode(to: newValue)
-            // Draw first card after mode switch
-            deckManager.drawCard()
             // Reset any animation states
             dragOffset = .zero
             isAnimatingDiscard = false
@@ -357,7 +364,7 @@ struct SpawnDeckView: View {
             Button {
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                     deckManager.resetDeck()
-                    deckManager.drawCard()
+                    // Reset animation states
                     dragOffset = .zero
                     isAnimatingDiscard = false
                 }
@@ -378,6 +385,36 @@ struct SpawnDeckView: View {
                 .stroke(.secondary.opacity(0.3), style: StrokeStyle(lineWidth: 2, dash: [10, 5]))
         )
         .padding(.horizontal, 20)
+    }
+
+    // MARK: - Initial State Placeholder
+
+    private var initialStatePlaceholder: some View {
+        Button {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                _ = deckManager.drawCard()
+            }
+        } label: {
+            VStack(spacing: 20) {
+                Image(systemName: "hand.tap.fill")
+                    .font(.system(size: 80))
+                    .foregroundStyle(.blue)
+
+                Text("Tap to begin!")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.primary)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 450)
+            .background(.quaternary.opacity(0.3), in: RoundedRectangle(cornerRadius: 16))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(.blue, style: StrokeStyle(lineWidth: 2, dash: [10, 5]))
+            )
+            .padding(.horizontal, 20)
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Statistic Card
