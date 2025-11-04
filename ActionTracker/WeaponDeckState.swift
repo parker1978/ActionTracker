@@ -39,48 +39,51 @@ class WeaponDeckState {
     /// Reset deck to initial state with current difficulty
     func reset() {
         remaining = buildDeck(mode: difficulty)
-        remaining.shuffle()
+        shuffle()
         discard.removeAll()
         recentDraws.removeAll()
         drawHistory.removeAll()
     }
 
     /// Shuffle remaining cards in deck
-    /// For Regular and Ultrared decks, prevents back-to-back duplicates
+    /// Prevents back-to-back duplicates by swapping cards intelligently
     func shuffle() {
-        // Starting deck is too small, just shuffle normally
-        guard deckType != .starting && remaining.count > 1 else {
+        // Need at least 2 cards to check for duplicates
+        guard remaining.count > 1 else {
             remaining.shuffle()
             return
         }
 
-        // For Regular and Ultrared decks, prevent back-to-back duplicates
-        var attempts = 0
-        let maxAttempts = 10
+        // Initial shuffle
+        remaining.shuffle()
 
-        repeat {
-            remaining.shuffle()
-            attempts += 1
-
-            // Check if we have back-to-back duplicates
-            var hasBackToBack = false
-            for i in 0..<(remaining.count - 1) {
-                if remaining[i].name == remaining[i + 1].name {
-                    hasBackToBack = true
-                    break
+        // Fix duplicates in a single pass
+        var i = 0
+        while i < remaining.count - 1 {
+            if remaining[i].name == remaining[i + 1].name {
+                // Find next card that's DIFFERENT from current
+                var swapIndex = i + 2
+                while swapIndex < remaining.count &&
+                      remaining[swapIndex].name == remaining[i].name {
+                    swapIndex += 1
                 }
-            }
 
-            // If no back-to-back duplicates, we're done
-            if !hasBackToBack {
-                break
+                if swapIndex < remaining.count {
+                    // Found a different card, swap it with position i+1
+                    remaining.swapAt(i + 1, swapIndex)
+                    // Don't increment i - recheck this position in case swap created new duplicate
+                } else if i > 0 && remaining[0].name != remaining[i].name {
+                    // All remaining cards are identical, wrap to start if position 0 is different
+                    remaining.swapAt(i + 1, 0)
+                    // Don't increment i - recheck this position
+                } else {
+                    // Can't fix this duplicate (all cards are the same), move on
+                    i += 1
+                }
+            } else {
+                i += 1
             }
-
-            // If we've tried too many times, give up and accept it
-            if attempts >= maxAttempts {
-                break
-            }
-        } while true
+        }
     }
 
     /// Change difficulty and reset deck
@@ -242,13 +245,13 @@ class WeaponDeckState {
         guard !discard.isEmpty else {
             // Emergency: rebuild with current difficulty if both empty
             remaining = buildDeck(mode: difficulty)
-            remaining.shuffle()
+            shuffle()
             return
         }
 
         remaining = discard
         discard.removeAll()
-        remaining.shuffle()
+        shuffle()
     }
 
     // MARK: - Computed Properties
