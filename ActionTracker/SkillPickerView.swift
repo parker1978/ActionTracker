@@ -27,10 +27,10 @@ struct SkillPickerView: View {
         self.onSelect = nil
     }
 
-    init(currentSkills: [String], colorTier: String, onSelect: @escaping (String) -> Void) {
+    init(currentSkills: [String], colorTier: String, allSkills: [Skill], onSelect: @escaping (String) -> Void) {
         self._selectedSkills = .constant([])
         self.excludedSkills = currentSkills
-        self.allSkills = []
+        self.allSkills = allSkills
         self.currentSkills = currentSkills
         self.colorTier = colorTier
         self.onSelect = onSelect
@@ -119,6 +119,7 @@ struct SkillPickerView: View {
     SkillPickerView(
         currentSkills: ["Barbarian", "+1 Damage: Combat"],
         colorTier: "Blue",
+        allSkills: [],
         onSelect: { skillName in
             print("Selected: \(skillName)")
         }

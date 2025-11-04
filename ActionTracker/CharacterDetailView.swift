@@ -291,6 +291,7 @@ struct SkillEditSection: View {
             SkillPickerView(
                 currentSkills: skills,
                 colorTier: colorTier,
+                allSkills: allSkills,
                 onSelect: { skillName in
                     withAnimation {
                         skills.append(skillName)
