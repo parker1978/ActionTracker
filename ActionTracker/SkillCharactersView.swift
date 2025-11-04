@@ -8,9 +8,12 @@ import SwiftData
 
 struct SkillCharactersView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     @Query private var allCharacters: [Character]
 
     let skill: Skill
+
+    @State private var showDeleteAlert = false
 
     var charactersWithSkill: [Character] {
         allCharacters.filter { character in
@@ -84,6 +87,82 @@ struct SkillCharactersView: View {
         }
         .navigationTitle("Characters")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if !skill.isBuiltIn {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(role: .destructive) {
+                        showDeleteAlert = true
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+            }
+        }
+        .alert("Delete Skill?", isPresented: $showDeleteAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                deleteSkill()
+            }
+        } message: {
+            Text(deleteAlertMessage)
+        }
+    }
+
+    private var deleteAlertMessage: String {
+        let count = charactersWithSkill.count
+        if count == 0 {
+            return "This skill is not used by any characters."
+        } else if count == 1 {
+            return "This skill is used by 1 character: \(charactersWithSkill[0].name). It will be removed from this character."
+        } else if count <= 5 {
+            let names = charactersWithSkill.map { $0.name }.joined(separator: ", ")
+            return "This skill is used by \(count) characters: \(names). It will be removed from all of them."
+        } else {
+            let firstFive = charactersWithSkill.prefix(5).map { $0.name }.joined(separator: ", ")
+            return "This skill is used by \(count) characters including: \(firstFive), and \(count - 5) more. It will be removed from all of them."
+        }
+    }
+
+    private func deleteSkill() {
+        // Remove skill from all characters that have it
+        for character in charactersWithSkill {
+            // Remove from blue skills
+            if character.blueSkillsList.contains(skill.name) {
+                let updatedSkills = character.blueSkillsList.filter { $0 != skill.name }
+                character.blueSkills = updatedSkills.joined(separator: ";")
+            }
+
+            // Remove from yellow skills
+            if character.yellowSkillsList.contains(skill.name) {
+                let updatedSkills = character.yellowSkillsList.filter { $0 != skill.name }
+                character.yellowSkills = updatedSkills.joined(separator: ";")
+            }
+
+            // Remove from orange skills
+            if character.orangeSkillsList.contains(skill.name) {
+                let updatedSkills = character.orangeSkillsList.filter { $0 != skill.name }
+                character.orangeSkills = updatedSkills.joined(separator: ";")
+            }
+
+            // Remove from red skills
+            if character.redSkillsList.contains(skill.name) {
+                let updatedSkills = character.redSkillsList.filter { $0 != skill.name }
+                character.redSkills = updatedSkills.joined(separator: ";")
+            }
+        }
+
+        // Delete the skill
+        modelContext.delete(skill)
+
+        // Save changes
+        do {
+            try modelContext.save()
+        } catch {
+            print("Error deleting skill: \(error)")
+        }
+
+        // Dismiss the view
+        dismiss()
     }
 }
 

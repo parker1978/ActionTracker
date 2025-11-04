@@ -160,34 +160,42 @@ struct SkillsScreen: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     if searchMode == .skillsList {
-                        Menu {
-                            Section("Sort By") {
-                                ForEach(SortOption.allCases, id: \.self) { option in
-                                    Button {
-                                        sortOption = option
-                                    } label: {
-                                        Label(option.rawValue, systemImage: option.icon)
-                                        if sortOption == option {
-                                            Image(systemName: "checkmark")
+                        HStack(spacing: 16) {
+                            Menu {
+                                Section("Sort By") {
+                                    ForEach(SortOption.allCases, id: \.self) { option in
+                                        Button {
+                                            sortOption = option
+                                        } label: {
+                                            Label(option.rawValue, systemImage: option.icon)
+                                            if sortOption == option {
+                                                Image(systemName: "checkmark")
+                                            }
                                         }
                                     }
                                 }
+
+                                Section("Filter") {
+                                    ForEach(FilterOption.allCases, id: \.self) { option in
+                                        Button {
+                                            filterOption = option
+                                        } label: {
+                                            Text(option.rawValue)
+                                            if filterOption == option {
+                                                Image(systemName: "checkmark")
+                                            }
+                                        }
+                                    }
+                                }
+                            } label: {
+                                Label("Sort & Filter", systemImage: "line.3.horizontal.decrease.circle")
                             }
 
-                            Section("Filter") {
-                                ForEach(FilterOption.allCases, id: \.self) { option in
-                                    Button {
-                                        filterOption = option
-                                    } label: {
-                                        Text(option.rawValue)
-                                        if filterOption == option {
-                                            Image(systemName: "checkmark")
-                                        }
-                                    }
-                                }
+                            Button {
+                                showingNewSkill = true
+                            } label: {
+                                Image(systemName: "plus")
                             }
-                        } label: {
-                            Label("Sort & Filter", systemImage: "line.3.horizontal.decrease.circle")
                         }
                     } else {
                         Button {
