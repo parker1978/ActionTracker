@@ -952,6 +952,7 @@ struct InventoryManagementSheet: View {
 
     @State private var activeWeapons: [String] = []
     @State private var inactiveWeapons: [String] = []
+    @State private var userCancelled = false
     @State private var showingAddActiveWeapon = false
     @State private var showingAddInactiveWeapon = false
     @State private var showingWeaponDetail = false
@@ -1174,12 +1175,19 @@ struct InventoryManagementSheet: View {
 
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
+                        userCancelled = true
                         dismiss()
                     }
                 }
             }
             .onAppear {
                 loadInventory()
+            }
+            .onDisappear {
+                if !userCancelled {
+                    saveInventory()
+                }
+                userCancelled = false
             }
             .alert("No Capacity Available", isPresented: $showingCapacityAlert) {
                 Button("OK", role: .cancel) { }

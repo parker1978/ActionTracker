@@ -230,8 +230,7 @@ struct WeaponsScreen: View {
         if activeWeapons.count < 2 {
             activeWeapons.append(weapon.name)
             session.activeWeapons = InventoryFormatter.join(activeWeapons)
-            // Discard the card and mark as handled
-            currentDeck.discardCard(weapon)
+            // Mark as handled
             handledCardIDs.insert(weapon.id)
             // Close sheet if all cards handled
             if handledCardIDs.count == drawnCards.count {
@@ -245,8 +244,7 @@ struct WeaponsScreen: View {
         if inactiveWeapons.count < maxInactive {
             inactiveWeapons.append(weapon.name)
             session.inactiveWeapons = InventoryFormatter.join(inactiveWeapons)
-            // Discard the card and mark as handled
-            currentDeck.discardCard(weapon)
+            // Mark as handled
             handledCardIDs.insert(weapon.id)
             // Close sheet if all cards handled
             if handledCardIDs.count == drawnCards.count {
