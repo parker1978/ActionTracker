@@ -150,6 +150,13 @@ class WeaponDeckState {
         }
     }
 
+    /// Remove a card from discard pile (e.g., when adding to inventory)
+    func removeFromDiscard(_ card: Weapon) {
+        if let index = discard.firstIndex(where: { $0.id == card.id }) {
+            discard.remove(at: index)
+        }
+    }
+
     /// Move all cards from discard back into deck and shuffle
     func reclaimAllDiscardIntoDeck(shuffle: Bool = true) {
         remaining.append(contentsOf: discard)

@@ -21,6 +21,7 @@ struct WeaponsScreen: View {
     @State private var showDeckSettings = false
     @State private var showInventoryReplacement = false
     @State private var weaponToAdd: Weapon?
+    @State private var handledCardIDs: Set<UUID> = [] // Track which cards have been added to inventory or discarded
 
     // Access to active game session for inventory management
     @Environment(\.modelContext) private var modelContext
@@ -91,45 +92,69 @@ struct WeaponsScreen: View {
                 Text("Changing difficulty will reset and reshuffle all three decks. Continue?")
             }
             .sheet(isPresented: $showCardDetail, onDismiss: {
-                // Auto-discard all remaining drawn cards when sheet is dismissed
-                for card in drawnCards {
+                // Auto-discard only unhandled cards when sheet is dismissed
+                for card in drawnCards where !handledCardIDs.contains(card.id) {
                     currentDeck.discardCard(card)
                 }
                 drawnCards.removeAll()
+                handledCardIDs.removeAll()
             }) {
                 NavigationStack {
                     VStack(spacing: 0) {
                         ScrollView {
-                            VStack(spacing: 16) {
+                            VStack(spacing: 20) {
                                 ForEach(drawnCards) { card in
-                                    WeaponCardView(weapon: card)
+                                    VStack(spacing: 12) {
+                                        // Card display
+                                        WeaponCardView(weapon: card)
+
+                                        // Show handled indicator or action buttons
+                                        if handledCardIDs.contains(card.id) {
+                                            // Card has been handled - show indicator
+                                            HStack {
+                                                Image(systemName: "checkmark.circle.fill")
+                                                    .foregroundStyle(.green)
+                                                Text("Handled")
+                                                    .font(.subheadline)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                            .padding(.vertical, 8)
+                                        } else {
+                                            // Card not yet handled - show action buttons
+                                            VStack(spacing: 8) {
+                                                // Add to Inventory Button (only if active session exists and not zombie card)
+                                                if let _ = activeSession, !card.isZombieCard {
+                                                    Button(action: {
+                                                        addWeaponToInventory(card)
+                                                    }) {
+                                                        Label("Add to Inventory", systemImage: "bag.badge.plus")
+                                                            .frame(maxWidth: .infinity)
+                                                            .padding(.vertical, 12)
+                                                            .background(Color.blue.opacity(0.1))
+                                                            .foregroundStyle(.blue)
+                                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                    }
+                                                }
+
+                                                // Discard Button
+                                                Button(action: {
+                                                    discardCard(card)
+                                                }) {
+                                                    Label("Discard", systemImage: "trash")
+                                                        .frame(maxWidth: .infinity)
+                                                        .padding(.vertical, 12)
+                                                        .background(Color.orange.opacity(0.1))
+                                                        .foregroundStyle(.orange)
+                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                }
+                                            }
+                                        }
+                                    }
+                                    .padding(.vertical, 8)
                                 }
                             }
                             .padding()
                         }
-
-                        // Action Buttons at bottom
-                        VStack(spacing: 0) {
-                            Divider()
-
-                            VStack(spacing: 8) {
-                                // Add to Inventory Button (only show if there's an active session and single card)
-                                if drawnCards.count == 1, let _ = activeSession, let weapon = drawnCards.first, !weapon.isZombieCard {
-                                    Button(action: {
-                                        addWeaponToInventory(weapon)
-                                    }) {
-                                        Label("Add to Inventory", systemImage: "bag.badge.plus")
-                                            .frame(maxWidth: .infinity)
-                                            .padding()
-                                            .background(Color.blue.opacity(0.1))
-                                            .foregroundStyle(.blue)
-                                    }
-                                }
-                            }
-                            .padding(.horizontal)
-                            .padding(.vertical, 8)
-                        }
-                        .background(Color(.systemGroupedBackground))
                     }
                     .navigationTitle(drawnCards.count == 1 ? "Drawn Card" : "Drawn Cards (\(drawnCards.count))")
                     .navigationBarTitleDisplayMode(.inline)
@@ -166,14 +191,29 @@ struct WeaponsScreen: View {
                             // Discard both the replaced weapon and the added weapon
                             currentDeck.discardCard(replacedWeapon)
                             currentDeck.discardCard(weapon)
-                            // Remove the added weapon from drawn cards
-                            drawnCards.removeAll { $0.id == weapon.id }
-                            // Close the drawn card sheet
-                            showCardDetail = false
+                            // Mark the added weapon as handled
+                            handledCardIDs.insert(weapon.id)
+                            // Close the drawn card sheet if all cards handled
+                            if handledCardIDs.count == drawnCards.count {
+                                showCardDetail = false
+                            }
                         }
                     )
                 }
             }
+        }
+    }
+
+    // MARK: - Card Management
+
+    private func discardCard(_ weapon: Weapon) {
+        // Discard card to deck
+        currentDeck.discardCard(weapon)
+        // Mark as handled
+        handledCardIDs.insert(weapon.id)
+        // Close sheet if all cards handled
+        if handledCardIDs.count == drawnCards.count {
+            showCardDetail = false
         }
     }
 
@@ -190,10 +230,13 @@ struct WeaponsScreen: View {
         if activeWeapons.count < 2 {
             activeWeapons.append(weapon.name)
             session.activeWeapons = InventoryFormatter.join(activeWeapons)
-            // Discard the card, remove from drawn cards, and close sheet
+            // Discard the card and mark as handled
             currentDeck.discardCard(weapon)
-            drawnCards.removeAll { $0.id == weapon.id }
-            showCardDetail = false
+            handledCardIDs.insert(weapon.id)
+            // Close sheet if all cards handled
+            if handledCardIDs.count == drawnCards.count {
+                showCardDetail = false
+            }
             return
         }
 
@@ -202,10 +245,13 @@ struct WeaponsScreen: View {
         if inactiveWeapons.count < maxInactive {
             inactiveWeapons.append(weapon.name)
             session.inactiveWeapons = InventoryFormatter.join(inactiveWeapons)
-            // Discard the card, remove from drawn cards, and close sheet
+            // Discard the card and mark as handled
             currentDeck.discardCard(weapon)
-            drawnCards.removeAll { $0.id == weapon.id }
-            showCardDetail = false
+            handledCardIDs.insert(weapon.id)
+            // Close sheet if all cards handled
+            if handledCardIDs.count == drawnCards.count {
+                showCardDetail = false
+            }
             return
         }
 

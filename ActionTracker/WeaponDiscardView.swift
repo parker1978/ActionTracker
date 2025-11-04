@@ -7,10 +7,22 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct WeaponDiscardView: View {
     @Bindable var deckState: WeaponDeckState
     @Environment(\.dismiss) private var dismiss
+    @State private var showInventoryReplacement = false
+    @State private var weaponToAdd: Weapon?
+
+    // Access to active game session for inventory management
+    @Environment(\.modelContext) private var modelContext
+    @Query(filter: #Predicate<GameSession> { $0.endedAt == nil }, sort: \GameSession.startedAt, order: .reverse)
+    private var activeSessions: [GameSession]
+
+    private var activeSession: GameSession? {
+        activeSessions.first
+    }
 
     var body: some View {
         NavigationStack {
@@ -26,7 +38,14 @@ struct WeaponDiscardView: View {
                         // Discard Pile Section
                         Section {
                             ForEach(deckState.discard) { weapon in
-                                WeaponDiscardRow(weapon: weapon, deckState: deckState)
+                                WeaponDiscardRow(
+                                    weapon: weapon,
+                                    deckState: deckState,
+                                    activeSession: activeSession,
+                                    onAddToInventory: { weapon in
+                                        addWeaponToInventory(weapon)
+                                    }
+                                )
                             }
                         } header: {
                             HStack {
@@ -61,7 +80,54 @@ struct WeaponDiscardView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showInventoryReplacement) {
+                if let weapon = weaponToAdd, let session = activeSession {
+                    InventoryReplacementSheet(
+                        weaponToAdd: weapon,
+                        session: session,
+                        onReplace: { replacedWeapon in
+                            // Discard the replaced weapon
+                            deckState.discardCard(replacedWeapon)
+                            // Remove the added weapon from discard pile
+                            deckState.removeFromDiscard(weapon)
+                        }
+                    )
+                }
+            }
         }
+    }
+
+    // MARK: - Inventory Management
+
+    private func addWeaponToInventory(_ weapon: Weapon) {
+        guard let session = activeSession else { return }
+
+        // Parse current inventory
+        var activeWeapons = InventoryFormatter.parse(session.activeWeapons)
+        var inactiveWeapons = InventoryFormatter.parse(session.inactiveWeapons)
+
+        // Check if there's space in active slots (hands) first
+        if activeWeapons.count < 2 {
+            activeWeapons.append(weapon.name)
+            session.activeWeapons = InventoryFormatter.join(activeWeapons)
+            // Remove from discard pile
+            deckState.removeFromDiscard(weapon)
+            return
+        }
+
+        // Check if there's space in backpack
+        let maxInactive = 3 + session.extraInventorySlots
+        if inactiveWeapons.count < maxInactive {
+            inactiveWeapons.append(weapon.name)
+            session.inactiveWeapons = InventoryFormatter.join(inactiveWeapons)
+            // Remove from discard pile
+            deckState.removeFromDiscard(weapon)
+            return
+        }
+
+        // No space - show replacement picker
+        weaponToAdd = weapon
+        showInventoryReplacement = true
     }
 }
 
@@ -70,6 +136,8 @@ struct WeaponDiscardView: View {
 struct WeaponDiscardRow: View {
     let weapon: Weapon
     @Bindable var deckState: WeaponDeckState
+    let activeSession: GameSession?
+    let onAddToInventory: (Weapon) -> Void
 
     var body: some View {
         HStack(spacing: 12) {
@@ -136,6 +204,16 @@ struct WeaponDiscardRow: View {
             .tint(.blue)
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            // Add to Inventory button (only if active session exists and not zombie card)
+            if activeSession != nil && !weapon.isZombieCard {
+                Button {
+                    onAddToInventory(weapon)
+                } label: {
+                    Label("Inventory", systemImage: "bag.badge.plus")
+                }
+                .tint(.purple)
+            }
+
             Button {
                 deckState.returnFromDiscardToBottom(weapon)
             } label: {
