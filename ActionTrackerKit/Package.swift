@@ -36,7 +36,11 @@ let package = Package(
         /// Dependencies: CoreDomain only
         .target(
             name: "DataLayer",
-            dependencies: ["CoreDomain"]
+            dependencies: ["CoreDomain"],
+            resources: [
+                .copy("Resources/characters.json"),
+                .copy("Resources/weapons.json")
+            ]
         ),
 
         /// Reusable UI components and modifiers
