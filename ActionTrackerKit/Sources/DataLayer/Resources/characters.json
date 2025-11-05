@@ -1,0 +1,1562 @@
+[
+  {
+    "Name": "Achille",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Zombie Link",
+    "Orange": "+1 To Dice Roll: Melee;Distributor",
+    "Red": "+1 Damage: Combat;+1 Free Action: Combat;Born Leader",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Adam",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Die: Melee",
+    "Orange": "+1 Die: Combat;Webbing",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Hoard",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Adriana",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Taunt",
+    "Orange": "+1 Free Action: Combat;Lifesaver",
+    "Red": "+1 Free Action: Move;+1 To Dice Roll: Combat;Steady Hand",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Amy",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Free Action: Move",
+    "Orange": "+1 Free Action: Melee;+1 Free Action: Ranged",
+    "Red": "+1 Die: Combat;+1 To Dice Roll: Combat;Medic",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Amy",
+    "Set": "Ultimate",
+    "Notes": null,
+    "Blue": "+1 Free Action: Move;Medic",
+    "Orange": "+1 Free Action: Combat;+1 Free Action: Move",
+    "Red": "+1 Die: Combat;+1 To Dice Roll: Combat;Bloodlust: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Angry Mary",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Reaper: Ranged",
+    "Orange": "+1 Free Action: Ranged;Hit & Run",
+    "Red": "+1 Die: Combat;+1 Free Action: Move;+1 To Dice Roll: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Audrey",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Zombie Link",
+    "Orange": "+1 Die: Ranged;+1 To Dice Roll: Melee",
+    "Red": "+1 Free Action: Combat;Bloodlust: Combat;Hit & Run",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Azaghal",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Swordmaster",
+    "Orange": "+1 Die: Combat;Barbarian",
+    "Red": "+1 Free Action: Combat;Dreadnought: Walker;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Bastian",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Matching Set",
+    "Orange": "+1 Die: Combat;+1 Free Action: Combat",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;+1 To Dice Roll: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Bear",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Shove",
+    "Orange": "+1 Free Action: Melee;+1 To Dice Roll: Melee",
+    "Red": "+1 Damage: Melee;+1 Die: Combat;Lifesaver",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Belle",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Free Action: Move",
+    "Orange": "+1 Free Action: Melee;+1 To Dice Roll: Ranged",
+    "Red": "+1 Die: Combat;+1 Free Action: Move;Ambidextrous",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Benny",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Die: Ranged",
+    "Orange": "+1 Die: Ranged;Lifesaver",
+    "Red": "+1 Die: Ranged;+1 Free Action: Combat;Born Leader",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Bill",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Damage: Ranged",
+    "Orange": "+1 Die: Combat;Distributor",
+    "Red": "+1 Free Action: Combat;Born Leader;Point-Blank",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Bobby Singer",
+    "Set": "Supernatural",
+    "Notes": null,
+    "Blue": "Sniper",
+    "Orange": "+1 Free Action: Ranged;Hoard",
+    "Red": "+1 Damage: Ranged;+1 Free Action: Combat;Blitz",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Bones",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Tactician",
+    "Orange": "+1 To Dice Roll: Ranged;Slippery",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;Lucky",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Brad",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Starts With: A Shotgun",
+    "Orange": "+1 Free Action: Ranged;Lucky",
+    "Red": "+1 Damage: Ranged;+1 To Dice Roll: Combat;Steady Hand",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Brother Max",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Dreadnought: Walker",
+    "Orange": "Barbarian;Full Auto",
+    "Red": "+1 Damage: Melee;+1 Damage: Ranged;+1 Free Action: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Bunny G",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Lucky",
+    "Orange": "+1 To Dice Roll: Melee;Jump",
+    "Red": "+1 Damage: Melee;+1 Free Action: Combat;Roll 6: +1 Die Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Carson",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Slippery",
+    "Orange": "+1 Free Action: Ranged;Dreadnought: Walker",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Lifesaver",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Castiel",
+    "Set": "Supernatural",
+    "Notes": null,
+    "Blue": "Medic",
+    "Orange": "Blitz;Dreadnought: Walker",
+    "Red": "+1 Free Action: Combat;Regeneration;Super Strength",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Cat",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Free Action: Move",
+    "Orange": "+1 Die: Combat;+1 Free Action: Melee",
+    "Red": "+1 Free Action: Combat;+1 Zone Per Move;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Cathy",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Sprint",
+    "Orange": "+1 Free Action: Melee;Jump",
+    "Red": "+1 To Dice Roll: Combat;Bloodlust: Combat;Lifesaver",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Chaz",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Free Action: Melee",
+    "Orange": "+1 Free Action: Melee;+1 To Dice Roll: Melee",
+    "Red": "+1 Damage: Melee;+1 Free Action: Melee;Born Leader",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Chaz",
+    "Set": "Ultimate",
+    "Notes": null,
+    "Blue": "+1 Free Action: Melee;+1 Damage: Melee",
+    "Orange": "+1 To Dice Roll: Melee;Bloodlust: Melee",
+    "Red": "+1 Free Action: Melee;Barbarian;Born Leader",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Chuck",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Low Profile",
+    "Orange": "+1 Free Action: Melee;Taunt",
+    "Red": "+1 Free Action: Combat;Lucky;Tough",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Claudia",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 To Dice Roll: Melee",
+    "Orange": "+1 Free Action: Move;Low Profile",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Claudia",
+    "Set": "Ultimate",
+    "Notes": null,
+    "Blue": "+1 To Dice Roll: Melee;+1 Die: Ranged",
+    "Orange": "+1 Free Action: Move;Webbing",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;Shove",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Crowley",
+    "Set": "Supernatural",
+    "Notes": null,
+    "Blue": "Tactician",
+    "Orange": "Hit & Run;Zombie Link",
+    "Red": "+1 Free Action: Melee;Charge;Super Strength",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Curro",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Is That All You Got?",
+    "Orange": "+1 Free Action: Ranged;Reaper: Combat",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Ranged;Full Auto",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Dakota",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Taunt",
+    "Orange": "+1 Die: Ranged;Point-Blank",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Born Leader",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Dan",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Lifesaver",
+    "Orange": "+1 Free Action: Move;Jump",
+    "Red": "+1 Damage: Melee;+1 Free Action: Combat;Tactician",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Dave",
+    "Set": null,
+    "Notes": null,
+    "Blue": "2 Cocktails Are Better Than 1",
+    "Orange": "Lucky;Slippery",
+    "Red": "+1 Die: Ranged;+1 To Dice Roll: Ranged;Lucky",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Dave",
+    "Set": "Ultimate",
+    "Notes": null,
+    "Blue": "2 Cocktails Are Better Than 1;Starts With: 2 Molotov",
+    "Orange": "+1 Free Action: Combat;Webbing",
+    "Red": "+1 Free Action: Combat;+1 Die: Combat;+1 To Dice Roll: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Dean Winchester",
+    "Set": "Supernatural",
+    "Notes": null,
+    "Blue": "B.I.A: Tough",
+    "Orange": "Is That All You Got?;Taunt",
+    "Red": "+1 Free Action: Ranged;Bloodlust: Melee;Regeneration",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Derek",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Max Range",
+    "Orange": "+1 Free Action: Melee;Tough",
+    "Red": "+1 Free Action: Move;+1 To Dice Roll: Combat;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Dick",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Lucky",
+    "Orange": "+1 Die: Combat;Zombie Link",
+    "Red": "+1 Free Action: Combat;Distributor;Hit & Run",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Doc",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Medic",
+    "Orange": "+1 To Dice Roll: Melee;Reaper: Melee",
+    "Red": "+1 Damage: Melee;+1 Free Action: Combat;Roll 6: +1 Die Melee",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Don",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Born Leader",
+    "Orange": "+1 Die: Ranged;Distributor",
+    "Red": "+1 Free Action: Combat;+1 Max Range;Tactician",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Donna",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 To Dice Roll: Melee",
+    "Orange": "+1 Free Action: Melee;Swordmaster",
+    "Red": "+1 Die: Melee;Hit & Run;Shove",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Doud",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Scavenger",
+    "Orange": "+1 Free Action: Combat;Webbing",
+    "Red": "+1 Die: Ranged;Bloodlust: Combat;Dreadnought: Walker",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Doug",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Matching Set",
+    "Orange": "+1 Die: Ranged;+1 Free Action: Combat",
+    "Red": "+1 To Dice Roll: Combat;Ambidextrous;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Doug",
+    "Set": "Ultimate",
+    "Notes": null,
+    "Blue": "Matching Set;Hoard",
+    "Orange": "+1 Die: Combat;+1 Free Action: Combat",
+    "Red": "+1 To Dice Roll: Combat;Ambidextrous;Full Auto",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Dylan",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Lifesaver",
+    "Orange": "+1 Free Action: Melee;Born Leader",
+    "Red": "+1 Die: Combat;+1 To Dice Roll: Combat;Shove",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "El Cholo",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Starts With: 2 Machetes",
+    "Orange": "+1 Die: Melee;+1 Free Action: Combat",
+    "Red": "+1 Damage With Machete;+1 Free Action: Combat;+1 To Dice Roll: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "El Cholo",
+    "Set": "Ultimate",
+    "Notes": null,
+    "Blue": "Starts With: 2 Machetes;Bloodlust: Melee",
+    "Orange": "+1 Die: Melee;+1 Free Action: Combat",
+    "Red": "+1 Damage: Combat;+1 Free Action: Combat;+1 To Dice Roll: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Elena",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Swordmaster",
+    "Orange": "+1 Die: Melee;+1 To Dice Roll: Melee",
+    "Red": "+1 Die: Melee;+1 Free Action: Melee;Bloodlust: Melee",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Elle",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Sniper",
+    "Orange": "+1 Die: Combat;+1 Free Action: Ranged",
+    "Red": "+1 Die: Ranged;+1 Free Action: Combat;+1 To Dice Roll: Ranged",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Elsa",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Break-In",
+    "Orange": "+1 Free Action: Ranged;Slippery",
+    "Red": "+1 Free Action: Combat;+1 Free Action: Move;Sprint",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Eva",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 To Dice Roll: Ranged",
+    "Orange": "+1 Free Action: Combat;Gunslinger",
+    "Red": "+1 Die: Ranged;+1 Free Action: Move;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Frank",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Starts With: A Fire Axe",
+    "Orange": "+1 Damage: Melee;+1 Free Action: Search",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;Steady Hand",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Fred",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Reaper: Combat",
+    "Orange": "+1 Free Action: Combat;Dreadnought: Walker",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;+1 To Dice Roll: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Fred",
+    "Set": "Pariz",
+    "Notes": null,
+    "Blue": "Lifesaver",
+    "Orange": "Combat Reflexes;Field Medic",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Melee;Escalation: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Gary",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Slippery",
+    "Orange": "+1 Free Action: Move;Lucky",
+    "Red": "+1 To Dice Roll: Melee;+1 Free Action: Combat;Roll 6: +1 Die Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Gilly",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Shove",
+    "Orange": "+1 Free Action: Ranged;Steady Hand",
+    "Red": "+1 Free Action: Move;+1 To Dice Roll: Combat;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Grindlock",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Taunt",
+    "Orange": "+1 Free Action: Melee;Slippery",
+    "Red": "+1 Damage: Melee;Is That All You Got?;Roll 6: +1 Die Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Helen",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Starts With: A Flashlight",
+    "Orange": "+1 To Dice Roll: Ranged;Destiny",
+    "Red": "+1 Die: Combat;Low Profile;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Igor",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Bloodlust: Melee",
+    "Orange": "+1 To Dice Roll: Melee;Dreadnought: Walker",
+    "Red": "Ambidextrous;Barbarian;Roll 6: +1 Die Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Ivy",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Sniper",
+    "Orange": "+1 Die: Combat;+1 Free Action: Ranged",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Lucky",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Ivy",
+    "Set": "Ultimate",
+    "Notes": null,
+    "Blue": "Sniper;Starts With: A Sniper Rifle",
+    "Orange": "+1 Damage: Ranged;+1 Free Action: Ranged",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Reaper: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Jack Kline",
+    "Set": "Supernatural",
+    "Notes": null,
+    "Blue": "Can Search More Than Once",
+    "Orange": "Distributor;Shove",
+    "Red": "+1 Free Action: Combat;Slippery;Super Strength",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Jacquin",
+    "Set": "Pariz",
+    "Notes": null,
+    "Blue": "+1 Free All-Out Combat Action",
+    "Orange": "Ignore 1 Break;Night Vision",
+    "Red": "+1 Die: Combat;+1 Free Action: Move;Ambidextrous",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "James",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Max Range",
+    "Orange": "+1 Free Action: Ranged;Sniper",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Reaper: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Jane",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Die: Ranged",
+    "Orange": "+1 Die: Ranged;Lucky",
+    "Red": "+1 Free Action: Combat;+1 Free Action: Move;Gunslinger",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Javier",
+    "Set": "Fort Hendrix",
+    "Notes": null,
+    "Blue": "All-Out: Ranged: Damage 2",
+    "Orange": "+1 Free Action: Ranged;Double All-Out Dice",
+    "Red": "+1 Free Move Action;Hit & Run;Ignore 1 Break",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Jeff",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Sniper",
+    "Orange": "+1 Die: Ranged;+1 Max Range",
+    "Red": "+1 Free Action: Ranged;Reaper: Combat;Tactician",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Jesse",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Born Leader",
+    "Orange": "+1 To Dice Roll: Melee;Swordmaster",
+    "Red": "+1 Free Action: Melee;+1 Die: Melee;+1 To Dice Roll: Melee",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Joe",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Scavenger",
+    "Orange": "+1 Die: Combat;Reaper: Combat",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Ambidextrous",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "John Winchester",
+    "Set": "Supernatural",
+    "Notes": null,
+    "Blue": "Born Leader",
+    "Orange": "+1 Free Action: Melee;+1 Free Action: Ranged",
+    "Red": "+1 Free Action: Combat;Charge;Regeneration",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Josh",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Slippery",
+    "Orange": "+1 Die: Melee;+1 Free Action: Combat",
+    "Red": "+1 Free Action: Move;+1 To Dice Roll: Combat;Lucky",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Josh",
+    "Set": "Ultimate",
+    "Notes": null,
+    "Blue": "Slippery;Jump",
+    "Orange": "+1 Die: Combat;Lucky",
+    "Red": "+1 Free Action: Move;+1 Free Action: Combat;+1 To Dice Roll: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Joshua",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Lifesaver",
+    "Orange": "+1 Free Action: Ranged;+1 To Dice Roll: Melee",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Ranged;Born Leader",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Jovem Nerd",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Steady Hand",
+    "Orange": "+1 Free Action: Ranged;+1 To Dice Roll: Melee",
+    "Red": "+1 Damage: Combat;+1 Free Action: Combat;Roll 6: +1 Die Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Julien",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Steady Hand",
+    "Orange": "+1 To Dice Roll: Ranged;Hit & Run",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;Point-Blank",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Kabir",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Slippery",
+    "Orange": "+1 Free Action: Move;+1 To Dice Roll: Melee",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;Reaper: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Karl",
+    "Set": "Fort Hendrix",
+    "Notes": null,
+    "Blue": "Sniper",
+    "Orange": "+1 Free Action: Ranged;All-Out: +1 Die: Combat",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;Reaper: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Kevin",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Taunt",
+    "Orange": "+1 Die: Combat;Tough",
+    "Red": "+1 Free Action: Melee;+1 Free Action: Move;+1 To Dice Roll: Ranged",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Kim",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Lucky",
+    "Orange": "Roll 6: +1 Die Ranged;Webbing",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Roll 6: +1 Die Melee",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Kirk",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Melee: Damage 2",
+    "Orange": "+1 Free Action: Melee;Slippery",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Tough",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Kris",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Point-Blank",
+    "Orange": "+1 Die: Ranged;+1 Free Action: Move",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Ranged;Roll 6: +1 Die Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Kyoko",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Free Action: Search",
+    "Orange": "+1 To Dice Roll: Melee;Destiny",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Laurie",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Free Reload",
+    "Orange": "+1 Free Action: Ranged;Webbing",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Hit & Run",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Lea",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Slippery",
+    "Orange": "+1 Free Action: Melee;Webbing",
+    "Red": "+1 Free Action: Move;+1 To Dice Roll: Combat;Ambidextrous",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Leroy",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Tough",
+    "Orange": "+1 Damage: Combat;Shove",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Reaper: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Lili",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Max Range",
+    "Orange": "+1 Die: Ranged;Sprint",
+    "Red": "+1 Free Action: Combat;+1 Free Action: Move;+1 To Dice Roll: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Lou",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Charge",
+    "Orange": "+1 Die: Combat;+1 Free Action: Melee",
+    "Red": "+1 Free Action: Move;+1 Free Action: Ranged;Medic",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Louise",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Search: 2 Cards",
+    "Orange": "+1 Damage: Combat;+1 To Dice Roll: Ranged",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;Sniper",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Louise",
+    "Set": "Pariz",
+    "Notes": null,
+    "Blue": "Camaraderie",
+    "Orange": "Roll 6: +1 Damage Combat;Taunt",
+    "Red": "+1 Free Action: Combat;Full Auto;Shove",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Lucius",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 To Dice Roll: Ranged",
+    "Orange": "+1 Free Action: Ranged;+1 To Dice Roll: Melee",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;Reaper: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "M. Phal",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Taunt",
+    "Orange": "+1 Free Action: Move;Reaper: Combat",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Bloodlust: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Mack",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Starts With: 2 Kukris",
+    "Orange": "+1 Die: Melee;Steady Hand",
+    "Red": "+1 To Dice Roll: Combat;Reaper: Combat;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Maddie",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Bloodlust: Melee",
+    "Orange": "+1 To Dice Roll: Melee;Taunt",
+    "Red": "+1 Free Action: Combat;Hit & Run;Roll 6: +1 Die Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Maki",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Swordmaster",
+    "Orange": "+1 Die: Melee;Slippery",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Low Profile",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Marian",
+    "Set": "Fort Hendrix",
+    "Notes": null,
+    "Blue": "Field Medic",
+    "Orange": "+1 Free Melee Action;All-Out: +1 Damage: Melee",
+    "Red": "+1 Free Combat Action;+1 To Dice Roll: Melee;Lifesaver",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Marianne",
+    "Set": "Pariz",
+    "Notes": null,
+    "Blue": "+1 Die: Melee",
+    "Orange": "Born Leader;Charge",
+    "Red": "+1 Die: Combat;Ambidextrous;B.I.A.: +1 Free Action: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Marvin",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Destiny",
+    "Orange": "Lucky;Taunt",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Born Leader",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Marvin",
+    "Set": "Ultimate",
+    "Notes": null,
+    "Blue": "Destiny;Search: 2 Cards",
+    "Orange": "+1 Free Action: Ranged;Lifesaver",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Lucky",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Matt",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Born Leader",
+    "Orange": "+1 Free Action: Ranged;Gunslinger",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;Distributor",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Michelle",
+    "Set": "Fort Hendrix",
+    "Notes": null,
+    "Blue": "Spare Parts",
+    "Orange": "Charge;Double All-Out Dice",
+    "Red": "+1 Free Action: Combat;Roll 6: +1 Damage;Taunt",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Mike",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Starts With: A Chainsaw",
+    "Orange": "+1 Free Action: Melee;Lucky",
+    "Red": "+1 Free Action: Move;+1 To Dice Roll: Combat;Taunt",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Miss Trish",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Full Auto",
+    "Orange": "+1 Free Action: Ranged;Tough",
+    "Red": "+1 To Dice Roll: Combat;Hit & Run;Sniper",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Mitch",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Free Action: Move",
+    "Orange": "+1 To Dice Roll: Combat;Slippery",
+    "Red": "+1 Free Action: Combat;+1 Free Action: Move;Lifesaver",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Nadia",
+    "Set": "Pariz",
+    "Notes": null,
+    "Blue": "Night Vision",
+    "Orange": "+1 To Dice Roll: Ranged;Lucky",
+    "Red": "+1 Damage: Ranged;+1 Free All-Out Combat Action;Reaper: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Ned",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Free Action: Search",
+    "Orange": "+1 Die: Ranged;+1 Free Action: Combat",
+    "Red": "+1 Die: Combat;+1 To Dice Roll: Combat;Shove",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Ned",
+    "Set": "Ultimate",
+    "Notes": null,
+    "Blue": "+1 Free Action: Search;Scavenger",
+    "Orange": "+1 Die: Combat;+1 Free Action: Combat",
+    "Red": "+1 Die: Combat;+1 To Dice Roll: Combat;Shove",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Neema",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Born Leader",
+    "Orange": "+1 Free Action: Combat;Is That All You Got?",
+    "Red": "+1 Free Action: Melee;+1 Free Action: Ranged;Tough",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Nick",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Tough",
+    "Orange": "+1 Die: Combat;Slippery",
+    "Red": "+1 Free Action: Combat;+1 Free Action: Move;Born Leader",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Nick",
+    "Set": "Ultimate",
+    "Notes": null,
+    "Blue": "Tough;Lucky",
+    "Orange": "+1 Die: Combat;+1 Free Action: Ranged",
+    "Red": "+1 Free Action: Combat;Distributor;Roll 6: +1 Die Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Nikki",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Free Action: Ranged",
+    "Orange": "+1 Free Action: Ranged;Point-Blank",
+    "Red": "+1 Free Action: Ranged;+1 To Dice Roll: Ranged;Hit & Run",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Odin",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Die: Melee",
+    "Orange": "+1 Free Action: Melee;+1 Free Action: Move",
+    "Red": "+1 Die: Melee;+1 Die: Ranged;+1 Free Action: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Oksana",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Bloodlust: Combat",
+    "Orange": "+1 Free Action: Combat;Free Reload",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;Hit & Run",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Ostara",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Can Search More Than Once",
+    "Orange": "+1 Die: Ranged;+1 Free Action: Move",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Ranged;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Padre Johnson",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Super Strength",
+    "Orange": "+1 Free Action: Melee;Medic",
+    "Red": "+1 To Dice Roll: Combat;Lifesaver;Tough",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Parker",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Medic",
+    "Orange": "+1 Free Action: Move;Free Reload",
+    "Red": "+1 Free Action: Combat;+1 Max Range;Shove",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Patrick",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Lucky",
+    "Orange": "+1 Die: Combat;+1 Free Action: Move",
+    "Red": "+1 Free Action: Combat;Roll 6: +1 Die Combat;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Paul",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Swordmaster",
+    "Orange": "+1 Die: Melee;+1 Free Action: Melee",
+    "Red": "+1 Damage: Melee;+1 To Dice Roll: Melee;Bloodlust: Melee",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Peach",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Jump",
+    "Orange": "+1 Free Action: Ranged;+1 Max Range",
+    "Red": "+1 Free Action: Combat;+1 Free Action: Move;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Phil",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Ranged: Damage 2",
+    "Orange": "+1 Free Action: Combat;+1 To Dice Roll: Ranged",
+    "Red": "+1 Die: Combat;B.I.A.: +1 Free Action: Combat;Sniper",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Phil",
+    "Set": "Ultimate",
+    "Notes": null,
+    "Blue": "Starts With: A Shotgun;Lifesaver",
+    "Orange": "+1 To Dice Roll: Ranged;Born Leader",
+    "Red": "+1 Die: Ranged;+1 Free Action: Combat;Sniper",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "President 16",
+    "Set": "Presidents",
+    "Notes": null,
+    "Blue": "+1 Free Action: Combat",
+    "Orange": "Blitz;Hit & Run",
+    "Red": "+1 Die: Combat;+1 To Dice Roll: Melee;+1 To Dice Roll: Ranged",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "President 40",
+    "Set": "Presidents",
+    "Notes": null,
+    "Blue": "Ronald's Ray Gun",
+    "Orange": "+1 Die: Ranged;+1 Free Action: Ranged",
+    "Red": "+1 Die: Ranged;+1 To Dice Roll: Ranged;Tough",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "President 42",
+    "Set": "Presidents",
+    "Notes": null,
+    "Blue": "Hoard",
+    "Orange": "+1 Free Action: Melee;Webbing",
+    "Red": "+1 Damage: Melee;+1 Free Action: Ranged;Charge",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "President 43",
+    "Set": "Presidents",
+    "Notes": null,
+    "Blue": "Blitz",
+    "Orange": "+1 Die: Ranged;Hit & Run",
+    "Red": "+1 Die: Ranged;+1 Free Action: Ranged;Reaper: Ranged",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "President 44",
+    "Set": "Presidents",
+    "Notes": null,
+    "Blue": "B.I.A.: Field Medic",
+    "Orange": "+1 Free Action: Ranged;Tactician",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;B.I.A.: Born Leader",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "President 45",
+    "Set": "Presidents",
+    "Notes": null,
+    "Blue": "Trump Card",
+    "Orange": "+1 Free Action: Ranged;Taunt",
+    "Red": "+1 Damage: Ranged;+1 Die: Combat;Escalation: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Ralph",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Steady Hand",
+    "Orange": "+1 Free Action: Ranged;Lifesaver",
+    "Red": "+1 Die: Combat;+1 To Dice Roll: Combat;Shove",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Raoul",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Webbing",
+    "Orange": "Hoard;Medic",
+    "Red": "+1 Free Action: Melee;+1 Free Action: Ranged;+1 To Dice Roll: Ranged",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Red Cap Ben",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Hit & Run",
+    "Orange": "+1 Die: Melee;+1 To Dice Roll: Ranged",
+    "Red": "+1 Free Action: Combat;+1 Free Action: Move;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Rick",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Steady Hand",
+    "Orange": "+1 To Dice Roll: Ranged;Tough",
+    "Red": "+1 Free Action: Combat;+1 Free Action: Move;Tactician",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Riley",
+    "Set": "Fort Hendrix",
+    "Notes": null,
+    "Blue": "All-Out: +1 Die: Melee",
+    "Orange": "+1 Free Action: Move;All-Out: +1 Free Action: Ranged",
+    "Red": "+1 Free Action: Melee;+1 Max Range;All-Out: +1 To Dice Roll: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Rob",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Break-In",
+    "Orange": "+1 Free Action: Ranged;Steady Hand",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Roll 6: +1 Die Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Rose",
+    "Set": null,
+    "Notes": null,
+    "Blue": "2 Cocktails Are Better Than 1",
+    "Orange": "Bloodlust: Combat;Medic",
+    "Red": "+1 Free Action: Ranged;Born Leader;Steady Hand",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Ross",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Die: Ranged",
+    "Orange": "+1 Die: Ranged;+1 Free Action: Ranged",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;+1 To Dice Roll: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Sam Winchester",
+    "Set": "Supernatural",
+    "Notes": null,
+    "Blue": "B.I.A.: Lucky",
+    "Orange": "Hold Your Nose;Lifesaver",
+    "Red": "+1 Free Action: Combat;Reaper: Ranged;Regeneration",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Seth",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Hit & Run",
+    "Orange": "+1 Free Action: Melee;Steady Hand",
+    "Red": "+1 To Dice Roll: Combat;Lifesaver;Reaper: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Shannon",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Point-Blank",
+    "Orange": "+1 Free Action: Ranged;Lucky",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Smith",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Free Action: Combat",
+    "Orange": "+1 Free Action: Move;Lucky",
+    "Red": "+1 Die: Combat;+1 To Dice Roll: Combat;Webbing",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Spencer",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Free Action: Ranged",
+    "Orange": "2 Cocktails Are Better Than 1;Zombie Link",
+    "Red": "+1 Free Action: Combat;+1 Max Range;+1 To Dice Roll: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Terry",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Born Leader",
+    "Orange": "+1 Free Action: Combat;Distributor",
+    "Red": "+1 Free Action: Combat;Is That All You Got?;Steady Hand",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Thaissa",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Free Action: Search",
+    "Orange": "+1 Free Action: Ranged;Destiny",
+    "Red": "+1 To Dice Roll: Combat;Born Leader;Webbing",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "The Carboard Tube Samurai",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Starts With: A Katana",
+    "Orange": "+1 Free Action: Melee;Slippery",
+    "Red": "+1 Damage With Katana;+1 Die: Combat;Low Profile",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Thiago",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Reaper: Melee",
+    "Orange": "+1 Free Action: Melee;Taunt",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Tiff",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Starts With: A Sub-MG",
+    "Orange": "+1 Free Action: Ranged;Sniper",
+    "Red": "+1 Die: Ranged;+1 Free Action: Ranged;Gunslinger",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Tiger Sam",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Die: Ranged",
+    "Orange": "+1 Free Action: Move;Sniper",
+    "Red": "+1 Damage: Ranged;+1 Free Action: Combat;Shove",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Tomiko",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Taunt",
+    "Orange": "+1 Die: Melee;Hit & Run",
+    "Red": "+1 To Dice Roll: Combat;Ambidextrous;Reaper: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Travis",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Reaper: Combat",
+    "Orange": "+1 To Dice Roll: Ranged;Hit & Run",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;Point-Blank",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Troy",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Starts With: A Sawed-Off",
+    "Orange": "+1 To Dice Roll: Combat;Tough",
+    "Red": "+1 Free Action: Melee;+1 Free Action: Ranged;Webbing",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Troy",
+    "Set": "Ultimate",
+    "Notes": null,
+    "Blue": "Starts With: A Sawed-Off;+1 Free Reload",
+    "Orange": "+1 To Dice Roll: Combat;Shove",
+    "Red": "+1 Free Action: Melee;+1 Free Action: Ranged;Webbing",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Uncle Honk",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Taunt",
+    "Orange": "+1 Free Action: Melee;Bloodlust: Melee",
+    "Red": "+1 Damage: Melee;+1 Free Action: Combat;Reaper: Combat",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Union Worker #42",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Free Action: Melee",
+    "Orange": "+1 To Dice Roll: Melee;Shove",
+    "Red": "+1 Damage: Melee;+1 Die: Melee;Lifesaver",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Wanda",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Sprint",
+    "Orange": "+1 To Dice Roll: Melee;Slippery",
+    "Red": "+1 Die: Combat;+1 Free Action: Melee;+1 Free Action: Move",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Wanda",
+    "Set": "Ultimate",
+    "Notes": null,
+    "Blue": "Sprint;Bloodlust: Melee",
+    "Orange": "+1 To Dice Roll: Melee;Hit & Run",
+    "Red": "+1 Damage: Melee;+1 Die: Combat;+1 Free Action: Move",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Watts",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Starts With: A Fire Axe",
+    "Orange": "+1 Die: Melee;Shove",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Combat;Sprint",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Wayne",
+    "Set": "Fort Hendrix",
+    "Notes": null,
+    "Blue": "Shove",
+    "Orange": "All-Out: +1 Die: Combat;Charge",
+    "Red": "+1 Free Action: Melee;Ambidextrous;Taunt",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Will",
+    "Set": null,
+    "Notes": null,
+    "Blue": "+1 Damage: Ranged",
+    "Orange": "Gunslinger;Slippery",
+    "Red": "+1 Die: Combat;+1 Free Action: Combat;Dual Expert",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Yanis",
+    "Set": "Pariz",
+    "Notes": null,
+    "Blue": "Parrying Blow",
+    "Orange": "Jump;Reaper: Melee",
+    "Red": "+1 Damage: Melee;Ignore 1 Break;Slippery",
+    "Teen": "False",
+    "Health": "3"
+  },
+  {
+    "Name": "Yuri",
+    "Set": null,
+    "Notes": null,
+    "Blue": "Distributor",
+    "Orange": "+1 Free Action: Ranged;Steady Hand",
+    "Red": "+1 Free Action: Combat;+1 To Dice Roll: Ranged;Tactician",
+    "Teen": "False",
+    "Health": "3"
+  }
+]
