@@ -4,9 +4,16 @@ import SwiftData
 // MARK: - Data Seeder
 
 struct DataSeeder {
+    // Version tracking
+    private static let SKILLS_DATA_VERSION = "1.0"
+    private static let skillsVersionKey = "SkillsDataVersion"
+
     /// Seeds the database with built-in characters and skills if not already seeded
     static func seedIfNeeded(context: ModelContext) {
-        // Seed skills first (always check)
+        // Clean up any duplicate skills first (one-time operation)
+        cleanupDuplicateSkills(context: context)
+
+        // Seed skills with versioning
         seedSkills(context: context)
 
         // Seed characters with versioning
@@ -38,9 +45,80 @@ struct DataSeeder {
         return false
     }
 
+    /// Check if skills need to be reseeded based on version
+    private static func shouldReseedSkills(context: ModelContext) -> Bool {
+        // Check for version mismatch using UserDefaults
+        let currentVersion = SKILLS_DATA_VERSION
+        let storedVersion = UserDefaults.standard.string(forKey: skillsVersionKey)
+
+        if storedVersion != currentVersion {
+            return true
+        }
+
+        // Check if any built-in skills exist
+        let descriptor = FetchDescriptor<Skill>(
+            predicate: #Predicate { $0.isBuiltIn == true }
+        )
+
+        if let count = try? context.fetchCount(descriptor), count == 0 {
+            return true
+        }
+
+        return false
+    }
+
+    /// Remove duplicate skills from the database (one-time cleanup)
+    private static func cleanupDuplicateSkills(context: ModelContext) {
+        // Fetch all skills
+        let descriptor = FetchDescriptor<Skill>()
+
+        guard let allSkills = try? context.fetch(descriptor) else {
+            return
+        }
+
+        // Group skills by name
+        var skillsByName: [String: [Skill]] = [:]
+        for skill in allSkills {
+            if skillsByName[skill.name] == nil {
+                skillsByName[skill.name] = []
+            }
+            skillsByName[skill.name]?.append(skill)
+        }
+
+        // Remove duplicates (keep first occurrence)
+        var duplicatesRemoved = 0
+        for (_, skills) in skillsByName where skills.count > 1 {
+            // Keep the first one, delete the rest
+            for skill in skills.dropFirst() {
+                context.delete(skill)
+                duplicatesRemoved += 1
+            }
+        }
+
+        if duplicatesRemoved > 0 {
+            print("🧹 Cleaned up \(duplicatesRemoved) duplicate skills")
+        }
+    }
+
     // MARK: - Seed Skills
 
     private static func seedSkills(context: ModelContext) {
+        // Check if reseeding is needed
+        guard shouldReseedSkills(context: context) else {
+            return
+        }
+
+        // Delete existing built-in skills
+        let descriptor = FetchDescriptor<Skill>(
+            predicate: #Predicate { $0.isBuiltIn == true }
+        )
+
+        if let existingSkills = try? context.fetch(descriptor) {
+            for skill in existingSkills {
+                context.delete(skill)
+            }
+        }
+
         let skills: [(String, String)] = [
             ("+1 Damage With Katana", ""),
             ("+1 Damage With Machete", ""),
@@ -175,6 +253,11 @@ struct DataSeeder {
             let skill = Skill(name: name, skillDescription: description, isBuiltIn: true)
             context.insert(skill)
         }
+
+        // Update version in UserDefaults
+        UserDefaults.standard.set(SKILLS_DATA_VERSION, forKey: skillsVersionKey)
+
+        print("✅ Seeded \(skills.count) skills (v\(SKILLS_DATA_VERSION))")
     }
 
     // MARK: - Seed Characters
