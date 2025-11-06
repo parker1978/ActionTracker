@@ -28,7 +28,7 @@ struct ExperienceCard: View {
 
                 // Show cycle number if in cycle 2 or 3
                 if session.xpCycle > 1 {
-                    Text("Cycle \\(session.xpCycle)")
+                    Text("Cycle \(session.xpCycle)")
                         .font(.caption)
                         .fontWeight(.semibold)
                         .padding(.horizontal, 8)
@@ -60,12 +60,12 @@ struct ExperienceCard: View {
 
                 // XP display with cycle position
                 VStack(spacing: 4) {
-                    Text("\\(session.currentExperience)")
+                    Text("\(session.currentExperience)")
                         .font(.system(size: 48, weight: .bold, design: .rounded))
                         .monospacedDigit()
                         .frame(minWidth: 80)
 
-                    Text("(\\(session.displayNormalizedXP) in cycle)")
+                    Text("(\(session.displayNormalizedXP) in cycle)")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -236,17 +236,17 @@ internal struct SkillSelectionSheet: View {
                             Label("Current XP", systemImage: "star.fill")
                                 .font(.headline)
                             Spacer()
-                            Text("\\(session.currentExperience)")
+                            Text("\(session.currentExperience)")
                                 .font(.title2)
                                 .fontWeight(.bold)
                                 .monospacedDigit()
                         }
 
                         HStack {
-                            Text("Cycle \\(session.xpCycle)")
+                            Text("Cycle \(session.xpCycle)")
                                 .font(.subheadline)
                             Spacer()
-                            Text("Position: \\(session.displayNormalizedXP)")
+                            Text("Position: \(session.displayNormalizedXP)")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }

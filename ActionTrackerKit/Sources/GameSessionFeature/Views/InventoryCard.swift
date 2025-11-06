@@ -77,7 +77,7 @@ struct InventoryCard: View {
                             icon: "hand.raised.fill",
                             iconColor: .blue,
                             weapons: Array(activeWeaponsList.prefix(2)),
-                            capacity: "(\\(activeWeaponsList.count)/2)"
+                            capacity: "(\(activeWeaponsList.count)/2)"
                         )
                     }
 
@@ -88,14 +88,14 @@ struct InventoryCard: View {
                             icon: "backpack.fill",
                             iconColor: .orange,
                             weapons: Array(inactiveWeaponsList.prefix(3)),
-                            capacity: "(\\(inactiveWeaponsList.count)/\\(3 + session.extraInventorySlots))"
+                            capacity: "(\(inactiveWeaponsList.count)/\(3 + session.extraInventorySlots))"
                         )
 
                         if inactiveWeaponsList.count > 3 {
                             Button {
                                 showingInventorySheet = true
                             } label: {
-                                Text("+ \\(inactiveWeaponsList.count - 3) more...")
+                                Text("+ \(inactiveWeaponsList.count - 3) more...")
                                     .font(.caption)
                                     .foregroundStyle(.blue)
                             }
@@ -138,7 +138,7 @@ struct InventoryCard: View {
                 Image(systemName: icon)
                     .font(.caption)
                     .foregroundStyle(iconColor)
-                Text("\\(title) \\(capacity)")
+                Text("\(title) \(capacity)")
                     .font(.caption)
                     .fontWeight(.semibold)
             }
@@ -279,7 +279,7 @@ internal struct InventoryManagementSheet: View {
                     }
                     .disabled(activeWeapons.count >= 2)
 
-                    Text("Capacity: \\(activeWeapons.count)/2 slots")
+                    Text("Capacity: \(activeWeapons.count)/2 slots")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 } header: {
@@ -331,13 +331,13 @@ internal struct InventoryManagementSheet: View {
                     .disabled(inactiveWeapons.count >= (3 + session.extraInventorySlots))
 
                     HStack {
-                        Text("Capacity: \\(inactiveWeapons.count)/\\(3 + session.extraInventorySlots) slots")
+                        Text("Capacity: \(inactiveWeapons.count)/\(3 + session.extraInventorySlots) slots")
                             .font(.caption)
                             .foregroundStyle(.secondary)
 
                         Spacer()
 
-                        Stepper("Bonus: \\(session.extraInventorySlots)", value: $session.extraInventorySlots, in: 0...10)
+                        Stepper("Bonus: \(session.extraInventorySlots)", value: $session.extraInventorySlots, in: 0...10)
                             .font(.caption)
                     }
                 } header: {
