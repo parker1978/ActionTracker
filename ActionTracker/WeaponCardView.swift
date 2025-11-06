@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import SharedUI
 
 struct WeaponCardView: View {
     let weapon: Weapon

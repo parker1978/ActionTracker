@@ -10,6 +10,7 @@
 
 import SwiftUI
 import SwiftData
+import SharedUI
 
 // MARK: - Main Actions Screen
 
@@ -596,93 +597,6 @@ struct ActionToken: View {
     }
 }
 
-// MARK: - Shake Effect
-
-/// View modifier that creates a smooth horizontal shake animation
-/// Used to indicate deletable action tokens in edit mode
-struct ShakeEffect: ViewModifier {
-    let isShaking: Bool
-    @State private var offset: CGFloat = 0
-
-    func body(content: Content) -> some View {
-        content
-            .offset(x: offset)
-            // Apply repeating animation when shaking, default animation when stopping
-            .animation(isShaking ? .easeInOut(duration: 0.1).repeatForever(autoreverses: true) : .default, value: offset)
-            .onChange(of: isShaking) { oldValue, newValue in
-                if newValue {
-                    // Start shaking
-                    offset = 2
-                } else {
-                    // Stop shaking
-                    offset = 0
-                }
-            }
-            .onAppear {
-                if isShaking {
-                    offset = 2
-                }
-            }
-    }
-}
-
-// MARK: - Flow Layout
-
-/// Custom layout that arranges subviews in a flowing horizontal pattern
-/// Similar to CSS flexbox with wrapping enabled
-/// Used for arranging action tokens that wrap to new lines as needed
-struct FlowLayout: Layout {
-    var spacing: CGFloat = 8
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let result = FlowResult(
-            in: proposal.replacingUnspecifiedDimensions().width,
-            subviews: subviews,
-            spacing: spacing
-        )
-        return result.size
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let result = FlowResult(
-            in: bounds.width,
-            subviews: subviews,
-            spacing: spacing
-        )
-        for (index, subview) in subviews.enumerated() {
-            subview.place(at: CGPoint(x: bounds.minX + result.positions[index].x, y: bounds.minY + result.positions[index].y), proposal: .unspecified)
-        }
-    }
-
-    /// Helper struct that calculates positions for flow layout
-    struct FlowResult {
-        var size: CGSize = .zero
-        var positions: [CGPoint] = []
-
-        init(in maxWidth: CGFloat, subviews: Subviews, spacing: CGFloat) {
-            var currentX: CGFloat = 0
-            var currentY: CGFloat = 0
-            var lineHeight: CGFloat = 0
-
-            for subview in subviews {
-                let size = subview.sizeThatFits(.unspecified)
-
-                if currentX + size.width > maxWidth && currentX > 0 {
-                    // Move to next line
-                    currentX = 0
-                    currentY += lineHeight + spacing
-                    lineHeight = 0
-                }
-
-                positions.append(CGPoint(x: currentX, y: currentY))
-                currentX += size.width + spacing
-                lineHeight = max(lineHeight, size.height)
-            }
-
-            self.size = CGSize(width: maxWidth, height: currentY + lineHeight)
-        }
-    }
-}
 
 // MARK: - Inventory Card
 
