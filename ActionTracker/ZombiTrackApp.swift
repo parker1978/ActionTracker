@@ -6,14 +6,43 @@ import DataLayer
 
 @main
 struct ZombiTrackApp: App {
+    private static let storeName = "ActionTrackerModel-v2"
+
+    private static func legacyStoreURL() -> URL? {
+        guard let baseURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            return nil
+        }
+        return baseURL.appendingPathComponent("default.store", isDirectory: false)
+    }
+
+    private static func purgeLegacyStoreIfNeeded() {
+        guard let legacyURL = legacyStoreURL(),
+              FileManager.default.fileExists(atPath: legacyURL.path) else {
+            return
+        }
+
+        do {
+            try FileManager.default.removeItem(at: legacyURL)
+            print("🗑️ Removed legacy SwiftData store at: \(legacyURL.path)")
+        } catch {
+            print("⚠️ Failed to remove legacy SwiftData store: \(error)")
+        }
+    }
+
     var sharedModelContainer: ModelContainer = {
+        purgeLegacyStoreIfNeeded()
+
         let schema = Schema([
             CoreDomain.Character.self,
             CoreDomain.Skill.self,
             CoreDomain.GameSession.self,
             CoreDomain.ActionInstance.self,
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        let modelConfiguration = ModelConfiguration(
+            storeName,
+            schema: schema,
+            isStoredInMemoryOnly: false
+        )
 
         do {
             let container = try ModelContainer(for: schema, configurations: [modelConfiguration])

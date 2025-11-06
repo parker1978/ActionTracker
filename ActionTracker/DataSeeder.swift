@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import CoreDomain
 
 // MARK: - Data Seeder
 
@@ -34,7 +35,7 @@ struct DataSeeder {
         }
 
         // Check if any built-in characters exist
-        let descriptor = FetchDescriptor<Character>(
+        let descriptor = FetchDescriptor<CoreDomain.Character>(
             predicate: #Predicate { $0.isBuiltIn == true }
         )
 
@@ -56,7 +57,7 @@ struct DataSeeder {
         }
 
         // Check if any built-in skills exist
-        let descriptor = FetchDescriptor<Skill>(
+        let descriptor = FetchDescriptor<CoreDomain.Skill>(
             predicate: #Predicate { $0.isBuiltIn == true }
         )
 
@@ -70,14 +71,14 @@ struct DataSeeder {
     /// Remove duplicate skills from the database (one-time cleanup)
     private static func cleanupDuplicateSkills(context: ModelContext) {
         // Fetch all skills
-        let descriptor = FetchDescriptor<Skill>()
+        let descriptor = FetchDescriptor<CoreDomain.Skill>()
 
         guard let allSkills = try? context.fetch(descriptor) else {
             return
         }
 
         // Group skills by name
-        var skillsByName: [String: [Skill]] = [:]
+        var skillsByName: [String: [CoreDomain.Skill]] = [:]
         for skill in allSkills {
             if skillsByName[skill.name] == nil {
                 skillsByName[skill.name] = []
@@ -109,7 +110,7 @@ struct DataSeeder {
         }
 
         // Delete existing built-in skills
-        let descriptor = FetchDescriptor<Skill>(
+        let descriptor = FetchDescriptor<CoreDomain.Skill>(
             predicate: #Predicate { $0.isBuiltIn == true }
         )
 
@@ -250,7 +251,7 @@ struct DataSeeder {
         ]
 
         for (name, description) in skills {
-            let skill = Skill(name: name, skillDescription: description, isBuiltIn: true)
+            let skill = CoreDomain.Skill(name: name, skillDescription: description, isBuiltIn: true)
             context.insert(skill)
         }
 
@@ -269,7 +270,7 @@ struct DataSeeder {
         }
 
         // Delete existing built-in characters
-        let descriptor = FetchDescriptor<Character>(
+        let descriptor = FetchDescriptor<CoreDomain.Character>(
             predicate: #Predicate { $0.isBuiltIn == true }
         )
 
@@ -285,7 +286,7 @@ struct DataSeeder {
 
         // Insert characters into database
         for data in characterDataList {
-            let character = Character(
+            let character = CoreDomain.Character(
                 name: data.name,
                 set: data.set ?? "",
                 notes: data.notes ?? "",
