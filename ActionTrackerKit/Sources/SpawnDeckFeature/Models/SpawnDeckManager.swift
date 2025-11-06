@@ -1,6 +1,6 @@
 //
-//  SpawnDeckModels.swift
-//  ZombiTrack
+//  SpawnDeckManager.swift
+//  SpawnDeckFeature
 //
 //  This file contains models for the Spawn Deck feature:
 //  - SpawnCard: Individual spawn cards with difficulty-based spawn counts
@@ -9,23 +9,24 @@
 
 import Foundation
 import SwiftUI
+import CoreDomain
 
 // MARK: - Spawn Card Model
 
 /// Represents a single spawn card from the Zombicide deck
 /// Cards contain spawn information across 4 difficulty levels
-struct SpawnCard: Identifiable, Codable, Equatable {
-    let id: String // Card number (e.g., "001")
-    let type: SpawnCardType
-    let isRush: Bool
-    let blue: Int
-    let yellow: Int
-    let orange: Int
-    let red: Int
-    let note: String
+public struct SpawnCard: Identifiable, Codable, Equatable {
+    public let id: String // Card number (e.g., "001")
+    public let type: SpawnCardType
+    public let isRush: Bool
+    public let blue: Int
+    public let yellow: Int
+    public let orange: Int
+    public let red: Int
+    public let note: String
 
     /// Types of spawn cards in the deck
-    enum SpawnCardType: String, Codable, CaseIterable {
+    public enum SpawnCardType: String, Codable, CaseIterable {
         case walkers = "Walkers"
         case brutes = "Brutes"
         case runners = "Runners"
@@ -34,7 +35,7 @@ struct SpawnCard: Identifiable, Codable, Equatable {
     }
 
     /// Get spawn count for a specific difficulty level
-    func spawnCount(for difficulty: DifficultyLevel) -> String {
+    public func spawnCount(for difficulty: DifficultyLevel) -> String {
         switch difficulty {
         case .blue:
             // Special handling for Extra Activation cards
@@ -61,29 +62,17 @@ struct SpawnCard: Identifiable, Codable, Equatable {
     }
 }
 
-// MARK: - Difficulty Level Enum
-
-/// Four difficulty levels matching the game's color system
-enum DifficultyLevel: String, Codable, CaseIterable {
-    case blue = "Blue"
-    case yellow = "Yellow"
-    case orange = "Orange"
-    case red = "Red"
-
-    var displayName: String { rawValue }
-}
-
 // MARK: - Game Mode Enum
 
 /// Easy mode uses cards 001-018, Hard mode uses all 40 cards
-enum SpawnDeckMode: String, Codable, CaseIterable {
+public enum SpawnDeckMode: String, Codable, CaseIterable {
     case easy = "Easy"
     case hard = "Normal"
 
-    var displayName: String { rawValue }
+    public var displayName: String { rawValue }
 
     /// Card range for this mode
-    var cardRange: ClosedRange<Int> {
+    public var cardRange: ClosedRange<Int> {
         switch self {
         case .easy: return 1...18
         case .hard: return 1...40
@@ -95,7 +84,7 @@ enum SpawnDeckMode: String, Codable, CaseIterable {
 
 extension SpawnCard {
     /// The complete 40-card spawn deck, hardcoded for immediate availability
-    static let fullDeck: [SpawnCard] = [
+    public static let fullDeck: [SpawnCard] = [
         // Walkers 001-008
         SpawnCard(id: "001", type: .walkers, isRush: false, blue: 1, yellow: 2, orange: 4, red: 6, note: ""),
         SpawnCard(id: "002", type: .walkers, isRush: false, blue: 2, yellow: 3, orange: 5, red: 7, note: ""),
@@ -159,37 +148,37 @@ extension SpawnCard {
 // MARK: - Spawn Deck Manager
 
 /// Manages the spawn deck state including draw pile, discard pile, and game mode
-class SpawnDeckManager: ObservableObject {
-    @Published var drawPile: [SpawnCard] = []
-    @Published var discardPile: [SpawnCard] = []
-    @Published var currentCard: SpawnCard?
-    @Published var mode: SpawnDeckMode = .hard
-    @Published var difficulty: DifficultyLevel = .yellow
+public class SpawnDeckManager: ObservableObject {
+    @Published public var drawPile: [SpawnCard] = []
+    @Published public var discardPile: [SpawnCard] = []
+    @Published public var currentCard: SpawnCard?
+    @Published public var mode: SpawnDeckMode = .hard
+    @Published public var difficulty: DifficultyLevel = .yellow
 
     // MARK: - Computed Properties
 
     /// Number of cards remaining in the draw pile
-    var cardsRemaining: Int { drawPile.count }
+    public var cardsRemaining: Int { drawPile.count }
 
     /// Number of cards in the discard pile
-    var cardsDiscarded: Int { discardPile.count }
+    public var cardsDiscarded: Int { discardPile.count }
 
     /// Whether there are cards left to draw
-    var hasCardsRemaining: Bool { !drawPile.isEmpty }
+    public var hasCardsRemaining: Bool { !drawPile.isEmpty }
 
     /// Whether the deck needs to be reshuffled (draw pile empty but discard has cards)
-    var needsReshuffle: Bool { !hasCardsRemaining && !discardPile.isEmpty }
+    public var needsReshuffle: Bool { !hasCardsRemaining && !discardPile.isEmpty }
 
     // MARK: - Initialization
 
-    init() {
+    public init() {
         print("🎴 SpawnDeckManager initialized")
     }
 
     // MARK: - Deck Management
 
     /// Load and shuffle a fresh deck based on current mode
-    func loadDeck() {
+    public func loadDeck() {
         print("🎴 Loading deck in \(mode.rawValue) mode...")
 
         let cardNumbers = mode.cardRange
@@ -207,14 +196,14 @@ class SpawnDeckManager: ObservableObject {
     }
 
     /// Shuffle the draw pile
-    func shuffleDeck() {
+    public func shuffleDeck() {
         print("🔀 Shuffling deck...")
         drawPile.shuffle()
         print("✅ Deck shuffled: \(drawPile.count) cards")
     }
 
     /// Switch between Easy and Hard mode, then reload the deck
-    func switchMode(to newMode: SpawnDeckMode) {
+    public func switchMode(to newMode: SpawnDeckMode) {
         print("🔄 Switching mode from \(mode.rawValue) to \(newMode.rawValue)")
         mode = newMode
         loadDeck()
@@ -225,7 +214,7 @@ class SpawnDeckManager: ObservableObject {
     /// Draw the next card from the draw pile
     /// Returns true if successful, false if draw pile is empty
     @discardableResult
-    func drawCard() -> Bool {
+    public func drawCard() -> Bool {
         print("🃏 Drawing card...")
 
         // Move current card to discard if one exists
@@ -248,17 +237,17 @@ class SpawnDeckManager: ObservableObject {
     }
 
     /// Get the current card without removing it
-    func getCurrentCard() -> SpawnCard? {
+    public func getCurrentCard() -> SpawnCard? {
         return currentCard
     }
 
     /// Peek at the top card of the draw pile without drawing it
-    func peekTopCard() -> SpawnCard? {
+    public func peekTopCard() -> SpawnCard? {
         return drawPile.first
     }
 
     /// Reset deck by shuffling discard pile back into the draw pile
-    func resetDeck() {
+    public func resetDeck() {
         print("♻️ Resetting deck...")
 
         // Return current card to discard
@@ -276,7 +265,7 @@ class SpawnDeckManager: ObservableObject {
     }
 
     /// Discard the current card without drawing a new one
-    func discardCurrentCard() {
+    public func discardCurrentCard() {
         if let current = currentCard {
             discardPile.append(current)
             currentCard = nil
@@ -287,7 +276,7 @@ class SpawnDeckManager: ObservableObject {
     // MARK: - Testing
 
     /// Run comprehensive tests on deck functionality
-    static func runTests() {
+    public static func runTests() {
         print("\n" + String(repeating: "=", count: 60))
         print("🧪 SPAWN DECK MANAGER TESTS")
         print(String(repeating: "=", count: 60) + "\n")
