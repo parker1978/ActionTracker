@@ -1,7 +1,16 @@
+//
+//  NewCharacterView.swift
+//  CharacterFeature
+//
+//  Created by Stephen Parker on 6/6/25.
+//
+
 import SwiftUI
 import SwiftData
+import CoreDomain
+import SharedUI
 
-struct NewCharacterView: View {
+public struct NewCharacterView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query private var allSkills: [Skill]
@@ -23,7 +32,9 @@ struct NewCharacterView: View {
     @State private var showingOrangeSkillPicker = false
     @State private var showingRedSkillPicker = false
 
-    var body: some View {
+    public init() {}
+
+    public var body: some View {
         VStack {
             Form {
                 Section {
@@ -136,7 +147,9 @@ struct NewCharacterView: View {
             .animation(.spring(), value: appear)
         }
         .navigationTitle("New Character")
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
         .onAppear { appear = true }
         .sheet(isPresented: $showingBlueSkillPicker) {
             SkillPickerView(

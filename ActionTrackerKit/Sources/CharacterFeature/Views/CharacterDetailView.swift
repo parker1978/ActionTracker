@@ -1,7 +1,16 @@
+//
+//  CharacterDetailView.swift
+//  CharacterFeature
+//
+//  Created by Stephen Parker on 6/6/25.
+//
+
 import SwiftUI
 import SwiftData
+import CoreDomain
+import SharedUI
 
-struct CharacterDetailView: View {
+public struct CharacterDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Bindable var character: Character
@@ -19,7 +28,11 @@ struct CharacterDetailView: View {
     @State private var editedOrangeSkills: [String] = []
     @State private var editedRedSkills: [String] = []
 
-    var body: some View {
+    public init(character: Character) {
+        self.character = character
+    }
+
+    public var body: some View {
         List {
             // MARK: - Character Info Section
             Section {
@@ -115,10 +128,13 @@ struct CharacterDetailView: View {
             }
         }
         .navigationTitle(isEditing ? editedName : character.name)
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.large)
+        #endif
         .toolbar {
             // Delete button (only for custom characters)
             if !character.isBuiltIn && !isEditing {
+                #if os(iOS)
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(role: .destructive) {
                         showDeleteAlert = true
@@ -126,10 +142,20 @@ struct CharacterDetailView: View {
                         Label("Delete", systemImage: "trash")
                     }
                 }
+                #else
+                ToolbarItem(placement: .primaryAction) {
+                    Button(role: .destructive) {
+                        showDeleteAlert = true
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+                #endif
             }
 
             // Cancel button (when editing)
             if isEditing {
+                #if os(iOS)
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
                         if hasChanges() {
@@ -139,9 +165,21 @@ struct CharacterDetailView: View {
                         }
                     }
                 }
+                #else
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        if hasChanges() {
+                            showCancelAlert = true
+                        } else {
+                            cancelEditing()
+                        }
+                    }
+                }
+                #endif
             }
 
             // Edit/Done button
+            #if os(iOS)
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(isEditing ? "Done" : "Edit") {
                     if isEditing {
@@ -151,6 +189,17 @@ struct CharacterDetailView: View {
                     }
                 }
             }
+            #else
+            ToolbarItem(placement: .primaryAction) {
+                Button(isEditing ? "Done" : "Edit") {
+                    if isEditing {
+                        saveChanges()
+                    } else {
+                        startEditing()
+                    }
+                }
+            }
+            #endif
         }
         .alert("Delete Character?", isPresented: $showDeleteAlert) {
             Button("Cancel", role: .cancel) { }
