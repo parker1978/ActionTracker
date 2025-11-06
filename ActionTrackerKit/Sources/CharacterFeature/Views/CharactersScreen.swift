@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import CoreDomain
+import SharedUI
 
 public struct CharactersScreen: View {
     @Query var allCharacters: [Character]
