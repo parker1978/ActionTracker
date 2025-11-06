@@ -6,8 +6,7 @@ import PackageDescription
 let package = Package(
     name: "ActionTrackerKit",
     platforms: [
-        .iOS(.v17),
-        .macOS(.v14)
+        .iOS(.v17)
     ],
     products: [
         // Foundation Layer

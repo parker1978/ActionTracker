@@ -8,12 +8,19 @@
 
 import SwiftUI
 import CoreDomain
-import SharedUI
 
-struct WeaponCardView: View {
+#if canImport(UIKit)
+import UIKit
+#endif
+
+public struct WeaponCardView: View {
     let weapon: Weapon
 
-    var body: some View {
+    public init(weapon: Weapon) {
+        self.weapon = weapon
+    }
+
+    public var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             // Header
             cardHeader
@@ -204,12 +211,18 @@ struct WeaponCardView: View {
 
 // MARK: - Stat Badge
 
-struct StatBadge: View {
+public struct StatBadge: View {
     let icon: String
     let label: String
     let value: String
 
-    var body: some View {
+    public init(icon: String, label: String, value: String) {
+        self.icon = icon
+        self.label = label
+        self.value = value
+    }
+
+    public var body: some View {
         VStack(spacing: 4) {
             Image(systemName: icon)
                 .font(.title3)
@@ -233,12 +246,18 @@ struct StatBadge: View {
 
 // MARK: - Ability Tag
 
-struct AbilityTag: View {
+public struct AbilityTag: View {
     let icon: String
     let text: String
     let color: Color
 
-    var body: some View {
+    public init(icon: String, text: String, color: Color) {
+        self.icon = icon
+        self.text = text
+        self.color = color
+    }
+
+    public var body: some View {
         HStack(spacing: 4) {
             Image(systemName: icon)
                 .font(.caption)

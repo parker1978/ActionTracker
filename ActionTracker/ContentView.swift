@@ -2,6 +2,7 @@ import SwiftUI
 import GameSessionFeature
 import CharacterFeature
 import SkillsFeature
+import WeaponsFeature
 import DataLayer
 
 struct ContentView: View {

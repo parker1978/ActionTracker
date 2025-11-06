@@ -8,12 +8,13 @@
 
 import Foundation
 import SwiftUI
+import CoreDomain
 
 // MARK: - Deck State
 
 /// Manages the state of a single weapon deck (Starting, Regular, or Ultrared)
 @Observable
-class WeaponDeckState {
+public class WeaponDeckState {
     let deckType: DeckType
     var difficulty: DifficultyMode
 
@@ -25,7 +26,7 @@ class WeaponDeckState {
     // Full weapon list from repository
     private var sourceWeapons: [Weapon]
 
-    init(deckType: DeckType, difficulty: DifficultyMode, weapons: [Weapon]) {
+    public init(deckType: DeckType, difficulty: DifficultyMode, weapons: [Weapon]) {
         self.deckType = deckType
         self.difficulty = difficulty
         self.sourceWeapons = weapons.filter { $0.deck == deckType }
@@ -37,7 +38,7 @@ class WeaponDeckState {
     // MARK: - Deck Management
 
     /// Reset deck to initial state with current difficulty
-    func reset() {
+    public func reset() {
         remaining = buildDeck(mode: difficulty)
         shuffle()
         discard.removeAll()
@@ -47,7 +48,7 @@ class WeaponDeckState {
 
     /// Shuffle remaining cards in deck
     /// Prevents back-to-back duplicates by swapping cards intelligently
-    func shuffle() {
+    public func shuffle() {
         // Need at least 2 cards to check for duplicates
         guard remaining.count > 1 else {
             remaining.shuffle()
@@ -87,13 +88,13 @@ class WeaponDeckState {
     }
 
     /// Change difficulty and reset deck
-    func changeDifficulty(to mode: DifficultyMode) {
+    public func changeDifficulty(to mode: DifficultyMode) {
         difficulty = mode
         reset()
     }
 
     /// Update weapon list (for expansion filtering) and reset
-    func updateWeapons(_ weapons: [Weapon]) {
+    public func updateWeapons(_ weapons: [Weapon]) {
         // Filter to only weapons for this deck type
         sourceWeapons = weapons.filter { $0.deck == deckType }
         reset()
@@ -103,7 +104,7 @@ class WeaponDeckState {
 
     /// Draw a single card from the deck
     /// Automatically reshuffles discard if deck is empty
-    func draw() -> Weapon? {
+    public func draw() -> Weapon? {
         if remaining.isEmpty {
             reshuffleDiscardIntoDeck()
         }
@@ -116,7 +117,7 @@ class WeaponDeckState {
     }
 
     /// Draw two cards (for Flashlight or Draw 2 abilities)
-    func drawTwo() -> [Weapon] {
+    public func drawTwo() -> [Weapon] {
         var cards: [Weapon] = []
 
         if let first = draw() {
@@ -133,12 +134,12 @@ class WeaponDeckState {
     // MARK: - Discard Management
 
     /// Add a card to the discard pile
-    func discardCard(_ card: Weapon) {
+    public func discardCard(_ card: Weapon) {
         discard.insert(card, at: 0) // Newest first
     }
 
     /// Return a card from discard to top of deck
-    func returnFromDiscardToTop(_ card: Weapon) {
+    public func returnFromDiscardToTop(_ card: Weapon) {
         if let index = discard.firstIndex(where: { $0.id == card.id }) {
             discard.remove(at: index)
             remaining.insert(card, at: 0)
@@ -146,7 +147,7 @@ class WeaponDeckState {
     }
 
     /// Return a card from discard to bottom of deck
-    func returnFromDiscardToBottom(_ card: Weapon) {
+    public func returnFromDiscardToBottom(_ card: Weapon) {
         if let index = discard.firstIndex(where: { $0.id == card.id }) {
             discard.remove(at: index)
             remaining.append(card)
@@ -154,14 +155,14 @@ class WeaponDeckState {
     }
 
     /// Remove a card from discard pile (e.g., when adding to inventory)
-    func removeFromDiscard(_ card: Weapon) {
+    public func removeFromDiscard(_ card: Weapon) {
         if let index = discard.firstIndex(where: { $0.id == card.id }) {
             discard.remove(at: index)
         }
     }
 
     /// Move all cards from discard back into deck and shuffle
-    func reclaimAllDiscardIntoDeck(shuffle: Bool = true) {
+    public func reclaimAllDiscardIntoDeck(shuffle: Bool = true) {
         remaining.append(contentsOf: discard)
         discard.removeAll()
 
@@ -171,7 +172,7 @@ class WeaponDeckState {
     }
 
     /// Clear discard pile (for dev/testing)
-    func clearDiscard() {
+    public func clearDiscard() {
         discard.removeAll()
     }
 
@@ -256,70 +257,15 @@ class WeaponDeckState {
 
     // MARK: - Computed Properties
 
-    var remainingCount: Int {
+    public var remainingCount: Int {
         remaining.count
     }
 
-    var discardCount: Int {
+    public var discardCount: Int {
         discard.count
     }
 
-    var isEmpty: Bool {
+    public var isEmpty: Bool {
         remaining.isEmpty
-    }
-}
-
-// MARK: - Weapons Manager
-
-/// Manages all three weapon decks and global settings
-@Observable
-class WeaponsManager {
-    private(set) var startingDeck: WeaponDeckState
-    private(set) var regularDeck: WeaponDeckState
-    private(set) var ultraredDeck: WeaponDeckState
-
-    var currentDifficulty: DifficultyMode {
-        didSet {
-            if currentDifficulty != oldValue {
-                changeDifficultyForAllDecks(to: currentDifficulty)
-            }
-        }
-    }
-
-    init(weapons: [Weapon], difficulty: DifficultyMode = .medium) {
-        self.currentDifficulty = difficulty
-        self.startingDeck = WeaponDeckState(deckType: .starting, difficulty: difficulty, weapons: weapons)
-        self.regularDeck = WeaponDeckState(deckType: .regular, difficulty: difficulty, weapons: weapons)
-        self.ultraredDeck = WeaponDeckState(deckType: .ultrared, difficulty: difficulty, weapons: weapons)
-    }
-
-    /// Get deck state by type
-    func getDeck(_ type: DeckType) -> WeaponDeckState {
-        switch type {
-        case .starting: return startingDeck
-        case .regular: return regularDeck
-        case .ultrared: return ultraredDeck
-        }
-    }
-
-    /// Change difficulty for all decks (resets all decks)
-    private func changeDifficultyForAllDecks(to mode: DifficultyMode) {
-        startingDeck.changeDifficulty(to: mode)
-        regularDeck.changeDifficulty(to: mode)
-        ultraredDeck.changeDifficulty(to: mode)
-    }
-
-    /// Reset all decks
-    func resetAllDecks() {
-        startingDeck.reset()
-        regularDeck.reset()
-        ultraredDeck.reset()
-    }
-
-    /// Update weapons for all decks (for expansion filtering)
-    func updateWeapons(_ weapons: [Weapon]) {
-        startingDeck.updateWeapons(weapons)
-        regularDeck.updateWeapons(weapons)
-        ultraredDeck.updateWeapons(weapons)
     }
 }

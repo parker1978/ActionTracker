@@ -8,8 +8,10 @@
 
 import SwiftUI
 import SwiftData
+import CoreDomain
+import DataLayer
 
-struct WeaponDiscardView: View {
+public struct WeaponDiscardView: View {
     @Bindable var deckState: WeaponDeckState
     @Environment(\.dismiss) private var dismiss
     @State private var showInventoryReplacement = false
@@ -20,11 +22,15 @@ struct WeaponDiscardView: View {
     @Query(filter: #Predicate<GameSession> { $0.endedAt == nil }, sort: \GameSession.startedAt, order: .reverse)
     private var activeSessions: [GameSession]
 
+    public init(deckState: WeaponDeckState) {
+        self.deckState = deckState
+    }
+
     private var activeSession: GameSession? {
         activeSessions.first
     }
 
-    var body: some View {
+    public var body: some View {
         NavigationStack {
             Group {
                 if deckState.discardCount == 0 {
@@ -82,7 +88,7 @@ struct WeaponDiscardView: View {
             }
             .sheet(isPresented: $showInventoryReplacement) {
                 if let weapon = weaponToAdd, let session = activeSession {
-                    InventoryReplacementSheet(
+                    InventoryManagementSheet(
                         weaponToAdd: weapon,
                         session: session,
                         onReplace: { replacedWeapon in
