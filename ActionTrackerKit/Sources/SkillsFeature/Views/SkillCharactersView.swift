@@ -1,12 +1,14 @@
 //
 //  SkillCharactersView.swift
-//  ActionTracker
+//  SkillsFeature
 //
 
 import SwiftUI
 import SwiftData
+import CoreDomain
+import SharedUI
 
-struct SkillCharactersView: View {
+public struct SkillCharactersView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query private var allCharacters: [Character]
@@ -14,6 +16,10 @@ struct SkillCharactersView: View {
     let skill: Skill
 
     @State private var showDeleteAlert = false
+
+    public init(skill: Skill) {
+        self.skill = skill
+    }
 
     var charactersWithSkill: [Character] {
         allCharacters.filter { character in
@@ -43,7 +49,7 @@ struct SkillCharactersView: View {
         return tiers
     }
 
-    var body: some View {
+    public var body: some View {
         Group {
             if charactersWithSkill.isEmpty {
                 ContentUnavailableView {
@@ -163,68 +169,6 @@ struct SkillCharactersView: View {
 
         // Dismiss the view
         dismiss()
-    }
-}
-
-struct CharacterSkillRowView: View {
-    let character: Character
-    let skillTiers: [SkillTier]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                if character.isFavorite {
-                    Image(systemName: "star.fill")
-                        .foregroundStyle(.yellow)
-                        .font(.caption)
-                }
-
-                Text(character.name)
-                    .font(.headline)
-            }
-
-            Text(character.set)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-
-            // Tier badges
-            if !skillTiers.isEmpty {
-                HStack(spacing: 6) {
-                    ForEach(skillTiers) { tier in
-                        Text(tier.displayName)
-                            .font(.caption2)
-                            .fontWeight(.medium)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(tier.color)
-                            .clipShape(Capsule())
-                    }
-                }
-                .padding(.top, 2)
-            }
-        }
-        .padding(.vertical, 4)
-    }
-}
-
-enum SkillTier: String, Identifiable {
-    case blue
-    case orange
-    case red
-
-    var id: String { rawValue }
-
-    var displayName: String {
-        rawValue.capitalized
-    }
-
-    var color: Color {
-        switch self {
-        case .blue: return .blue
-        case .orange: return .orange
-        case .red: return .red
-        }
     }
 }
 

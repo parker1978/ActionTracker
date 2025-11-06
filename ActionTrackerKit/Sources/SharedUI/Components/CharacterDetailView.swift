@@ -1,6 +1,6 @@
 //
 //  CharacterDetailView.swift
-//  CharacterFeature
+//  SharedUI
 //
 //  Created by Stephen Parker on 6/6/25.
 //
@@ -8,7 +8,6 @@
 import SwiftUI
 import SwiftData
 import CoreDomain
-import SharedUI
 
 public struct CharacterDetailView: View {
     @Environment(\.modelContext) private var modelContext

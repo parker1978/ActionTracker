@@ -1,12 +1,14 @@
 //
 //  SkillsScreen.swift
-//  ActionTracker
+//  SkillsFeature
 //
 
 import SwiftUI
 import SwiftData
+import CoreDomain
+import SharedUI
 
-struct SkillsScreen: View {
+public struct SkillsScreen: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var allSkills: [Skill]
     @Query private var allCharacters: [Character]
@@ -22,6 +24,8 @@ struct SkillsScreen: View {
     @State private var selectedSkills: [String] = []
     @State private var skillSearchText = ""
     @State private var isSearchingSkills = false
+
+    public init() {}
 
     enum SearchMode: String, CaseIterable {
         case skillsList = "Skills List"
@@ -137,7 +141,7 @@ struct SkillsScreen: View {
         }
     }
 
-    var body: some View {
+    public var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
                 // Segmented control
@@ -396,42 +400,6 @@ struct SkillsScreen: View {
                 }
             }
         }
-    }
-}
-
-struct SkillRowView: View {
-    let skill: Skill
-    let characterCount: Int
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(skill.name)
-                    .font(.headline)
-
-                Spacer()
-
-                // Character count badge
-                HStack(spacing: 4) {
-                    Image(systemName: "person.fill")
-                        .font(.caption2)
-                    Text("\(characterCount)")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                }
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.secondary.opacity(0.15))
-                .clipShape(Capsule())
-            }
-
-            Text(skill.skillDescription)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .lineLimit(2)
-        }
-        .padding(.vertical, 4)
     }
 }
 

@@ -1,19 +1,22 @@
 //
 //  NewSkillView.swift
-//  ActionTracker
+//  SkillsFeature
 //
 
 import SwiftUI
 import SwiftData
+import CoreDomain
 
-struct NewSkillView: View {
+public struct NewSkillView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
     @State private var skillName = ""
     @State private var skillDescription = ""
 
-    var body: some View {
+    public init() {}
+
+    public var body: some View {
         NavigationStack {
             Form {
                 Section("Skill Details") {

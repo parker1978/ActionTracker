@@ -1,12 +1,21 @@
+//
+//  AdvancedSkillSearchView.swift
+//  SkillsFeature
+//
+
 import SwiftUI
 import SwiftData
+import CoreDomain
+import SharedUI
 
-struct AdvancedSkillSearchView: View {
+public struct AdvancedSkillSearchView: View {
     @Query var allCharacters: [Character]
     @Query var allSkills: [Skill]
     @State private var selectedSkills: Set<String> = []
     @State private var searchText = ""
     @State private var isSkillPickerExpanded = true
+
+    public init() {}
 
     // MARK: - Computed Properties
 
@@ -33,7 +42,7 @@ struct AdvancedSkillSearchView: View {
 
     // MARK: - Body
 
-    var body: some View {
+    public var body: some View {
         VStack(spacing: 0) {
             // Selected skills display
             if !selectedSkills.isEmpty {
@@ -162,61 +171,6 @@ struct AdvancedSkillSearchView: View {
         }
         .navigationTitle("Advanced Search")
         .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-// MARK: - Advanced Search Character Row
-
-struct AdvancedSearchCharacterRow: View {
-    let character: Character
-    let selectedSkills: Set<String>
-
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(character.name)
-                        .font(.headline)
-
-                    if character.isFavorite {
-                        Image(systemName: "star.fill")
-                            .foregroundStyle(.yellow)
-                            .font(.caption)
-                    }
-
-                    if !character.set.isEmpty {
-                        Text(character.set)
-                            .font(.caption)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(.quaternary, in: Capsule())
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                // Show matching skills in bold blue
-                if !selectedSkills.isEmpty {
-                    let matchingSkills = character.allSkillsList.filter { selectedSkills.contains($0) }
-                    if !matchingSkills.isEmpty {
-                        Text(matchingSkills.joined(separator: " • "))
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundStyle(.blue)
-                    }
-                }
-
-                // Show other skills normally
-                let otherSkills = character.allSkillsList.filter { !selectedSkills.contains($0) }
-                if !otherSkills.isEmpty {
-                    Text(otherSkills.prefix(3).joined(separator: " • "))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-            }
-
-            Spacer()
-        }
     }
 }
 
