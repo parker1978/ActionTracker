@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SharedUI
 
 struct DiscardPileView: View {
     @ObservedObject var deckManager: SpawnDeckManager
@@ -170,7 +171,7 @@ struct DiscardPileView: View {
             // Color indicator with icon
             ZStack {
                 Circle()
-                    .fill(colorForDifficulty(level))
+                    .fill(level.color)
                     .frame(width: 40, height: 40)
 
                 Image(systemName: "figure.walk")
@@ -188,25 +189,14 @@ struct DiscardPileView: View {
             // Spawn count - smaller text for Extra Activation
             Text(count)
                 .font(isExtraActivation ? .system(size: 20, weight: .bold, design: .rounded) : .system(size: 32, weight: .bold, design: .rounded))
-                .foregroundStyle(colorForDifficulty(level))
+                .foregroundStyle(level.color)
                 .frame(minWidth: 60, alignment: .trailing)
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
         }
         .padding(.vertical, 4)
     }
-
-    private func colorForDifficulty(_ level: DifficultyLevel) -> Color {
-        switch level {
-        case .blue: return .blue
-        case .yellow: return .yellow
-        case .orange: return .orange
-        case .red: return .red
-        }
-    }
 }
-
-// Note: Extensions for cornerRadius and `if` are defined in SpawnDeckView.swift
 
 #Preview {
     let manager = SpawnDeckManager()

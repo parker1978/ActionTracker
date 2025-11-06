@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import SharedUI
 
 struct SpawnDeckView: View {
     @StateObject private var deckManager = SpawnDeckManager()
@@ -327,21 +328,12 @@ struct SpawnDeckView: View {
             // Spawn count - smaller text for Extra Activation
             Text(count)
                 .font(isExtraActivation ? .system(size: 20, weight: .bold, design: .rounded) : .system(size: 32, weight: .bold, design: .rounded))
-                .foregroundStyle(colorForDifficulty(level))
+                .foregroundStyle(level.color)
                 .frame(minWidth: 60, alignment: .trailing)
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
         }
         .padding(.vertical, 4)
-    }
-
-    private func colorForDifficulty(_ level: DifficultyLevel) -> Color {
-        switch level {
-        case .blue: return .blue
-        case .yellow: return .yellow
-        case .orange: return .orange
-        case .red: return .red
-        }
     }
 
     // MARK: - Empty Card Placeholder
@@ -449,37 +441,6 @@ struct SpawnDeckView: View {
         .padding(.horizontal, 12)
         .frame(maxWidth: .infinity)
         .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
-    }
-}
-
-// MARK: - Custom Shape for Specific Corner Rounding
-
-struct RoundedCorner: Shape {
-    var radius: CGFloat = .infinity
-    var corners: UIRectCorner = .allCorners
-
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(
-            roundedRect: rect,
-            byRoundingCorners: corners,
-            cornerRadii: CGSize(width: radius, height: radius)
-        )
-        return Path(path.cgPath)
-    }
-}
-
-extension View {
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape(RoundedCorner(radius: radius, corners: corners))
-    }
-
-    /// Conditionally applies a transformation to a view
-    @ViewBuilder func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
-        if condition {
-            transform(self)
-        } else {
-            self
-        }
     }
 }
 
