@@ -15,13 +15,13 @@ import CoreDomain
 /// Manages the state of a single weapon deck (Starting, Regular, or Ultrared)
 @Observable
 public class WeaponDeckState {
-    let deckType: DeckType
-    var difficulty: DifficultyMode
+    public let deckType: DeckType
+    public var difficulty: DifficultyMode
 
-    private(set) var remaining: [Weapon] = []
-    private(set) var discard: [Weapon] = []
-    private(set) var recentDraws: [Weapon] = [] // Last 3 drawn cards
-    private(set) var drawHistory: [Weapon] = [] // All drawn cards (most recent first)
+    public private(set) var remaining: [Weapon] = []
+    public private(set) var discard: [Weapon] = []
+    public private(set) var recentDraws: [Weapon] = [] // Last 3 drawn cards
+    public private(set) var drawHistory: [Weapon] = [] // All drawn cards (most recent first)
 
     // Full weapon list from repository
     private var sourceWeapons: [Weapon]

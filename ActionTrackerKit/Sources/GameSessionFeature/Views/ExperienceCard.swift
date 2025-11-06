@@ -146,7 +146,7 @@ struct ExperienceCard: View {
                     }
 
                     // List of currently active skills with color coding
-                    ForEach(session.getActiveSkills(), id: \\.self) { skill in
+                    ForEach(session.getActiveSkills(), id: \.self) { skill in
                         HStack(spacing: 8) {
                             Circle()
                                 .fill(skillColor(for: skill).gradient)
@@ -408,7 +408,7 @@ struct SkillLevelSection: View {
                 .foregroundStyle(color)
 
             VStack(spacing: 8) {
-                ForEach(skills, id: \\.self) { skill in
+                ForEach(skills, id: \.self) { skill in
                     SkillRow(
                         skill: skill,
                         color: color,

@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import CoreDomain
+import SharedUI
 
 struct CharacterDetailView: View {
     @Environment(\.modelContext) private var modelContext

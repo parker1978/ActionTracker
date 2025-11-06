@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 import CoreDomain
 import DataLayer
+import SharedUI
 
 // NOTE: WeaponsManager is passed from main app until WeaponsFeature is extracted (Phase 8)
 // This maintains dependency rules while allowing functionality to work
@@ -142,7 +143,7 @@ struct InventoryCard: View {
                     .fontWeight(.semibold)
             }
 
-            ForEach(Array(weapons.enumerated()), id: \\.offset) { _, weaponName in
+            ForEach(Array(weapons.enumerated()), id: \.offset) { _, weaponName in
                 if let weapon = findWeapon(byName: weaponName) {
                     Button {
                         selectedWeapon = weapon
@@ -240,7 +241,7 @@ struct InventoryManagementSheet: View {
                         Text("No active weapons")
                             .foregroundStyle(.secondary)
                     } else {
-                        ForEach(activeWeapons.indices, id: \\.self) { index in
+                        ForEach(activeWeapons.indices, id: \.self) { index in
                             weaponRow(
                                 weapon: activeWeapons[index],
                                 icon: "hand.raised.fill",
@@ -291,7 +292,7 @@ struct InventoryManagementSheet: View {
                         Text("No inactive weapons")
                             .foregroundStyle(.secondary)
                     } else {
-                        ForEach(inactiveWeapons.indices, id: \\.self) { index in
+                        ForEach(inactiveWeapons.indices, id: \.self) { index in
                             weaponRow(
                                 weapon: inactiveWeapons[index],
                                 icon: "backpack.fill",
@@ -527,7 +528,7 @@ struct WeaponPickerSheet: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(filteredWeapons, id: \\.self) { weapon in
+                ForEach(filteredWeapons, id: \.self) { weapon in
                     Button {
                         selectedWeapons.append(weapon)
                         dismiss()

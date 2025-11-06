@@ -1,5 +1,8 @@
 import SwiftUI
 import SwiftData
+import AppShell
+import CoreDomain
+import DataLayer
 
 @main
 struct ZombiTrackApp: App {

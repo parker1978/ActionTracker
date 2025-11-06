@@ -1,19 +1,22 @@
 import SwiftUI
+import CoreDomain
+import DataLayer
 import GameSessionFeature
 import CharacterFeature
 import SkillsFeature
 import WeaponsFeature
 import SpawnDeckFeature
-import DataLayer
 
-struct ContentView: View {
+public struct ContentView: View {
     @State private var selectedTab = 0
     @State private var weaponsManager = WeaponsManager(
         weapons: WeaponRepository.shared.allWeapons,
         difficulty: .medium
     )
 
-    var body: some View {
+    public init() {}
+
+    public var body: some View {
         if #available(iOS 26.0, *) {
             TabView(selection: $selectedTab) {
                 Tab("Actions", systemImage: "bolt.fill", value: 0) {
