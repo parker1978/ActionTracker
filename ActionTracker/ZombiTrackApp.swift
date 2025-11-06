@@ -8,10 +8,10 @@ import DataLayer
 struct ZombiTrackApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Character.self,
-            Skill.self,
-            GameSession.self,
-            ActionInstance.self,
+            CoreDomain.Character.self,
+            CoreDomain.Skill.self,
+            CoreDomain.GameSession.self,
+            CoreDomain.ActionInstance.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
