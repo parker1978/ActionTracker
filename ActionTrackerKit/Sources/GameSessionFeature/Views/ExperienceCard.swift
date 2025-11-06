@@ -221,7 +221,7 @@ struct XPLevelBadge: View {
 
 /// Sheet for viewing and selecting character skills at various XP thresholds
 /// Displays all skill tiers with selection controls based on current XP cycle
-struct SkillSelectionSheet: View {
+internal struct SkillSelectionSheet: View {
     @Environment(\.modelContext) private var modelContext
     @Bindable var session: GameSession
     @Binding var isPresented: Bool

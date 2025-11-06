@@ -9,7 +9,7 @@ import SwiftUI
 
 /// View displayed when no active game session exists
 /// Prompts the user to select a character to begin tracking
-struct StartGameView: View {
+internal struct StartGameView: View {
     @Binding var showingCharacterPicker: Bool
 
     var body: some View {

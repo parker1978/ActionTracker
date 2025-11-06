@@ -10,7 +10,7 @@ import SwiftData
 import CoreDomain
 
 /// Sheet for selecting a character to start a new game session
-struct CharacterPickerSheet: View {
+internal struct CharacterPickerSheet: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var allCharacters: [Character]
     @Binding var isPresented: Bool

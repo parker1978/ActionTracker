@@ -13,7 +13,7 @@ import CoreDomain
 /// Manages game session timer state and operations
 /// Handles starting, stopping, and toggling the game duration timer
 @Observable
-class GameTimer {
+internal class GameTimer {
     private var timer: Timer?
     var isRunning: Bool = true
     weak var session: GameSession?

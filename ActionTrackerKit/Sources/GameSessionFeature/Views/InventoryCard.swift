@@ -203,7 +203,7 @@ struct InventoryCard: View {
 
 // MARK: - Inventory Management Sheet
 
-struct InventoryManagementSheet: View {
+internal struct InventoryManagementSheet: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Bindable var session: GameSession
@@ -509,7 +509,7 @@ struct InventoryManagementSheet: View {
 
 // MARK: - Weapon Picker Sheet
 
-struct WeaponPickerSheet: View {
+internal struct WeaponPickerSheet: View {
     @Environment(\.dismiss) private var dismiss
     let allWeapons: [String]
     @Binding var selectedWeapons: [String]

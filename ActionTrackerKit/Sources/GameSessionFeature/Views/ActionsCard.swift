@@ -115,7 +115,7 @@ struct ActionsCard: View {
 // MARK: - Add Action Sheet
 
 /// Sheet for selecting a new action type to add to the character's pool
-struct AddActionSheet: View {
+internal struct AddActionSheet: View {
     @Environment(\.modelContext) private var modelContext
     @Bindable var session: GameSession
     @Binding var isPresented: Bool

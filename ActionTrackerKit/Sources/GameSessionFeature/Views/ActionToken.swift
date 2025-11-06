@@ -13,7 +13,7 @@ import SharedUI
 /// Individual action token that can be tapped to toggle used state
 /// In edit mode, displays shake animation and allows deletion via tap
 /// Default actions (first 3) cannot be deleted
-struct ActionToken: View {
+internal struct ActionToken: View {
     @Environment(\.modelContext) private var modelContext
     @Bindable var action: ActionInstance
     let isEditMode: Bool
