@@ -1,7 +1,15 @@
+//
+//  SkillPickerView.swift
+//  SharedUI
+//
+//  Created by Stephen Parker on 6/6/25.
+//
+
 import SwiftUI
 import SwiftData
+import CoreDomain
 
-struct SkillPickerView: View {
+public struct SkillPickerView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
@@ -15,25 +23,40 @@ struct SkillPickerView: View {
     var colorTier: String?
     var onSelect: ((String) -> Void)?
 
-    @State private var searchText = ""
-    @State private var showingNewSkill = false
+    // Optional closure for adding new skills (allows parent to control behavior)
+    var onAddNewSkill: (() -> Void)?
 
-    init(selectedSkills: Binding<[String]>, excludedSkills: [String], allSkills: [Skill]) {
+    @State private var searchText = ""
+
+    public init(
+        selectedSkills: Binding<[String]>,
+        excludedSkills: [String],
+        allSkills: [Skill],
+        onAddNewSkill: (() -> Void)? = nil
+    ) {
         self._selectedSkills = selectedSkills
         self.excludedSkills = excludedSkills
         self.allSkills = allSkills
         self.currentSkills = nil
         self.colorTier = nil
         self.onSelect = nil
+        self.onAddNewSkill = onAddNewSkill
     }
 
-    init(currentSkills: [String], colorTier: String, allSkills: [Skill], onSelect: @escaping (String) -> Void) {
+    public init(
+        currentSkills: [String],
+        colorTier: String,
+        allSkills: [Skill],
+        onSelect: @escaping (String) -> Void,
+        onAddNewSkill: (() -> Void)? = nil
+    ) {
         self._selectedSkills = .constant([])
         self.excludedSkills = currentSkills
         self.allSkills = allSkills
         self.currentSkills = currentSkills
         self.colorTier = colorTier
         self.onSelect = onSelect
+        self.onAddNewSkill = onAddNewSkill
     }
 
     var filteredSkills: [Skill] {
@@ -48,7 +71,7 @@ struct SkillPickerView: View {
         }
     }
 
-    var body: some View {
+    public var body: some View {
         NavigationStack {
             List {
                 if filteredSkills.isEmpty {
@@ -91,25 +114,45 @@ struct SkillPickerView: View {
                 }
             }
             .navigationTitle(colorTier ?? "Add Skill")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .searchable(text: $searchText, prompt: "Search skills")
             .toolbar {
+                #if os(iOS)
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
                         dismiss()
                     }
                 }
-
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingNewSkill = true
-                    } label: {
-                        Image(systemName: "plus")
+                #else
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
                     }
                 }
-            }
-            .sheet(isPresented: $showingNewSkill) {
-                NewSkillView()
+                #endif
+
+                // Only show add button if parent provides the closure
+                if let onAddNewSkill = onAddNewSkill {
+                    #if os(iOS)
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            onAddNewSkill()
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                    }
+                    #else
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            onAddNewSkill()
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                    }
+                    #endif
+                }
             }
         }
     }

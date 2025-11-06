@@ -1,15 +1,18 @@
 //
 //  CharactersScreen.swift
-//  ZombiTrack
+//  CharacterFeature
 //
 //  Created by Stephen Parker on 6/6/25.
 //
 
 import SwiftUI
 import SwiftData
+import CoreDomain
 
-struct CharactersScreen: View {
+public struct CharactersScreen: View {
     @Query var allCharacters: [Character]
+
+    public init() {}
 
     // MARK: - Computed Properties
 
@@ -24,7 +27,7 @@ struct CharactersScreen: View {
 
     // MARK: - Body
 
-    var body: some View {
+    public var body: some View {
         NavigationStack {
             List {
                 ForEach(characters) { character in
@@ -49,10 +52,12 @@ struct CharactersScreen: View {
 
 // MARK: - Characters Search Screen
 
-struct CharactersSearchScreen: View {
+public struct CharactersSearchScreen: View {
     @Query var allCharacters: [Character]
     @State private var searchText = ""
     @State private var showingNewCharacter = false
+
+    public init() {}
 
     var characters: [Character] {
         allCharacters.sorted {
@@ -75,7 +80,7 @@ struct CharactersSearchScreen: View {
         }
     }
 
-    var body: some View {
+    public var body: some View {
         NavigationStack {
             List {
                 ForEach(filteredCharacters) { character in
@@ -100,48 +105,6 @@ struct CharactersSearchScreen: View {
             .sheet(isPresented: $showingNewCharacter) {
                 NewCharacterView()
             }
-        }
-    }
-}
-
-// MARK: - Character Row Component
-
-struct CharacterRow: View {
-    let character: Character
-
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(character.name)
-                        .font(.headline)
-
-                    if character.isFavorite {
-                        Image(systemName: "star.fill")
-                            .foregroundStyle(.yellow)
-                            .font(.caption)
-                    }
-
-                    if !character.set.isEmpty {
-                        Text(character.set)
-                            .font(.caption)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(.quaternary, in: Capsule())
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                // Show first few skills as preview
-                if !character.allSkillsList.isEmpty {
-                    Text(character.allSkillsList.prefix(3).joined(separator: " • "))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                }
-            }
-
-            Spacer()
         }
     }
 }
