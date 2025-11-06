@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		AA4F89E92EBD58D400ED4F7A /* AppShell in Frameworks */ = {isa = PBXBuildFile; productRef = AAPKG0022D9C931B003E749E /* AppShell */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		AA2252D82D9C931B003E749E /* ActionTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ActionTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA4F89E92EBD58D400ED4F7A /* AppShell in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -86,21 +91,6 @@
 		};
 /* End PBXNativeTarget section */
 
-
-/* Begin XCLocalSwiftPackageReference section */
-		AAPKG0012D9C931B003E749E /* XCLocalSwiftPackageReference "ActionTrackerKit" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ActionTrackerKit;
-		};
-/* End XCLocalSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		AAPKG0022D9C931B003E749E /* AppShell */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = AAPKG0012D9C931B003E749E /* XCLocalSwiftPackageReference "ActionTrackerKit" */;
-			productName = AppShell;
-		};
-/* End XCSwiftPackageProductDependency section */
 /* Begin PBXProject section */
 		AA2252D02D9C931B003E749E /* Project object */ = {
 			isa = PBXProject;
@@ -123,13 +113,13 @@
 			);
 			mainGroup = AA2252CF2D9C931B003E749E;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AAPKG0012D9C931B003E749E /* XCLocalSwiftPackageReference "ActionTrackerKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AA2252D92D9C931B003E749E /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
-			packageReferences = (
-				AAPKG0012D9C931B003E749E /* XCLocalSwiftPackageReference "ActionTrackerKit" */,
-			);
 			targets = (
 				AA2252D72D9C931B003E749E /* ActionTracker */,
 			);
@@ -306,7 +296,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 18.1;
+				MARKETING_VERSION = 19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.parker1978.ActionTracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -341,7 +331,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 18.1;
+				MARKETING_VERSION = 19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.parker1978.ActionTracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -372,6 +362,21 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		AAPKG0012D9C931B003E749E /* XCLocalSwiftPackageReference "ActionTrackerKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ActionTrackerKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AAPKG0022D9C931B003E749E /* AppShell */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAPKG0012D9C931B003E749E /* XCLocalSwiftPackageReference "ActionTrackerKit" */;
+			productName = AppShell;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AA2252D02D9C931B003E749E /* Project object */;
 }
