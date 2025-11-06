@@ -136,20 +136,6 @@ public struct SpawnCardView: View {
     }
 }
 
-// MARK: - Conditional View Modifier
-
-extension View {
-    /// Applies a transformation to the view if a condition is met
-    @ViewBuilder
-    func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
-        if condition {
-            transform(self)
-        } else {
-            self
-        }
-    }
-}
-
 #Preview {
     SpawnCardView(card: SpawnCard(
         id: "001",

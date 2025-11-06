@@ -18,7 +18,7 @@ public struct ActiveGameView: View {
     var weaponsManager: WeaponsManager
 
     // Timer state
-    @StateObject private var gameTimer: GameTimer
+    @State private var gameTimer: GameTimer
 
     // UI state
     @State private var showingEndConfirmation = false
@@ -26,7 +26,7 @@ public struct ActiveGameView: View {
     public init(session: GameSession, weaponsManager: WeaponsManager) {
         self.session = session
         self.weaponsManager = weaponsManager
-        _gameTimer = StateObject(wrappedValue: GameTimer(session: session))
+        _gameTimer = State(wrappedValue: GameTimer(session: session))
     }
 
     public var body: some View {

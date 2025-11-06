@@ -78,6 +78,7 @@
 			);
 			name = ActionTracker;
 			packageProductDependencies = (
+				AAPKG0022D9C931B003E749E /* AppShell */,
 			);
 			productName = ActionTracker;
 			productReference = AA2252D82D9C931B003E749E /* ActionTracker.app */;
@@ -85,6 +86,21 @@
 		};
 /* End PBXNativeTarget section */
 
+
+/* Begin XCLocalSwiftPackageReference section */
+		AAPKG0012D9C931B003E749E /* XCLocalSwiftPackageReference "ActionTrackerKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ActionTrackerKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AAPKG0022D9C931B003E749E /* AppShell */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAPKG0012D9C931B003E749E /* XCLocalSwiftPackageReference "ActionTrackerKit" */;
+			productName = AppShell;
+		};
+/* End XCSwiftPackageProductDependency section */
 /* Begin PBXProject section */
 		AA2252D02D9C931B003E749E /* Project object */ = {
 			isa = PBXProject;
@@ -111,6 +127,9 @@
 			productRefGroup = AA2252D92D9C931B003E749E /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
+			packageReferences = (
+				AAPKG0012D9C931B003E749E /* XCLocalSwiftPackageReference "ActionTrackerKit" */,
+			);
 			targets = (
 				AA2252D72D9C931B003E749E /* ActionTracker */,
 			);

@@ -20,6 +20,9 @@ let package = Package(
         .library(name: "GameSessionFeature", targets: ["GameSessionFeature"]),
         .library(name: "WeaponsFeature", targets: ["WeaponsFeature"]),
         .library(name: "SpawnDeckFeature", targets: ["SpawnDeckFeature"]),
+
+        // App Shell
+        .library(name: "AppShell", targets: ["AppShell"]),
     ],
     targets: [
         // MARK: - Foundation Layer (No Cross-Dependencies)
@@ -103,6 +106,24 @@ let package = Package(
                 "CoreDomain",
                 "DataLayer",
                 "SharedUI"
+            ]
+        ),
+
+        // MARK: - App Shell
+
+        /// App coordination layer (tab navigation)
+        /// Dependencies: All feature modules + foundation layers
+        .target(
+            name: "AppShell",
+            dependencies: [
+                "CoreDomain",
+                "DataLayer",
+                "SharedUI",
+                "CharacterFeature",
+                "SkillsFeature",
+                "GameSessionFeature",
+                "WeaponsFeature",
+                "SpawnDeckFeature"
             ]
         ),
 
