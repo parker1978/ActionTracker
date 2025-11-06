@@ -29,7 +29,7 @@ public struct AdvancedSkillSearchView: View {
         return availableSkills.filter { $0.localizedCaseInsensitiveContains(searchText) }
     }
 
-    private var matchingCharacters: [Character] {
+    private var matchingCharacters: [CoreDomain.Character] {
         guard !selectedSkills.isEmpty else { return [] }
 
         return allCharacters.filter { character in

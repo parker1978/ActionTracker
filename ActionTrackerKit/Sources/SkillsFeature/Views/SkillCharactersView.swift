@@ -21,7 +21,7 @@ public struct SkillCharactersView: View {
         self.skill = skill
     }
 
-    var charactersWithSkill: [Character] {
+    var charactersWithSkill: [CoreDomain.Character] {
         allCharacters.filter { character in
             character.allSkillsList.contains(skill.name)
         }.sorted { c1, c2 in

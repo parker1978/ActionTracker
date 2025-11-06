@@ -17,7 +17,7 @@ public struct CharactersScreen: View {
 
     // MARK: - Computed Properties
 
-    var characters: [Character] {
+    var characters: [CoreDomain.Character] {
         allCharacters.sorted {
             if $0.isFavorite == $1.isFavorite {
                 return $0.name < $1.name
@@ -60,7 +60,7 @@ public struct CharactersSearchScreen: View {
 
     public init() {}
 
-    var characters: [Character] {
+    var characters: [CoreDomain.Character] {
         allCharacters.sorted {
             if $0.isFavorite == $1.isFavorite {
                 return $0.name < $1.name
@@ -69,7 +69,7 @@ public struct CharactersSearchScreen: View {
         }
     }
 
-    private var filteredCharacters: [Character] {
+    private var filteredCharacters: [CoreDomain.Character] {
         guard !searchText.isEmpty else { return characters }
         let searchLower = searchText.lowercased()
         return characters.filter { character in

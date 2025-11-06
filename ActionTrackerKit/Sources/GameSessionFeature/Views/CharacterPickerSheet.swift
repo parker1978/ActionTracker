@@ -16,7 +16,7 @@ internal struct CharacterPickerSheet: View {
     @Binding var isPresented: Bool
 
     /// Characters sorted with favorites first, then alphabetically
-    var sortedCharacters: [Character] {
+    var sortedCharacters: [CoreDomain.Character] {
         allCharacters.sorted {
             if $0.isFavorite == $1.isFavorite {
                 return $0.name < $1.name
@@ -49,8 +49,8 @@ internal struct CharacterPickerSheet: View {
     }
 
     /// Creates and starts a new game session with the selected character
-    private func startGame(with character: Character) {
-        let session = GameSession(character: character)
+    private func startGame(with character: CoreDomain.Character) {
+        let session = CoreDomain.GameSession(character: character)
         modelContext.insert(session)
         try? modelContext.save()
         isPresented = false
@@ -62,7 +62,7 @@ internal struct CharacterPickerSheet: View {
 /// Simple character row display for picker
 /// NOTE: This is a temporary simplified version. The full CharacterRow will be in CharacterFeature (Phase 6)
 struct CharacterRow: View {
-    let character: Character
+    let character: CoreDomain.Character
 
     var body: some View {
         HStack {

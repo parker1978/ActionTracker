@@ -28,14 +28,14 @@ public struct WeaponsScreen: View {
 
     // Access to active game session for inventory management
     @Environment(\.modelContext) private var modelContext
-    @Query(filter: #Predicate<GameSession> { $0.endedAt == nil }, sort: \GameSession.startedAt, order: .reverse)
-    private var activeSessions: [GameSession]
+    @Query(filter: #Predicate<CoreDomain.GameSession> { $0.endedAt == nil }, sort: \CoreDomain.GameSession.startedAt, order: .reverse)
+    private var activeSessions: [CoreDomain.GameSession]
 
     public init(weaponsManager: WeaponsManager) {
         self.weaponsManager = weaponsManager
     }
 
-    private var activeSession: GameSession? {
+    private var activeSession: CoreDomain.GameSession? {
         activeSessions.first
     }
 

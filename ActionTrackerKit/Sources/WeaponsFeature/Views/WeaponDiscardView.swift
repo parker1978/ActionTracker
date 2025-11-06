@@ -19,14 +19,14 @@ public struct WeaponDiscardView: View {
 
     // Access to active game session for inventory management
     @Environment(\.modelContext) private var modelContext
-    @Query(filter: #Predicate<GameSession> { $0.endedAt == nil }, sort: \GameSession.startedAt, order: .reverse)
-    private var activeSessions: [GameSession]
+    @Query(filter: #Predicate<CoreDomain.GameSession> { $0.endedAt == nil }, sort: \CoreDomain.GameSession.startedAt, order: .reverse)
+    private var activeSessions: [CoreDomain.GameSession]
 
     public init(deckState: WeaponDeckState) {
         self.deckState = deckState
     }
 
-    private var activeSession: GameSession? {
+    private var activeSession: CoreDomain.GameSession? {
         activeSessions.first
     }
 
@@ -142,7 +142,7 @@ public struct WeaponDiscardView: View {
 struct WeaponDiscardRow: View {
     let weapon: Weapon
     @Bindable var deckState: WeaponDeckState
-    let activeSession: GameSession?
+    let activeSession: CoreDomain.GameSession?
     let onAddToInventory: (Weapon) -> Void
 
     var body: some View {

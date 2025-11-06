@@ -108,7 +108,7 @@ public struct SkillsScreen: View {
 
     // MARK: - Advanced Search Computed Properties
 
-    private var characters: [Character] {
+    private var characters: [CoreDomain.Character] {
         allCharacters.sorted {
             if $0.isFavorite == $1.isFavorite {
                 return $0.name < $1.name
@@ -131,7 +131,7 @@ public struct SkillsScreen: View {
             .map { $0 }
     }
 
-    private var filteredCharactersBySkills: [Character] {
+    private var filteredCharactersBySkills: [CoreDomain.Character] {
         guard !selectedSkills.isEmpty else { return [] }
 
         return characters.filter { character in
