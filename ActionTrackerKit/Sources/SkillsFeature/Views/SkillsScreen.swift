@@ -10,8 +10,8 @@ import SharedUI
 
 public struct SkillsScreen: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var allSkills: [Skill]
-    @Query private var allCharacters: [Character]
+    @Query private var allSkills: [CoreDomain.Skill]
+    @Query private var allCharacters: [CoreDomain.Character]
 
     @State private var searchText = ""
     @State private var sortOption: SortOption = .alphabeticalAZ

@@ -17,10 +17,10 @@ public struct ActionsScreen: View {
     @Environment(\.modelContext) private var modelContext
 
     // Query for active (non-ended) game sessions
-    @Query(filter: #Predicate<GameSession> { $0.endedAt == nil }, sort: \GameSession.startedAt, order: .reverse)
-    private var activeSessions: [GameSession]
+    @Query(filter: #Predicate<CoreDomain.GameSession> { $0.endedAt == nil }, sort: \CoreDomain.GameSession.startedAt, order: .reverse)
+    private var activeSessions: [CoreDomain.GameSession]
 
-    @Query private var allCharacters: [Character]
+    @Query private var allCharacters: [CoreDomain.Character]
     @State private var showingCharacterPicker = false
 
     public init(weaponsManager: WeaponsManager) {

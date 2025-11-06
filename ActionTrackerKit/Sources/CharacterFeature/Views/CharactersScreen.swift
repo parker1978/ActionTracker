@@ -11,7 +11,7 @@ import CoreDomain
 import SharedUI
 
 public struct CharactersScreen: View {
-    @Query var allCharacters: [Character]
+    @Query var allCharacters: [CoreDomain.Character]
 
     public init() {}
 
@@ -54,7 +54,7 @@ public struct CharactersScreen: View {
 // MARK: - Characters Search Screen
 
 public struct CharactersSearchScreen: View {
-    @Query var allCharacters: [Character]
+    @Query var allCharacters: [CoreDomain.Character]
     @State private var searchText = ""
     @State private var showingNewCharacter = false
 

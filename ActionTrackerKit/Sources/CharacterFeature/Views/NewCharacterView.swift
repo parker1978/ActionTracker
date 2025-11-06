@@ -13,7 +13,7 @@ import SharedUI
 public struct NewCharacterView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @Query private var allSkills: [Skill]
+    @Query private var allSkills: [CoreDomain.Skill]
 
     @State private var name = ""
     @State private var notes = ""

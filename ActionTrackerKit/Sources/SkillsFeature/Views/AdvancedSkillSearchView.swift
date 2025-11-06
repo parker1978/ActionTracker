@@ -9,8 +9,8 @@ import CoreDomain
 import SharedUI
 
 public struct AdvancedSkillSearchView: View {
-    @Query var allCharacters: [Character]
-    @Query var allSkills: [Skill]
+    @Query var allCharacters: [CoreDomain.Character]
+    @Query var allSkills: [CoreDomain.Skill]
     @State private var selectedSkills: Set<String> = []
     @State private var searchText = ""
     @State private var isSkillPickerExpanded = true

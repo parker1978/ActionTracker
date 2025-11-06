@@ -12,7 +12,7 @@ import CoreDomain
 /// Sheet for selecting a character to start a new game session
 internal struct CharacterPickerSheet: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var allCharacters: [Character]
+    @Query private var allCharacters: [CoreDomain.Character]
     @Binding var isPresented: Bool
 
     /// Characters sorted with favorites first, then alphabetically

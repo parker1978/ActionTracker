@@ -240,7 +240,7 @@ struct SkillEditSection: View {
     @Binding var skills: [String]
     let color: Color
     let colorTier: String
-    @Query private var allSkills: [Skill]
+    @Query private var allSkills: [CoreDomain.Skill]
 
     @State private var showSkillPicker = false
 
@@ -310,7 +310,7 @@ struct SkillTierSection: View {
     let title: String
     let skills: [String]
     let color: Color
-    @Query private var allSkills: [Skill]
+    @Query private var allSkills: [CoreDomain.Skill]
 
     var body: some View {
         Section {

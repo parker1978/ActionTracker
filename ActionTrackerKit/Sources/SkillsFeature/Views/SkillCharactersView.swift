@@ -11,7 +11,7 @@ import SharedUI
 public struct SkillCharactersView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @Query private var allCharacters: [Character]
+    @Query private var allCharacters: [CoreDomain.Character]
 
     let skill: Skill
 
