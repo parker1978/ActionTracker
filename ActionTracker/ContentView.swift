@@ -1,4 +1,6 @@
 import SwiftUI
+import GameSessionFeature
+import DataLayer
 
 struct ContentView: View {
     @State private var selectedTab = 0
