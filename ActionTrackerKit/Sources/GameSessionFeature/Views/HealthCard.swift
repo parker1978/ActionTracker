@@ -77,7 +77,7 @@ struct HealthCard: View {
                     var transaction = Transaction()
                     transaction.disablesAnimations = true
                     withTransaction(transaction) {
-                        if session.currentHealth < 10 {
+                        if session.currentHealth < 5 {
                             session.currentHealth += 1
                         }
                         try? modelContext.save()
@@ -85,7 +85,7 @@ struct HealthCard: View {
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .font(.title)
-                        .foregroundStyle(session.currentHealth < 10 ? healthColor : .gray)
+                        .foregroundStyle(session.currentHealth < 5 ? healthColor : .gray)
                 }
                 .disabled(session.currentHealth >= 10)
             }
