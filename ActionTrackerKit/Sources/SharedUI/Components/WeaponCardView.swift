@@ -94,62 +94,59 @@ public struct WeaponCardView: View {
             Text("Combat Stats")
                 .font(.headline)
 
-            LazyVGrid(columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible()),
-                GridItem(.flexible())
-            ], spacing: 12) {
-                // Range
-                StatBadge(
-                    icon: "arrow.right",
-                    label: "Range",
-                    value: weapon.rangeDisplay
-                )
-
-                // Dice
-                if let dice = weapon.dice {
+            // Use simple HStack/VStack layout for better performance with small item count
+            VStack(spacing: 12) {
+                // First row: Range, Dice, Accuracy
+                HStack(spacing: 12) {
                     StatBadge(
-                        icon: "dice",
-                        label: "Dice",
-                        value: "\(dice)"
+                        icon: "arrow.right",
+                        label: "Range",
+                        value: weapon.rangeDisplay
                     )
+
+                    if let dice = weapon.dice {
+                        StatBadge(
+                            icon: "dice",
+                            label: "Dice",
+                            value: "\(dice)"
+                        )
+                    }
+
+                    if let accuracy = weapon.accuracy {
+                        StatBadge(
+                            icon: "target",
+                            label: "Accuracy",
+                            value: accuracy
+                        )
+                    }
                 }
 
-                // Accuracy
-                if let accuracy = weapon.accuracy {
-                    StatBadge(
-                        icon: "target",
-                        label: "Accuracy",
-                        value: accuracy
-                    )
-                }
+                // Second row: Damage, Ammo, Overload
+                HStack(spacing: 12) {
+                    if let damage = weapon.damage {
+                        StatBadge(
+                            icon: "bolt.fill",
+                            label: "Damage",
+                            value: "\(damage)"
+                        )
+                    }
 
-                // Damage
-                if let damage = weapon.damage {
-                    StatBadge(
-                        icon: "bolt.fill",
-                        label: "Damage",
-                        value: "\(damage)"
-                    )
-                }
+                    if weapon.ammoType != .none {
+                        StatBadge(
+                            icon: "circle.grid.3x3.fill",
+                            label: "Ammo",
+                            value: weapon.ammoType.displayName
+                        )
+                    }
 
-                // Ammo Type
-                if weapon.ammoType != .none {
-                    StatBadge(
-                        icon: "circle.grid.3x3.fill",
-                        label: "Ammo",
-                        value: weapon.ammoType.displayName
-                    )
-                }
-
-                // Overload
-                if weapon.overload {
-                    let overloadValue = weapon.overloadDice.map { "+\($0)" } ?? "Yes"
-                    StatBadge(
-                        icon: "exclamationmark.triangle",
-                        label: "Overload",
-                        value: overloadValue
-                    )
+                    if weapon.overload {
+                        let overloadValue = weapon.overloadDice.map { "+\($0)" } ?? "Yes"
+                        StatBadge(
+                            icon: "exclamationmark.triangle",
+                            label: "Overload",
+                            value: overloadValue
+                        )
+                    }
                 }
             }
         }

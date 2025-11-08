@@ -22,7 +22,6 @@ public struct WeaponsScreen: View {
     @State private var enableDrawTwo = false
     @State private var showDiscardPile = false
     @State private var showDeckSettings = false
-    @State private var showInventoryReplacement = false
     @State private var weaponToAdd: Weapon?
     @State private var handledCardIDs: Set<UUID> = [] // Track which cards have been added to inventory or discarded
 
@@ -189,8 +188,8 @@ public struct WeaponsScreen: View {
             .sheet(isPresented: $showDeckSettings) {
                 DeckSettingsSheet(weaponsManager: weaponsManager)
             }
-            .sheet(isPresented: $showInventoryReplacement) {
-                if let weapon = weaponToAdd, let session = activeSession {
+            .sheet(item: $weaponToAdd) { weapon in
+                if let session = activeSession {
                     InventoryManagementSheet(
                         weaponToAdd: weapon,
                         session: session,
@@ -206,6 +205,12 @@ public struct WeaponsScreen: View {
                             }
                         }
                     )
+                } else {
+                    ContentUnavailableView {
+                        Label("No Active Session", systemImage: "exclamationmark.triangle")
+                    } description: {
+                        Text("Start a game session to add weapons to inventory")
+                    }
                 }
             }
         }
@@ -262,7 +267,6 @@ public struct WeaponsScreen: View {
 
         // No space - show replacement picker
         weaponToAdd = weapon
-        showInventoryReplacement = true
     }
 
     // MARK: - Draw Actions

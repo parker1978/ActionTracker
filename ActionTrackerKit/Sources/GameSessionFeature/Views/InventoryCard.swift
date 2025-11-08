@@ -21,8 +21,8 @@ struct InventoryCard: View {
     @Bindable var session: GameSession
     var weaponsManager: WeaponsManager
     @State private var showingInventorySheet = false
-    @State private var showingWeaponDetail = false
     @State private var selectedWeapon: Weapon?
+    @State private var weaponDetailDetent: PresentationDetent = .fraction(0.75)
 
     // Parse weapon names from stored strings
     private var activeWeaponsList: [String] {
@@ -109,25 +109,29 @@ struct InventoryCard: View {
         .sheet(isPresented: $showingInventorySheet) {
             InventoryManagementSheet(session: session, weaponsManager: weaponsManager)
         }
-        .sheet(isPresented: $showingWeaponDetail) {
-            if let weapon = selectedWeapon {
-                NavigationStack {
+        .sheet(item: $selectedWeapon) { weapon in
+            NavigationStack {
+                VStack(spacing: 0) {
                     ScrollView {
-                        WeaponCardView(weapon: weapon)
-                            .padding()
+                        VStack(spacing: 20) {
+                            WeaponCardView(weapon: weapon)
+                        }
+                        .padding()
                     }
-                    .navigationTitle(weapon.name)
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            Button("Done") {
-                                showingWeaponDetail = false
-                            }
+                    .scrollBounceBehavior(.basedOnSize)
+                }
+                .navigationTitle(weapon.name)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Done") {
+                            selectedWeapon = nil
                         }
                     }
                 }
-                .presentationDetents([.medium, .large])
             }
+            .presentationDetents([.fraction(0.75), .large], selection: $weaponDetailDetent)
+            .presentationDragIndicator(.visible)
         }
     }
 
@@ -147,7 +151,6 @@ struct InventoryCard: View {
                 if let weapon = findWeapon(byName: weaponName) {
                     Button {
                         selectedWeapon = weapon
-                        showingWeaponDetail = true
                     } label: {
                         weaponRow(weapon: weapon)
                     }
@@ -214,8 +217,8 @@ internal struct InventoryManagementSheet: View {
     @State private var userCancelled = false
     @State private var showingAddActiveWeapon = false
     @State private var showingAddInactiveWeapon = false
-    @State private var showingWeaponDetail = false
     @State private var selectedWeapon: Weapon?
+    @State private var weaponDetailDetent: PresentationDetent = .fraction(0.75)
     @State private var showingCapacityAlert = false
     @State private var capacityAlertMessage = ""
 
@@ -249,7 +252,6 @@ internal struct InventoryManagementSheet: View {
                                 onInfo: {
                                     if let weapon = findWeapon(byName: activeWeapons[index]) {
                                         selectedWeapon = weapon
-                                        showingWeaponDetail = true
                                     }
                                 }
                             )
@@ -266,7 +268,7 @@ internal struct InventoryManagementSheet: View {
                                     discardWeapon(activeWeapons[index])
                                     activeWeapons.remove(at: index)
                                 } label: {
-                                    Label("Delete", systemImage: "trash")
+                                    Label("Discard", systemImage: "trash")
                                 }
                             }
                         }
@@ -300,7 +302,6 @@ internal struct InventoryManagementSheet: View {
                                 onInfo: {
                                     if let weapon = findWeapon(byName: inactiveWeapons[index]) {
                                         selectedWeapon = weapon
-                                        showingWeaponDetail = true
                                     }
                                 }
                             )
@@ -317,7 +318,7 @@ internal struct InventoryManagementSheet: View {
                                     discardWeapon(inactiveWeapons[index])
                                     inactiveWeapons.remove(at: index)
                                 } label: {
-                                    Label("Delete", systemImage: "trash")
+                                    Label("Discard", systemImage: "trash")
                                 }
                             }
                         }
@@ -421,25 +422,29 @@ internal struct InventoryManagementSheet: View {
                     title: "Add Inactive Weapon"
                 )
             }
-            .sheet(isPresented: $showingWeaponDetail) {
-                if let weapon = selectedWeapon {
-                    NavigationStack {
+            .sheet(item: $selectedWeapon) { weapon in
+                NavigationStack {
+                    VStack(spacing: 0) {
                         ScrollView {
-                            WeaponCardView(weapon: weapon)
-                                .padding()
+                            VStack(spacing: 20) {
+                                WeaponCardView(weapon: weapon)
+                            }
+                            .padding()
                         }
-                        .navigationTitle(weapon.name)
-                        .navigationBarTitleDisplayMode(.inline)
-                        .toolbar {
-                            ToolbarItem(placement: .topBarTrailing) {
-                                Button("Done") {
-                                    showingWeaponDetail = false
-                                }
+                        .scrollBounceBehavior(.basedOnSize)
+                    }
+                    .navigationTitle(weapon.name)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Done") {
+                                selectedWeapon = nil
                             }
                         }
                     }
-                    .presentationDetents([.medium, .large])
                 }
+                .presentationDetents([.fraction(0.75), .large], selection: $weaponDetailDetent)
+                .presentationDragIndicator(.visible)
             }
         }
     }

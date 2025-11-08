@@ -14,7 +14,6 @@ import DataLayer
 public struct WeaponDiscardView: View {
     @Bindable var deckState: WeaponDeckState
     @Environment(\.dismiss) private var dismiss
-    @State private var showInventoryReplacement = false
     @State private var weaponToAdd: Weapon?
 
     // Access to active game session for inventory management
@@ -86,8 +85,8 @@ public struct WeaponDiscardView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showInventoryReplacement) {
-                if let weapon = weaponToAdd, let session = activeSession {
+            .sheet(item: $weaponToAdd) { weapon in
+                if let session = activeSession {
                     InventoryManagementSheet(
                         weaponToAdd: weapon,
                         session: session,
@@ -98,6 +97,12 @@ public struct WeaponDiscardView: View {
                             deckState.removeFromDiscard(weapon)
                         }
                     )
+                } else {
+                    ContentUnavailableView {
+                        Label("No Active Session", systemImage: "exclamationmark.triangle")
+                    } description: {
+                        Text("Start a game session to add weapons to inventory")
+                    }
                 }
             }
         }
@@ -133,7 +138,6 @@ public struct WeaponDiscardView: View {
 
         // No space - show replacement picker
         weaponToAdd = weapon
-        showInventoryReplacement = true
     }
 }
 
