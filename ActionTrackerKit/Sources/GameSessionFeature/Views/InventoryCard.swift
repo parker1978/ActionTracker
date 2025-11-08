@@ -176,13 +176,13 @@ struct InventoryCard: View {
                     statLabel(icon: "arrow.right", text: weapon.rangeDisplay)
                 }
                 if let dice = weapon.dice {
-                    statLabel(icon: "dice", text: "\\(dice)")
+                    statLabel(icon: "dice", text: String(dice))
                 }
                 if let accuracy = weapon.accuracy {
                     statLabel(icon: "target", text: accuracy)
                 }
                 if let damage = weapon.damage {
-                    statLabel(icon: "bolt.fill", text: "\\(damage)")
+                    statLabel(icon: "bolt.fill", text: String(damage))
                 }
             }
         }
