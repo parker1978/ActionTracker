@@ -473,7 +473,7 @@ internal struct InventoryManagementSheet: View {
             activeWeapons.remove(at: index)
             inactiveWeapons.append(weaponName)
         } else {
-            capacityAlertMessage = "Backpack is full. Maximum capacity is \\(3 + session.extraInventorySlots) slots."
+            capacityAlertMessage = "Backpack is full. Maximum capacity is \(3 + session.extraInventorySlots) slots."
             showingCapacityAlert = true
         }
     }
