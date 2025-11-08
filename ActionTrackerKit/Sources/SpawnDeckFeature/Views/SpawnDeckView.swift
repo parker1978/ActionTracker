@@ -11,13 +11,15 @@ import CoreDomain
 import SharedUI
 
 public struct SpawnDeckView: View {
-    @StateObject private var deckManager = SpawnDeckManager()
+    @ObservedObject var deckManager: SpawnDeckManager
     @State private var showingDiscardPile = false
     @State private var dragOffset: CGSize = .zero
     @State private var isAnimatingDiscard = false
     @State private var showCheckmark = false
 
-    public init() {}
+    public init(deckManager: SpawnDeckManager) {
+        self.deckManager = deckManager
+    }
 
     public var body: some View {
         NavigationStack {
@@ -286,5 +288,5 @@ public struct SpawnDeckView: View {
 }
 
 #Preview {
-    SpawnDeckView()
+    SpawnDeckView(deckManager: SpawnDeckManager())
 }

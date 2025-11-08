@@ -8,12 +8,16 @@
 import SwiftUI
 import SwiftData
 import CoreDomain
+import SpawnDeckFeature
 
 /// Sheet for selecting a character to start a new game session
 internal struct CharacterPickerSheet: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var allCharacters: [CoreDomain.Character]
     @Binding var isPresented: Bool
+
+    var weaponsManager: WeaponsManager
+    var spawnDeckManager: SpawnDeckManager
 
     /// Characters sorted with favorites first, then alphabetically
     var sortedCharacters: [CoreDomain.Character] {
@@ -50,6 +54,13 @@ internal struct CharacterPickerSheet: View {
 
     /// Creates and starts a new game session with the selected character
     private func startGame(with character: CoreDomain.Character) {
+        // Reset all weapon decks at current difficulty
+        weaponsManager.resetAllDecks()
+
+        // Reset spawn deck at current mode and difficulty
+        spawnDeckManager.loadDeck()
+
+        // Create and save the new game session
         let session = CoreDomain.GameSession(character: character)
         modelContext.insert(session)
         try? modelContext.save()

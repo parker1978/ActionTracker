@@ -13,6 +13,7 @@ public struct ContentView: View {
         weapons: WeaponRepository.shared.allWeapons,
         difficulty: .medium
     )
+    @State private var spawnDeckManager = SpawnDeckManager()
 
     public init() {}
 
@@ -20,7 +21,7 @@ public struct ContentView: View {
         if #available(iOS 26.0, *) {
             TabView(selection: $selectedTab) {
                 Tab("Actions", systemImage: "bolt.fill", value: 0) {
-                    ActionsScreen(weaponsManager: weaponsManager)
+                    ActionsScreen(weaponsManager: weaponsManager, spawnDeckManager: spawnDeckManager)
                 }
 
                 Tab("Characters", systemImage: "person.3.fill", value: 1) {
@@ -32,7 +33,7 @@ public struct ContentView: View {
                 }
 
                 Tab("Spawn Deck", systemImage: "rectangle.stack.fill", value: 3) {
-                    SpawnDeckView()
+                    SpawnDeckView(deckManager: spawnDeckManager)
                 }
 
                 Tab("Weapons", systemImage: "shield.lefthalf.filled", value: 4) {
@@ -45,7 +46,7 @@ public struct ContentView: View {
             // Fallback on earlier versions: Use a basic TabView without iOS 26-only modifiers
             TabView(selection: $selectedTab) {
                 // Use legacy tab item style for compatibility
-                ActionsScreen(weaponsManager: weaponsManager)
+                ActionsScreen(weaponsManager: weaponsManager, spawnDeckManager: spawnDeckManager)
                     .tabItem { Label("Actions", systemImage: "bolt.fill") }
                     .tag(0)
 
@@ -57,7 +58,7 @@ public struct ContentView: View {
                     .tabItem { Label("Skills", systemImage: "sparkles") }
                     .tag(2)
 
-                SpawnDeckView()
+                SpawnDeckView(deckManager: spawnDeckManager)
                     .tabItem { Label("Spawn Deck", systemImage: "rectangle.stack.fill") }
                     .tag(3)
 

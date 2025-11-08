@@ -9,11 +9,13 @@ import SwiftUI
 import SwiftData
 import CoreDomain
 import DataLayer
+import SpawnDeckFeature
 
 /// Main screen for the Actions tab
 /// Displays either a "start game" view or the active game session
 public struct ActionsScreen: View {
     public var weaponsManager: WeaponsManager
+    public var spawnDeckManager: SpawnDeckManager
     @Environment(\.modelContext) private var modelContext
 
     // Query for active (non-ended) game sessions
@@ -23,8 +25,9 @@ public struct ActionsScreen: View {
     @Query private var allCharacters: [CoreDomain.Character]
     @State private var showingCharacterPicker = false
 
-    public init(weaponsManager: WeaponsManager) {
+    public init(weaponsManager: WeaponsManager, spawnDeckManager: SpawnDeckManager) {
         self.weaponsManager = weaponsManager
+        self.spawnDeckManager = spawnDeckManager
     }
 
     public var body: some View {
@@ -38,7 +41,11 @@ public struct ActionsScreen: View {
             }
         }
         .sheet(isPresented: $showingCharacterPicker) {
-            CharacterPickerSheet(isPresented: $showingCharacterPicker)
+            CharacterPickerSheet(
+                isPresented: $showingCharacterPicker,
+                weaponsManager: weaponsManager,
+                spawnDeckManager: spawnDeckManager
+            )
         }
     }
 }

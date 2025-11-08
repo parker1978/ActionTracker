@@ -77,13 +77,14 @@ let package = Package(
         ),
 
         /// Game session and actions screens
-        /// Dependencies: CoreDomain, DataLayer, SharedUI
+        /// Dependencies: CoreDomain, DataLayer, SharedUI, SpawnDeckFeature
         .target(
             name: "GameSessionFeature",
             dependencies: [
                 "CoreDomain",
                 "DataLayer",
-                "SharedUI"
+                "SharedUI",
+                "SpawnDeckFeature"
             ]
         ),
 
