@@ -18,6 +18,8 @@ public struct NewCharacterView: View {
     @State private var name = ""
     @State private var notes = ""
     @State private var isFavorite = false
+    @State private var isTeen = false
+    @State private var maxHealth = 3
 
     // Skills stored as arrays for easier manipulation
     @State private var blueSkills: [String] = []
@@ -42,6 +44,21 @@ public struct NewCharacterView: View {
                         .textInputAutocapitalization(.words)
 
                     Toggle("Favorite", isOn: $isFavorite.animation())
+                }
+
+                Section {
+                    Toggle("Teen Character", isOn: $isTeen.animation())
+
+                    Stepper(value: $maxHealth, in: 1...5) {
+                        HStack {
+                            Text("Max Health")
+                            Spacer()
+                            Text("\(maxHealth)")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                } header: {
+                    Text("Character Type")
                 }
 
                 // Blue Skills Section
@@ -151,6 +168,37 @@ public struct NewCharacterView: View {
         .navigationBarTitleDisplayMode(.inline)
         #endif
         .onAppear { appear = true }
+        .onChange(of: isTeen) { oldValue, newValue in
+            let slipperyText = "Teen Character - Slippery: The Survivor does not spend extra Actions when they perform a Move Action out of a Zone containing Zombies. The Survivor also ignores Zombies when performing Move Actions (including those allowing them to cross several Zones, with the Sprint Skill for example)."
+
+            if newValue {
+                // Teen toggled ON
+                if maxHealth == 3 {
+                    maxHealth = 2
+                }
+
+                // Add Slippery text to notes if not already present
+                if !notes.contains(slipperyText) {
+                    if notes.isEmpty {
+                        notes = slipperyText
+                    } else {
+                        notes = slipperyText + "\n\n" + notes
+                    }
+                }
+            } else {
+                // Teen toggled OFF
+                if maxHealth == 2 {
+                    maxHealth = 3
+                }
+
+                // Remove Slippery text from notes
+                if notes.hasPrefix(slipperyText + "\n\n") {
+                    notes = String(notes.dropFirst(slipperyText.count + 2))
+                } else if notes == slipperyText {
+                    notes = ""
+                }
+            }
+        }
         .sheet(isPresented: $showingBlueSkillPicker) {
             SkillPickerView(
                 selectedSkills: $blueSkills,
@@ -181,6 +229,8 @@ public struct NewCharacterView: View {
             notes: notes.trimmingCharacters(in: .whitespacesAndNewlines),
             isFavorite: isFavorite,
             isBuiltIn: false,
+            teen: isTeen,
+            health: maxHealth,
             blueSkills: blueSkills.joined(separator: ";"),
             orangeSkills: orangeSkills.joined(separator: ";"),
             redSkills: redSkills.joined(separator: ";")
