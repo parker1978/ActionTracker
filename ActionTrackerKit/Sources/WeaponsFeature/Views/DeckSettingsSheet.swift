@@ -203,13 +203,6 @@ public struct DeckSettingsSheet: View {
 
     private var deckManagementSection: some View {
         Section {
-            HStack {
-                Label("Current Difficulty", systemImage: "slider.horizontal.3")
-                Spacer()
-                Text(weaponsManager.currentDifficulty.displayName)
-                    .foregroundStyle(.secondary)
-            }
-
             Button(role: .destructive) {
                 showResetConfirmation = true
             } label: {

@@ -3,7 +3,7 @@
 //  CoreDomain
 //
 //  Weapon deck models for Zombicide 2nd Edition.
-//  Supports Starting, Regular, and Ultrared decks with difficulty modes.
+//  Supports Starting, Regular, and Ultrared decks.
 //
 
 import Foundation
@@ -71,16 +71,6 @@ public enum DeckType: String, Codable, CaseIterable, Identifiable {
         case .ultrared: return .red
         }
     }
-}
-
-// MARK: - Difficulty Mode
-
-public enum DifficultyMode: String, Codable, CaseIterable {
-    case easy = "Easy"
-    case medium = "Medium"
-    case hard = "Hard"
-
-    public var displayName: String { rawValue }
 }
 
 // MARK: - Combat Stats

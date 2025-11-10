@@ -16,7 +16,6 @@ import CoreDomain
 @Observable
 public class WeaponDeckState {
     public let deckType: DeckType
-    public var difficulty: DifficultyMode
 
     public private(set) var remaining: [Weapon] = []
     public private(set) var discard: [Weapon] = []
@@ -26,9 +25,8 @@ public class WeaponDeckState {
     // Full weapon list from repository
     private var sourceWeapons: [Weapon]
 
-    public init(deckType: DeckType, difficulty: DifficultyMode, weapons: [Weapon]) {
+    public init(deckType: DeckType, weapons: [Weapon]) {
         self.deckType = deckType
-        self.difficulty = difficulty
         self.sourceWeapons = weapons.filter { $0.deck == deckType }
         self.remaining = []
 
@@ -37,9 +35,9 @@ public class WeaponDeckState {
 
     // MARK: - Deck Management
 
-    /// Reset deck to initial state with current difficulty
+    /// Reset deck to initial state
     public func reset() {
-        remaining = buildDeck(mode: difficulty)
+        remaining = buildDeck()
         shuffle()
         discard.removeAll()
         recentDraws.removeAll()
@@ -85,12 +83,6 @@ public class WeaponDeckState {
                 i += 1
             }
         }
-    }
-
-    /// Change difficulty and reset deck
-    public func changeDifficulty(to mode: DifficultyMode) {
-        difficulty = mode
-        reset()
     }
 
     /// Update weapon list (for expansion filtering) and reset
@@ -183,58 +175,15 @@ public class WeaponDeckState {
         recentDraws = Array(drawHistory.prefix(3))
     }
 
-    // MARK: - Deck Building with Difficulty
+    // MARK: - Deck Building
 
-    /// Build deck with difficulty weighting applied
-    private func buildDeck(mode: DifficultyMode) -> [Weapon] {
+    /// Build deck with standard composition
+    private func buildDeck() -> [Weapon] {
         var deck: [Weapon] = []
 
-        switch mode {
-        case .easy:
-            // Weight toward powerful weapons
-            for weapon in sourceWeapons {
-                let baseCount = weapon.count
-                var effectiveCount = baseCount
-
-                if let dice = weapon.dice, dice >= 4 {
-                    effectiveCount += baseCount
-                }
-                if let damage = weapon.damage, damage >= 3 {
-                    effectiveCount += baseCount
-                }
-
-                for _ in 0..<effectiveCount {
-                    deck.append(weapon.duplicate())
-                }
-            }
-
-        case .medium:
-            // Standard deck composition
-            for weapon in sourceWeapons {
-                for _ in 0..<weapon.count {
-                    deck.append(weapon.duplicate())
-                }
-            }
-
-        case .hard:
-            // Weight toward weaker weapons
-            for weapon in sourceWeapons {
-                let baseCount = weapon.count
-                var effectiveCount = baseCount
-
-                if let dice = weapon.dice, dice <= 2 {
-                    effectiveCount += baseCount
-                }
-                if let damage = weapon.damage, damage <= 1 {
-                    effectiveCount += baseCount
-                }
-                if let accuracy = weapon.accuracyNumeric, accuracy >= 5 {
-                    effectiveCount += baseCount
-                }
-
-                for _ in 0..<effectiveCount {
-                    deck.append(weapon.duplicate())
-                }
+        for weapon in sourceWeapons {
+            for _ in 0..<weapon.count {
+                deck.append(weapon.duplicate())
             }
         }
 
@@ -244,8 +193,8 @@ public class WeaponDeckState {
     /// Reshuffle discard pile back into deck
     private func reshuffleDiscardIntoDeck() {
         guard !discard.isEmpty else {
-            // Emergency: rebuild with current difficulty if both empty
-            remaining = buildDeck(mode: difficulty)
+            // Emergency: rebuild deck if both empty
+            remaining = buildDeck()
             shuffle()
             return
         }

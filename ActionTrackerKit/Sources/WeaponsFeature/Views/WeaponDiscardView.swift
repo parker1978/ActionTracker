@@ -237,7 +237,6 @@ struct WeaponDiscardRow: View {
 #Preview {
     WeaponDiscardView(deckState: WeaponDeckState(
         deckType: .regular,
-        difficulty: .medium,
         weapons: WeaponRepository.shared.allWeapons
     ))
 }

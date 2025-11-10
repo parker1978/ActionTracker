@@ -10,8 +10,7 @@ import SpawnDeckFeature
 public struct ContentView: View {
     @State private var selectedTab = 0
     @State private var weaponsManager = WeaponsManager(
-        weapons: WeaponRepository.shared.allWeapons,
-        difficulty: .medium
+        weapons: WeaponRepository.shared.allWeapons
     )
     @State private var spawnDeckManager = SpawnDeckManager()
 

@@ -15,8 +15,6 @@ import SharedUI
 public struct WeaponsScreen: View {
     @Bindable var weaponsManager: WeaponsManager
     @State private var selectedDeck: DeckType = .regular
-    @State private var showDifficultyConfirmation = false
-    @State private var pendingDifficulty: DifficultyMode?
     @State private var drawnCards: [Weapon] = []
     @State private var showCardDetail = false
     @State private var enableDrawTwo = false
@@ -41,11 +39,6 @@ public struct WeaponsScreen: View {
     public var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Difficulty Mode Picker
-                difficultyPicker
-                    .padding()
-                    .background(Color(.systemGroupedBackground))
-
                 // Deck Switcher (Segmented Control)
                 deckSwitcher
                     .padding(.horizontal)
@@ -83,19 +76,6 @@ public struct WeaponsScreen: View {
                         Label("Reset", systemImage: "arrow.clockwise")
                     }
                 }
-            }
-            .alert("Change Difficulty?", isPresented: $showDifficultyConfirmation) {
-                Button("Cancel", role: .cancel) {
-                    pendingDifficulty = nil
-                }
-                Button("Reset & Change", role: .destructive) {
-                    if let newDifficulty = pendingDifficulty {
-                        weaponsManager.currentDifficulty = newDifficulty
-                    }
-                    pendingDifficulty = nil
-                }
-            } message: {
-                Text("Changing difficulty will reset and reshuffle all three decks. Continue?")
             }
             .sheet(isPresented: $showCardDetail, onDismiss: {
                 // Auto-discard only unhandled cards when sheet is dismissed
@@ -292,35 +272,6 @@ public struct WeaponsScreen: View {
         weaponsManager.getDeck(selectedDeck)
     }
 
-    // MARK: - Difficulty Picker
-
-    private var difficultyPicker: some View {
-        VStack(spacing: 8) {
-            Text("Difficulty")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-
-            Picker("Difficulty", selection: difficultyBinding) {
-                ForEach(DifficultyMode.allCases, id: \.self) { mode in
-                    Text(mode.displayName).tag(mode)
-                }
-            }
-            .pickerStyle(.segmented)
-        }
-    }
-
-    private var difficultyBinding: Binding<DifficultyMode> {
-        Binding(
-            get: { weaponsManager.currentDifficulty },
-            set: { newValue in
-                if newValue != weaponsManager.currentDifficulty {
-                    pendingDifficulty = newValue
-                    showDifficultyConfirmation = true
-                }
-            }
-        )
-    }
-
     // MARK: - Deck Switcher
 
     private var deckSwitcher: some View {
@@ -438,7 +389,6 @@ public struct WeaponsScreen: View {
 
 #Preview {
     WeaponsScreen(weaponsManager: WeaponsManager(
-        weapons: WeaponRepository.shared.allWeapons,
-        difficulty: .medium
+        weapons: WeaponRepository.shared.allWeapons
     ))
 }
