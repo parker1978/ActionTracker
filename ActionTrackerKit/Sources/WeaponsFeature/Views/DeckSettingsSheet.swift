@@ -16,8 +16,7 @@ public struct DeckSettingsSheet: View {
 
     @State private var selectedExpansions: Set<String> = []
     @State private var isCustomExpansionSelection = false
-    @State private var showDeckContents = false
-    @State private var selectedDeckForContents: DeckType = .regular
+    @State private var selectedDeckForContents: DeckType?
     @State private var showResetConfirmation = false
 
     public init(weaponsManager: WeaponsManager) {
@@ -64,8 +63,8 @@ public struct DeckSettingsSheet: View {
                     }
                 }
             }
-            .sheet(isPresented: $showDeckContents) {
-                DeckContentsView(deckState: weaponsManager.getDeck(selectedDeckForContents))
+            .sheet(item: $selectedDeckForContents) { deckType in
+                DeckContentsView(deckState: weaponsManager.getDeck(deckType))
             }
             .alert("Reset All Decks?", isPresented: $showResetConfirmation) {
                 Button("Cancel", role: .cancel) {}
@@ -119,7 +118,6 @@ public struct DeckSettingsSheet: View {
             ForEach(DeckType.allCases, id: \.self) { deckType in
                 Button {
                     selectedDeckForContents = deckType
-                    showDeckContents = true
                 } label: {
                     HStack {
                         Circle()
@@ -244,7 +242,10 @@ public struct DeckSettingsSheet: View {
     private func expansionWeaponCount(_ expansion: String) -> Int {
         // Map "Core Set" display name back to empty string for counting
         let actualExpansion = expansion == "Core Set" ? "" : expansion
-        return WeaponRepository.shared.allWeapons.filter { $0.expansion == actualExpansion }.count
+        // Sum up the count property to get total cards (not just unique weapons)
+        return WeaponRepository.shared.allWeapons
+            .filter { $0.expansion == actualExpansion }
+            .reduce(0) { $0 + $1.count }
     }
 
     private func getFilteredWeapons() -> [Weapon] {

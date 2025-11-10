@@ -11,11 +11,13 @@ import SwiftUI
 
 // MARK: - Weapon Category
 
-/// Type of weapon: Melee, Ranged, or both
+/// Type of weapon: Melee, Ranged, Dual (both), Bonus items, or Zombie cards
 public enum WeaponCategory: String, Codable, CaseIterable {
     case melee = "Melee"
     case ranged = "Ranged"
-    case meleeRanged = "Melee Ranged"
+    case dual = "Dual"
+    case bonus = "Bonus"
+    case zombie = "Zombie"
 
     public var displayName: String { rawValue }
 
@@ -23,7 +25,9 @@ public enum WeaponCategory: String, Codable, CaseIterable {
         switch self {
         case .melee: return "figure.fencing"
         case .ranged: return "figure.archery"
-        case .meleeRanged: return "bolt.trianglebadge.exclamationmark"
+        case .dual: return "bolt.trianglebadge.exclamationmark"
+        case .bonus: return "gift.fill"
+        case .zombie: return "figure.walk"
         }
     }
 
@@ -31,7 +35,9 @@ public enum WeaponCategory: String, Codable, CaseIterable {
         switch self {
         case .melee: return .orange
         case .ranged: return .purple
-        case .meleeRanged: return .blue
+        case .dual: return .blue
+        case .bonus: return .green
+        case .zombie: return .red
         }
     }
 }
@@ -50,11 +56,12 @@ public enum AmmoType: String, Codable {
 
 // MARK: - Deck Type
 
-public enum DeckType: String, Codable, CaseIterable {
+public enum DeckType: String, Codable, CaseIterable, Identifiable {
     case starting = "Starting"
     case regular = "Regular"
     case ultrared = "Ultrared"
 
+    public var id: String { rawValue }
     public var displayName: String { rawValue }
 
     public var color: Color {
@@ -76,6 +83,82 @@ public enum DifficultyMode: String, Codable, CaseIterable {
     public var displayName: String { rawValue }
 }
 
+// MARK: - Combat Stats
+
+/// Melee combat statistics
+public struct MeleeStats: Codable, Hashable {
+    public let range: Int
+    public let dice: Int
+    public let accuracy: Int  // 0-6, 0=100% auto-hit, displayed as "3+" unless 6
+    public let damage: Int
+    public let overload: Int  // 0 = no overload, >0 = overload dice bonus
+    public let killNoise: Bool
+
+    public init(range: Int, dice: Int, accuracy: Int, damage: Int, overload: Int, killNoise: Bool) {
+        self.range = range
+        self.dice = dice
+        self.accuracy = accuracy
+        self.damage = damage
+        self.overload = overload
+        self.killNoise = killNoise
+    }
+
+    /// Formatted accuracy display (e.g., "3+", "4+", "6", or "100%")
+    public var accuracyDisplay: String {
+        if accuracy == 0 {
+            return "100%"
+        } else if accuracy == 6 {
+            return "6"
+        } else {
+            return "\(accuracy)+"
+        }
+    }
+
+    /// Whether this accuracy is auto-hit (100%)
+    public var isAutoHit: Bool {
+        accuracy == 0
+    }
+}
+
+/// Ranged combat statistics
+public struct RangedStats: Codable, Hashable {
+    public let ammoType: AmmoType
+    public let rangeMin: Int
+    public let rangeMax: Int
+    public let dice: Int
+    public let accuracy: Int  // 0-6, 0=100% auto-hit, displayed as "3+" unless 6
+    public let damage: Int
+    public let overload: Int  // 0 = no overload, >0 = overload dice bonus
+    public let killNoise: Bool
+
+    public init(ammoType: AmmoType, rangeMin: Int, rangeMax: Int, dice: Int, accuracy: Int, damage: Int, overload: Int, killNoise: Bool) {
+        self.ammoType = ammoType
+        self.rangeMin = rangeMin
+        self.rangeMax = rangeMax
+        self.dice = dice
+        self.accuracy = accuracy
+        self.damage = damage
+        self.overload = overload
+        self.killNoise = killNoise
+    }
+
+    /// Formatted accuracy display (e.g., "3+", "4+", "6", or "100%")
+    public var accuracyDisplay: String {
+        if accuracy == 0 {
+            return "100%"
+        } else if accuracy == 6 {
+            return "6"
+        } else {
+            return "\(accuracy)+"
+        }
+    }
+
+    /// Whether this accuracy is auto-hit (100%)
+    public var isAutoHit: Bool {
+        accuracy == 0
+    }
+}
+
 // MARK: - Weapon Model
 
 /// Represents a weapon card from the Equipment deck
@@ -89,17 +172,21 @@ public struct Weapon: Identifiable, Codable, Hashable {
     public let count: Int  // Number of copies in the deck
     public let category: WeaponCategory
 
-    // Combat Stats
+    // New XML Format: Separate Melee/Ranged Stats
+    public let meleeStats: MeleeStats?
+    public let rangedStats: RangedStats?
+
+    // Legacy Combat Stats (kept for backward compatibility during transition)
     public let dice: Int?
     public let accuracy: String?  // e.g., "3+", "4+", "5+"
     public let damage: Int?
 
-    // Range (for ranged weapons)
+    // Legacy Range (for ranged weapons)
     public let rangeMin: Int?
     public let rangeMax: Int?
     public let range: Int?  // For melee weapons (always 0)
 
-    // Ammo
+    // Legacy Ammo
     public let ammoType: AmmoType
 
     // Abilities
@@ -122,20 +209,22 @@ public struct Weapon: Identifiable, Codable, Hashable {
         deck: DeckType,
         count: Int,
         category: WeaponCategory,
-        dice: Int?,
-        accuracy: String?,
-        damage: Int?,
-        rangeMin: Int?,
-        rangeMax: Int?,
-        range: Int?,
-        ammoType: AmmoType,
-        openDoor: Bool,
-        doorNoise: Bool,
-        killNoise: Bool,
-        dual: Bool,
-        overload: Bool,
-        overloadDice: Int?,
-        special: String
+        meleeStats: MeleeStats? = nil,
+        rangedStats: RangedStats? = nil,
+        dice: Int? = nil,
+        accuracy: String? = nil,
+        damage: Int? = nil,
+        rangeMin: Int? = nil,
+        rangeMax: Int? = nil,
+        range: Int? = nil,
+        ammoType: AmmoType = .none,
+        openDoor: Bool = false,
+        doorNoise: Bool = false,
+        killNoise: Bool = false,
+        dual: Bool = false,
+        overload: Bool = false,
+        overloadDice: Int? = nil,
+        special: String = ""
     ) {
         self.id = id
         self.name = name
@@ -143,6 +232,8 @@ public struct Weapon: Identifiable, Codable, Hashable {
         self.deck = deck
         self.count = count
         self.category = category
+        self.meleeStats = meleeStats
+        self.rangedStats = rangedStats
         self.dice = dice
         self.accuracy = accuracy
         self.damage = damage
@@ -163,6 +254,16 @@ public struct Weapon: Identifiable, Codable, Hashable {
 
     /// Formatted range display (e.g., "0", "0-1", "1-3")
     public var rangeDisplay: String {
+        // Prefer new format
+        if let rangedStats = rangedStats {
+            let min = rangedStats.rangeMin
+            let max = rangedStats.rangeMax
+            return min == max ? "\(min)" : "\(min)-\(max)"
+        } else if let meleeStats = meleeStats {
+            return "\(meleeStats.range)"
+        }
+
+        // Fall back to legacy format
         if let range = range {
             return "\(range)"
         } else if let min = rangeMin, let max = rangeMax {
@@ -173,19 +274,35 @@ public struct Weapon: Identifiable, Codable, Hashable {
 
     /// Whether this is a bonus item (not a weapon)
     public var isBonus: Bool {
-        category == .melee && dice == nil && damage == nil && name.contains("Flashlight", "Water", "Bag", "Food", "Bullets", "Shells")
+        category == .bonus
     }
 
     /// Whether this is a zombie card (AAAHH!!)
     public var isZombieCard: Bool {
-        name.contains("AAAHH")
+        category == .zombie
     }
 
     /// Power score for difficulty weighting (higher = more powerful)
     public var powerScore: Int {
-        let diceValue = dice ?? 0
-        let damageValue = damage ?? 0
-        let accuracyValue = accuracyNumeric ?? 0
+        // Use new format if available
+        var diceValue = 0
+        var damageValue = 0
+        var accuracyValue = 0
+
+        if let melee = meleeStats {
+            diceValue = melee.dice
+            damageValue = melee.damage
+            accuracyValue = melee.accuracy
+        } else if let ranged = rangedStats {
+            diceValue = ranged.dice
+            damageValue = ranged.damage
+            accuracyValue = ranged.accuracy
+        } else {
+            // Fall back to legacy
+            diceValue = dice ?? 0
+            damageValue = damage ?? 0
+            accuracyValue = accuracyNumeric ?? 0
+        }
 
         // Higher dice and damage = more powerful
         // Lower accuracy needed (e.g., 3+ vs 6) = more powerful
@@ -208,6 +325,8 @@ public struct Weapon: Identifiable, Codable, Hashable {
             deck: deck,
             count: count,
             category: category,
+            meleeStats: meleeStats,
+            rangedStats: rangedStats,
             dice: dice,
             accuracy: accuracy,
             damage: damage,

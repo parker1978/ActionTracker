@@ -41,7 +41,8 @@ let package = Package(
             dependencies: ["CoreDomain"],
             resources: [
                 .copy("Resources/characters.json"),
-                .copy("Resources/weapons.json")
+                .copy("Resources/weapons.xml"),
+                .copy("Resources/weapons.xsd")
             ]
         ),
 

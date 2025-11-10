@@ -91,62 +91,211 @@ public struct WeaponCardView: View {
 
     private var combatStats: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Combat Stats")
-                .font(.headline)
-
-            // Use simple HStack/VStack layout for better performance with small item count
-            VStack(spacing: 12) {
-                // First row: Range, Dice, Accuracy
-                HStack(spacing: 12) {
-                    StatBadge(
-                        icon: "arrow.right",
-                        label: "Range",
-                        value: weapon.rangeDisplay
-                    )
-
-                    if let dice = weapon.dice {
-                        StatBadge(
-                            icon: "dice",
-                            label: "Dice",
-                            value: "\(dice)"
-                        )
-                    }
-
-                    if let accuracy = weapon.accuracy {
-                        StatBadge(
-                            icon: "target",
-                            label: "Accuracy",
-                            value: accuracy
-                        )
+            // For Dual weapons, show both Melee and Ranged sections
+            if weapon.category == .dual {
+                // Melee Section
+                if let meleeStats = weapon.meleeStats {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Melee Combat Stats")
+                            .font(.headline)
+                        meleeStatsView(meleeStats)
                     }
                 }
 
-                // Second row: Damage, Ammo, Overload
-                HStack(spacing: 12) {
-                    if let damage = weapon.damage {
-                        StatBadge(
-                            icon: "bolt.fill",
-                            label: "Damage",
-                            value: "\(damage)"
-                        )
+                // Ranged Section
+                if let rangedStats = weapon.rangedStats {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Ranged Combat Stats")
+                            .font(.headline)
+                        rangedStatsView(rangedStats)
                     }
+                }
+            }
+            // For Melee-only weapons
+            else if weapon.category == .melee, let meleeStats = weapon.meleeStats {
+                Text("Combat Stats")
+                    .font(.headline)
+                meleeStatsView(meleeStats)
+            }
+            // For Ranged-only weapons
+            else if weapon.category == .ranged, let rangedStats = weapon.rangedStats {
+                Text("Combat Stats")
+                    .font(.headline)
+                rangedStatsView(rangedStats)
+            }
+            // Legacy fallback for old format
+            else {
+                Text("Combat Stats")
+                    .font(.headline)
+                legacyStatsView
+            }
+        }
+    }
 
-                    if weapon.ammoType != .none {
-                        StatBadge(
-                            icon: "circle.grid.3x3.fill",
-                            label: "Ammo",
-                            value: weapon.ammoType.displayName
-                        )
-                    }
+    private func meleeStatsView(_ stats: MeleeStats) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Build array of badges to display
+            let badges = buildMeleeBadges(stats)
 
-                    if weapon.overload {
-                        let overloadValue = weapon.overloadDice.map { "+\($0)" } ?? "Yes"
-                        StatBadge(
-                            icon: "exclamationmark.triangle",
-                            label: "Overload",
-                            value: overloadValue
-                        )
-                    }
+            // Use LazyVGrid with flexible columns
+            let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 4)
+
+            LazyVGrid(columns: columns, spacing: 12) {
+                ForEach(Array(badges.enumerated()), id: \.offset) { _, badge in
+                    badge
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func buildMeleeBadges(_ stats: MeleeStats) -> [AnyView] {
+        var badges: [AnyView] = []
+
+        // Always show Range
+        badges.append(AnyView(StatBadge(icon: "arrow.right", label: "Range", value: "\(stats.range)")))
+
+        // Show Dice only if > 0
+        if stats.dice > 0 {
+            badges.append(AnyView(StatBadge(icon: "dice", label: "Dice", value: "\(stats.dice)")))
+        }
+
+        // Show Overload only if > 0
+        if stats.overload > 0 {
+            badges.append(AnyView(StatBadge(icon: "exclamationmark.triangle", label: "Overload", value: "+\(stats.overload)")))
+        }
+
+        // Accuracy badge with special styling for 100%
+        if stats.isAutoHit {
+            badges.append(AnyView(StatBadge(icon: "target", label: "Accuracy", value: stats.accuracyDisplay, backgroundColor: Color.green.opacity(0.2))))
+        } else {
+            badges.append(AnyView(StatBadge(icon: "target", label: "Accuracy", value: stats.accuracyDisplay)))
+        }
+
+        // Show Damage only if > 0
+        if stats.damage > 0 {
+            badges.append(AnyView(StatBadge(icon: "bolt.fill", label: "Damage", value: "\(stats.damage)")))
+        }
+
+        return badges
+    }
+
+    private func rangedStatsView(_ stats: RangedStats) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Build array of badges to display
+            let badges = buildRangedBadges(stats)
+
+            // Use LazyVGrid with flexible columns
+            let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 4)
+
+            LazyVGrid(columns: columns, spacing: 12) {
+                ForEach(Array(badges.enumerated()), id: \.offset) { _, badge in
+                    badge
+                }
+            }
+
+            // Ammo as pill capsule below badges
+            if stats.ammoType != .none {
+                HStack(spacing: 4) {
+                    Image(systemName: "circle.grid.3x3.fill")
+                        .font(.caption)
+                    Text(stats.ammoType.displayName)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Capsule().fill(Color(.systemGray5)))
+                .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func buildRangedBadges(_ stats: RangedStats) -> [AnyView] {
+        var badges: [AnyView] = []
+
+        // Always show Range
+        let rangeDisplay = stats.rangeMin == stats.rangeMax ? "\(stats.rangeMin)" : "\(stats.rangeMin)-\(stats.rangeMax)"
+        badges.append(AnyView(StatBadge(icon: "arrow.right", label: "Range", value: rangeDisplay)))
+
+        // Show Dice only if > 0
+        if stats.dice > 0 {
+            badges.append(AnyView(StatBadge(icon: "dice", label: "Dice", value: "\(stats.dice)")))
+        }
+
+        // Show Overload only if > 0
+        if stats.overload > 0 {
+            badges.append(AnyView(StatBadge(icon: "exclamationmark.triangle", label: "Overload", value: "+\(stats.overload)")))
+        }
+
+        // Accuracy badge with special styling for 100%
+        if stats.isAutoHit {
+            badges.append(AnyView(StatBadge(icon: "target", label: "Accuracy", value: stats.accuracyDisplay, backgroundColor: Color.green.opacity(0.2))))
+        } else {
+            badges.append(AnyView(StatBadge(icon: "target", label: "Accuracy", value: stats.accuracyDisplay)))
+        }
+
+        // Show Damage only if > 0
+        if stats.damage > 0 {
+            badges.append(AnyView(StatBadge(icon: "bolt.fill", label: "Damage", value: "\(stats.damage)")))
+        }
+
+        return badges
+    }
+
+    private var legacyStatsView: some View {
+        VStack(spacing: 12) {
+            // First row: Range, Dice, Accuracy
+            HStack(spacing: 12) {
+                StatBadge(
+                    icon: "arrow.right",
+                    label: "Range",
+                    value: weapon.rangeDisplay
+                )
+
+                if let dice = weapon.dice {
+                    StatBadge(
+                        icon: "dice",
+                        label: "Dice",
+                        value: "\(dice)"
+                    )
+                }
+
+                if let accuracy = weapon.accuracy {
+                    StatBadge(
+                        icon: "target",
+                        label: "Accuracy",
+                        value: accuracy
+                    )
+                }
+            }
+
+            // Second row: Damage, Ammo, Overload
+            HStack(spacing: 12) {
+                if let damage = weapon.damage {
+                    StatBadge(
+                        icon: "bolt.fill",
+                        label: "Damage",
+                        value: "\(damage)"
+                    )
+                }
+
+                if weapon.ammoType != .none {
+                    StatBadge(
+                        icon: "circle.grid.3x3.fill",
+                        label: "Ammo",
+                        value: weapon.ammoType.displayName
+                    )
+                }
+
+                if weapon.overload {
+                    let overloadValue = weapon.overloadDice.map { "+\($0)" } ?? "Yes"
+                    StatBadge(
+                        icon: "exclamationmark.triangle",
+                        label: "Overload",
+                        value: overloadValue
+                    )
                 }
             }
         }
@@ -156,34 +305,52 @@ public struct WeaponCardView: View {
 
     private var abilitiesSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Abilities")
-                .font(.headline)
+            // Only show abilities section if weapon has any abilities
+            let hasAbilities = weapon.dual || weapon.openDoor || hasKillNoise || weapon.category == .dual
 
-            FlowLayout(spacing: 8) {
-                if weapon.dual {
-                    AbilityTag(icon: "02.circle", text: "Dual", color: .blue)
-                }
+            if hasAbilities {
+                Text("Abilities")
+                    .font(.headline)
 
-                if weapon.openDoor {
-                    AbilityTag(
-                        icon: weapon.doorNoise ? "door.left.hand.open" : "door.left.hand.closed",
-                        text: weapon.doorNoise ? "Open Door (Noise)" : "Open Door",
-                        color: .green
-                    )
-                }
+                FlowLayout(spacing: 8) {
+                    if weapon.dual {
+                        AbilityTag(icon: "02.circle", text: "Dual", color: .blue)
+                    }
 
-                if weapon.killNoise {
-                    AbilityTag(icon: "speaker.wave.3", text: "Kill Noise", color: .orange)
-                } else if !weapon.isBonus && !weapon.isZombieCard {
-                    AbilityTag(icon: "speaker.slash", text: "Silent", color: .gray)
-                }
+                    if weapon.openDoor {
+                        AbilityTag(
+                            icon: weapon.doorNoise ? "door.left.hand.open" : "door.left.hand.closed",
+                            text: weapon.doorNoise ? "Open Door (Noise)" : "Open Door",
+                            color: .green
+                        )
+                    }
 
-                // Melee Ranged special indicator
-                if weapon.category == .meleeRanged {
-                    AbilityTag(icon: "bolt.trianglebadge.exclamationmark", text: "Dual Mode", color: .purple)
+                    // Kill noise handling based on new format
+                    if hasKillNoise {
+                        AbilityTag(icon: "speaker.wave.3", text: "Kill Noise", color: .orange)
+                    } else if !weapon.isBonus && !weapon.isZombieCard {
+                        AbilityTag(icon: "speaker.slash", text: "Silent", color: .gray)
+                    }
+
+                    // Dual Mode special indicator
+                    if weapon.category == .dual {
+                        AbilityTag(icon: "bolt.trianglebadge.exclamationmark", text: "Dual Mode", color: .purple)
+                    }
                 }
             }
         }
+    }
+
+    private var hasKillNoise: Bool {
+        // Check new format first
+        if let meleeStats = weapon.meleeStats, meleeStats.killNoise {
+            return true
+        }
+        if let rangedStats = weapon.rangedStats, rangedStats.killNoise {
+            return true
+        }
+        // Fall back to legacy format
+        return weapon.killNoise
     }
 
     // MARK: - Special
@@ -212,11 +379,13 @@ public struct StatBadge: View {
     let icon: String
     let label: String
     let value: String
+    let backgroundColor: Color
 
-    public init(icon: String, label: String, value: String) {
+    public init(icon: String, label: String, value: String, backgroundColor: Color? = nil) {
         self.icon = icon
         self.label = label
         self.value = value
+        self.backgroundColor = backgroundColor ?? Color(.secondarySystemGroupedBackground)
     }
 
     public var body: some View {
@@ -236,7 +405,7 @@ public struct StatBadge: View {
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color(.secondarySystemGroupedBackground))
+                .fill(backgroundColor)
         )
     }
 }
@@ -296,26 +465,34 @@ public struct AbilityTag: View {
                 special: ""
             ))
 
-            // Gunblade example
+            // Gunblade example (Dual weapon)
             WeaponCardView(weapon: Weapon(
                 name: "Gunblade",
-                expansion: "Core",
+                expansion: "Zombicide 2nd Edition",
                 deck: .ultrared,
                 count: 1,
-                category: .meleeRanged,
-                dice: 2,
-                accuracy: "4+",
-                damage: 2,
-                rangeMin: 0,
-                rangeMax: 1,
-                range: 0,
-                ammoType: .bullets,
+                category: .dual,
+                meleeStats: MeleeStats(
+                    range: 0,
+                    dice: 2,
+                    accuracy: 4,
+                    damage: 2,
+                    overload: 0,
+                    killNoise: false
+                ),
+                rangedStats: RangedStats(
+                    ammoType: .bullets,
+                    rangeMin: 0,
+                    rangeMax: 1,
+                    dice: 1,
+                    accuracy: 4,
+                    damage: 2,
+                    overload: 0,
+                    killNoise: true
+                ),
                 openDoor: false,
                 doorNoise: false,
-                killNoise: true,
-                dual: true,
-                overload: false,
-                overloadDice: nil,
+                dual: false,
                 special: "For Melee: Roll 4 dice. No kill noise."
             ))
         }

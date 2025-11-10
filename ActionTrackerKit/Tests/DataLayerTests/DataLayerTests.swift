@@ -154,7 +154,7 @@ final class DataLayerTests: XCTestCase {
     }
 
     func testWeaponRepositoryDataVersion() {
-        XCTAssertEqual(WeaponRepository.WEAPONS_DATA_VERSION, "1.0.0")
+        XCTAssertEqual(WeaponRepository.WEAPONS_DATA_VERSION, "2.2.0")
     }
 
     func testWeaponRepositoryExpansions() {

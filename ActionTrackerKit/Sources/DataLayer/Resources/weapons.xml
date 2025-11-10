@@ -1,0 +1,2229 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Weapons xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="weapons.xsd">
+  <Weapon>
+    <Name>Crowbar</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Starting</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>1</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>1</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Fire Axe</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Starting</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>1</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Ka-Bar</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Starting</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>1</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special>Add +1 die to another equipped Melee weapon.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Pistol</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Starting</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Rifle</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Starting</Deck>
+    <Count>2</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>1</Range_Min>
+      <Range_Max>3</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>AAAHH!!</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Regular</Deck>
+    <Count>4</Count>
+    <Category>Zombie</Category>
+    <Special>Place a Walker in the Zone immediately and discard this card.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Canned Food</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Bonus</Category>
+    <Special>Discard: Gain 3 AP. May be used in the backpack.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Chainsaw</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>5</Dice>
+      <Accuracy>5</Accuracy>
+      <Damage>2</Damage>
+      <Overload>3</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Fire Axe</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Regular</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>1</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Flashlight</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Bonus</Category>
+    <Special>Search: Draw 2 cards. Light Source. May be used in the backpack.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Katana</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>2</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>1</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Kukri</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>2</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Machete</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>1</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Moltov</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Regular</Deck>
+    <Count>4</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type />
+      <Range_Min>1</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>0</Dice>
+      <Accuracy>0</Accuracy>
+      <Damage>0</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Discard from Hand: Eliminate all Actors in the Targeted Zone</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Pistol</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Regular</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Sawed-Off</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Regular</Deck>
+    <Count>4</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Shells</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>2</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special>Reload.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Sniper Rifle</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>1</Range_Min>
+      <Range_Max>3</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Sniper.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Water</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Bonus</Category>
+    <Special>Discard: Gain 3 AP. May be used in the backpack.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>AAAHH!!</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Ultrared</Deck>
+    <Count>2</Count>
+    <Category>Zombie</Category>
+    <Special>Place a Walker in the Zone immediately and discard this card.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Army Sniper Rifle</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>1</Range_Min>
+      <Range_Max>4</Range_Max>
+      <Dice>2</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Sniper.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Golden AK-47</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>1</Range_Min>
+      <Range_Max>2</Range_Max>
+      <Dice>3</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>3</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Golden Kukri</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>4</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Patton's .357 Magnum</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>2</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Add +2 dice if Patton's .45 Long Colt is equipped.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Patton's .45 Long Colt</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>3</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Add +2 dice if Patton's .357 Magnum is equipped.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Prized Katana</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>4</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Prototype Assault Shotgun</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Shells</Ammo_Type>
+      <Range_Min>1</Range_Min>
+      <Range_Max>2</Range_Max>
+      <Dice>3</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Siege Hammer</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>3</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Wristbreaker</Name>
+    <Set>Fort Hendrix</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>6</Dice>
+      <Accuracy>5</Accuracy>
+      <Damage>2</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Corkscrew</Name>
+    <Set>Pariz</Set>
+    <Deck>Starting</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>1</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Roll 6: Damage 2.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Fire Axe</Name>
+    <Set>Pariz</Set>
+    <Deck>Starting</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>1</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Flagpole</Name>
+    <Set>Pariz</Set>
+    <Deck>Starting</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type />
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>2</Dice>
+      <Accuracy>5</Accuracy>
+      <Damage>1</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Polearm.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>MAS-56</Name>
+    <Set>Pariz</Set>
+    <Deck>Starting</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>1</Range_Min>
+      <Range_Max>2</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Pistol R51</Name>
+    <Set>Pariz</Set>
+    <Deck>Starting</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Revolver MR73</Name>
+    <Set>Pariz</Set>
+    <Deck>Starting</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>1</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Roll 6: +1 die.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>AAAHH!!</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>4</Count>
+    <Category>Zombie</Category>
+    <Special>Place a Walker in the Zone immediately and discard this card.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Baguette</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>1</Dice>
+      <Accuracy>5</Accuracy>
+      <Damage>1</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special>Discard: Gain 3 AP.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Bayoneta</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>0</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Double-Strike.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Chainsaw</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>5</Dice>
+      <Accuracy>5</Accuracy>
+      <Damage>2</Damage>
+      <Overload>3</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Charleville Musket</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>1</Range_Min>
+      <Range_Max>2</Range_Max>
+      <Dice>0</Dice>
+      <Accuracy>2</Accuracy>
+      <Damage>2</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Reload.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Chef's Knife</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>1</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>1</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special>Add +1 die to another equipped Melee weapon.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Corkscrew</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>1</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Roll 6: Damage 2.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Croissant</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>0</Count>
+    <Category>Bonus</Category>
+    <Special>Discard to either gain 3 AP or Heal 1 Wound. May be used in the Backpack.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Double Barrel</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Shells</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>2</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Reload.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Famas</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>1</Range_Min>
+      <Range_Max>2</Range_Max>
+      <Dice>2</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>1</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Light source. Ignore Dark Zones.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Fire Axe</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>1</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Flagpole</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type />
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>2</Dice>
+      <Accuracy>5</Accuracy>
+      <Damage>1</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Polearm.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Flashlight</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>4</Count>
+    <Category>Bonus</Category>
+    <Special>Search: Draw 2 cards. Light Source. May be used in the backpack.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Hunting Rifle</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>1</Range_Min>
+      <Range_Max>2</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Sniper.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Improvised Spear</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type />
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>0</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Polearm.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Mandarina</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Bonus</Category>
+    <Special>Discard to gain 2 extra Actions. May be used in the Backpack.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>MAS-56</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>1</Range_Min>
+      <Range_Max>2</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Medieval Sword</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>2</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Molotov</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>4</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type />
+      <Range_Min>1</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>0</Dice>
+      <Accuracy>0</Accuracy>
+      <Damage>0</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Discard from Hand: Eliminate all Actors in the Targeted Zone</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Night Vision Goggles</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Bonus</Category>
+    <Special>Night Vision. May be used in the Backpack.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Pistol R51</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Repair Kit</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>4</Count>
+    <Category>Bonus</Category>
+    <Special>Discard: Ignore all Break results from a single Attach roll. May be used in the Backpack.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Revolver MR73</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>1</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Roll 6: +1 die.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Saber</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>3</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>2</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>1</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special>Roll 6: Damage 2.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>SMG MAT 49</Name>
+    <Set>Pariz</Set>
+    <Deck>Regular</Deck>
+    <Count>3</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>3</Dice>
+      <Accuracy>5</Accuracy>
+      <Damage>1</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>AAAHH!!</Name>
+    <Set>Pariz</Set>
+    <Deck>Ultrared</Deck>
+    <Count>2</Count>
+    <Category>Zombie</Category>
+    <Special>Place a Walker in the Zone immediately and discard this card.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Army Sniper Rifle</Name>
+    <Set>Pariz</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>1</Range_Min>
+      <Range_Max>4</Range_Max>
+      <Dice>2</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Sniper.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Automatic Shotgun</Name>
+    <Set>Pariz</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Shells</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>3</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>3</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Fleur De Lys Halberd</Name>
+    <Set>Pariz</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type />
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>2</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Ranged>
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Polearm.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>G36K</Name>
+    <Set>Pariz</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>1</Range_Min>
+      <Range_Max>3</Range_Max>
+      <Dice>2</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Night Vision.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Golden AK-47</Name>
+    <Set>Pariz</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>1</Range_Min>
+      <Range_Max>2</Range_Max>
+      <Dice>3</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>3</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Grenade Launcher</Name>
+    <Set>Pariz</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type />
+      <Range_Min>1</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>0</Dice>
+      <Accuracy>5</Accuracy>
+      <Damage>3</Damage>
+      <Overload>3</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>HK416 F</Name>
+    <Set>Pariz</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>2</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Overload>1</Overload>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Reaper: Ranged</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Joyeuse</Name>
+    <Set>Pariz</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>4</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Bloodlust: Melee. Unique.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Napoleon's Marengo Saber</Name>
+    <Set>Pariz</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>6</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>1</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Lucky. Unique.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Prized Katana</Name>
+    <Set>Pariz</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>4</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Siege Hammer</Name>
+    <Set>Pariz</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>3</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Overload>2</Overload>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Angel Blade</Name>
+    <Set>Supernatural</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>2</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Once per Player Phase, if at least one enemy is eliminated in a zone, lay down all Zombies in that zone. When laid down zombies would activate, instead lay them up.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Archangel Blade</Name>
+    <Set>Supernatural</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>2</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>If this eliminates at least 1 Zombie, +1 Action this Turn. +1 Damage against Abominations.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Death's Scythe</Name>
+    <Set>Supernatural</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>3</Dice>
+      <Accuracy>6</Accuracy>
+      <Damage>3</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>+1 die againt Abominations. This weapon can eliminate any enemy regardless of restrictions.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Mjolnir</Name>
+    <Set>Supernatural</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type />
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>4</Dice>
+      <Accuracy>5</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special>For each hit, deals 2 damage to another target in the same zone.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Ruby's Knife</Name>
+    <Set>Supernatural</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>3</Dice>
+      <Accuracy>5</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>If this rolls any 6s, +1 damage.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>The First Blade</Name>
+    <Set>Supernatural</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>2</Dice>
+      <Accuracy>5</Accuracy>
+      <Damage>1</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Once per Player Phase, if this eliminates at least 1 Zombie, you cannot be targeted during the Zombie Phase.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Baseball Bat</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Starting</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>2</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Crowbar</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Starting</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>1</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>1</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Fire Axe</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Starting</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>1</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Pistol</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Starting</Deck>
+    <Count>3</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>AAAHH!!</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>4</Count>
+    <Category>Zombie</Category>
+    <Special>Place a Walker in the Zone immediately and discard this card.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Bag of Rice</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Bonus</Category>
+    <Special>Discard: Gain 3 AP. May be used in the backpack.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Canned Food</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Bonus</Category>
+    <Special>Discard: Gain 3 AP. May be used in the backpack.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Chainsaw</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>5</Dice>
+      <Accuracy>5</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Crowbar</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>1</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>1</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Fire Axe</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>1</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Flashlight</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Bonus</Category>
+    <Special>Search: Draw 2 cards. May be used in the backpack.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Katana</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>2</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>1</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Kukri</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>2</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Machete</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>4</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>1</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Moltov</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>4</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type />
+      <Range_Min>1</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>0</Dice>
+      <Accuracy>0</Accuracy>
+      <Damage>0</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Discard from Hand: Eliminate all Actors in the Targeted Zone</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Pistol</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Plenty of Bullets</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>3</Count>
+    <Category>Bonus</Category>
+    <Special>You may re-roll all Attacks with bullet weapons once. The new result takes the place of the previous one. May be used in the backpack.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Plenty of Shells</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>3</Count>
+    <Category>Bonus</Category>
+    <Special>You may re-roll all Attacks with shell weapons once. The new result takes the place of the previous one. May be used in the backpack.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Sawed-Off</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>4</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Shells</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>2</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special>Reload.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Shotgun</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Shells</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>2</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Sniper Rifle</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>1</Range_Min>
+      <Range_Max>3</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Sniper.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Sub-Mg</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>3</Dice>
+      <Accuracy>5</Accuracy>
+      <Damage>1</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Water</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Bonus</Category>
+    <Special>Discard: Gain 3 AP. May be used in the backpack.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>AAAHH!!</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Ultrared</Deck>
+    <Count>2</Count>
+    <Category>Zombie</Category>
+    <Special>Place a Walker in the Zone immediately and discard this card.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Army Sniper Rifle</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>1</Range_Min>
+      <Range_Max>4</Range_Max>
+      <Dice>2</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Sniper.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Automatic Shotgun</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Shells</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>3</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Evil Twins</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>2</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Golden AK-47</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>1</Range_Min>
+      <Range_Max>2</Range_Max>
+      <Dice>3</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Golden Kukri</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>4</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Gunblade</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Dual</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>4</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>2</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Ma's Shotgun</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Dual</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>2</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged>
+      <Ammo_Type>Shells</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>Reload.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Nailbat</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>2</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Zantetsuken</Name>
+    <Set>Zombicide 2nd Edition</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>5</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>1</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Gunblade</Name>
+    <Set>Zombicide: Season 1 (Classic)</Set>
+    <Deck>Regular</Deck>
+    <Count>2</Count>
+    <Category>Dual</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>2</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>true</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Pa's Gun</Name>
+    <Set>Zombicide: Season 1 (Classic)</Set>
+    <Deck>Regular</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>1</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>3</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Doug's Dream</Name>
+    <Set>Zombicide: Season 1 (Classic)</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>8</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>1</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>911 Special</Name>
+    <Set>Zombicide: Season 2 - Toxic City Mall (Classic)</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>2</Range_Max>
+      <Dice>5</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>1</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Betty</Name>
+    <Set>Zombicide: Season 2 - Toxic City Mall (Classic)</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>7</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Jack &amp; Jill</Name>
+    <Set>Zombicide: Season 2 - Toxic City Mall (Classic)</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Ranged</Category>
+    <Melee />
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>6</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special>1 action to reload. Free reload in end phase.</Special>
+  </Weapon>
+  <Weapon>
+    <Name>Ned's Atomic Flashlight</Name>
+    <Set>Zombicide: Season 2 - Toxic City Mall (Classic)</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>5</Dice>
+      <Accuracy>4</Accuracy>
+      <Damage>3</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Sweet Sisters</Name>
+    <Set>Zombicide: Season 2 - Toxic City Mall (Classic)</Set>
+    <Deck>Ultrared</Deck>
+    <Count>1</Count>
+    <Category>Dual</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>6</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>false</Kill_Noise>
+    </Melee>
+    <Ranged>
+      <Ammo_Type>Bullets</Ammo_Type>
+      <Range_Min>0</Range_Min>
+      <Range_Max>1</Range_Max>
+      <Dice>4</Dice>
+      <Accuracy>3</Accuracy>
+      <Damage>2</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Ranged>
+    <Open_Door>false</Open_Door>
+    <Door_Noise>false</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+  <Weapon>
+    <Name>Concrete Saw</Name>
+    <Set>Zombicide: Season 2 ‑ Prison Outbreak (Classic)</Set>
+    <Deck>Regular</Deck>
+    <Count>1</Count>
+    <Category>Melee</Category>
+    <Melee>
+      <Range>0</Range>
+      <Dice>3</Dice>
+      <Accuracy>5</Accuracy>
+      <Damage>3</Damage>
+      <Kill_Noise>true</Kill_Noise>
+    </Melee>
+    <Ranged />
+    <Open_Door>true</Open_Door>
+    <Door_Noise>true</Door_Noise>
+    <Dual>false</Dual>
+    <Special />
+  </Weapon>
+</Weapons>

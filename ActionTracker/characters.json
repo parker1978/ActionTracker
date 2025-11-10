@@ -176,8 +176,8 @@
     "Blue": "Lucky",
     "Orange": "+1 To Dice Roll: Melee;Jump",
     "Red": "+1 Damage: Melee;+1 Free Action: Combat;Roll 6: +1 Die Combat",
-    "Teen": "False",
-    "Health": "3"
+    "Teen": "True",
+    "Health": "2"
   },
   {
     "Name": "Carson",
