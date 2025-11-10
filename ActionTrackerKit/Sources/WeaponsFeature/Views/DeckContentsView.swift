@@ -115,6 +115,28 @@ public struct DeckContentsView: View {
                                 }
                             }
                             .buttonStyle(.plain)
+                            .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                                Button {
+                                    deckState.moveCardToTop(weapon)
+                                } label: {
+                                    Label("Top", systemImage: "arrow.up.to.line")
+                                }
+                                .tint(.blue)
+                            }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    deckState.discardFromDeck(weapon)
+                                } label: {
+                                    Label("Discard", systemImage: "trash")
+                                }
+
+                                Button {
+                                    deckState.moveCardToBottom(weapon)
+                                } label: {
+                                    Label("Bottom", systemImage: "arrow.down.to.line")
+                                }
+                                .tint(.green)
+                            }
                         }
                     }
                 } header: {

@@ -153,6 +153,32 @@ public class WeaponDeckState {
         }
     }
 
+    // MARK: - Deck Reordering
+
+    /// Move a card from remaining deck to the top
+    public func moveCardToTop(_ card: Weapon) {
+        if let index = remaining.firstIndex(where: { $0.id == card.id }) {
+            remaining.remove(at: index)
+            remaining.insert(card, at: 0)
+        }
+    }
+
+    /// Move a card from remaining deck to the bottom
+    public func moveCardToBottom(_ card: Weapon) {
+        if let index = remaining.firstIndex(where: { $0.id == card.id }) {
+            remaining.remove(at: index)
+            remaining.append(card)
+        }
+    }
+
+    /// Move a card from remaining deck to discard pile
+    public func discardFromDeck(_ card: Weapon) {
+        if let index = remaining.firstIndex(where: { $0.id == card.id }) {
+            remaining.remove(at: index)
+            discard.insert(card, at: 0)
+        }
+    }
+
     /// Move all cards from discard back into deck and shuffle
     public func reclaimAllDiscardIntoDeck(shuffle: Bool = true) {
         remaining.append(contentsOf: discard)
