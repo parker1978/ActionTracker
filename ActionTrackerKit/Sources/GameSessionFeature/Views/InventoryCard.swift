@@ -33,9 +33,13 @@ struct InventoryCard: View {
         InventoryFormatter.parse(session.inactiveWeapons)
     }
 
-    // Helper to find weapon by name
-    private func findWeapon(byName name: String) -> Weapon? {
-        WeaponRepository.shared.allWeapons.first { $0.name == name }
+    // Helper to find weapon by identifier (name|expansion)
+    private func findWeapon(byIdentifier identifier: String) -> Weapon? {
+        let parts = identifier.split(separator: "|").map(String.init)
+        guard parts.count == 2 else { return nil }
+        let name = parts[0]
+        let expansion = parts[1]
+        return WeaponRepository.shared.allWeapons.first { $0.name == name && $0.expansion == expansion }
     }
 
     var body: some View {
@@ -147,8 +151,8 @@ struct InventoryCard: View {
                     .fontWeight(.semibold)
             }
 
-            ForEach(Array(weapons.enumerated()), id: \.offset) { _, weaponName in
-                if let weapon = findWeapon(byName: weaponName) {
+            ForEach(Array(weapons.enumerated()), id: \.offset) { _, weaponIdentifier in
+                if let weapon = findWeapon(byIdentifier: weaponIdentifier) {
                     Button {
                         selectedWeapon = weapon
                     } label: {
@@ -222,17 +226,21 @@ internal struct InventoryManagementSheet: View {
     @State private var showingCapacityAlert = false
     @State private var capacityAlertMessage = ""
 
-    // Get all weapon names from repository, excluding zombie cards
+    // Get all weapon identifiers (name|expansion) from repository, excluding zombie cards
     private var allWeaponNames: [String] {
         Array(Set(WeaponRepository.shared.allWeapons
             .filter { !$0.isZombieCard }
-            .map { $0.name }))
+            .map { "\($0.name)|\($0.expansion)" }))
             .sorted()
     }
 
-    // Helper to find weapon by name
-    private func findWeapon(byName name: String) -> Weapon? {
-        WeaponRepository.shared.allWeapons.first { $0.name == name }
+    // Helper to find weapon by identifier (name|expansion)
+    private func findWeapon(byIdentifier identifier: String) -> Weapon? {
+        let parts = identifier.split(separator: "|").map(String.init)
+        guard parts.count == 2 else { return nil }
+        let name = parts[0]
+        let expansion = parts[1]
+        return WeaponRepository.shared.allWeapons.first { $0.name == name && $0.expansion == expansion }
     }
 
     var body: some View {
@@ -250,7 +258,7 @@ internal struct InventoryManagementSheet: View {
                                 icon: "hand.raised.fill",
                                 iconColor: .blue,
                                 onInfo: {
-                                    if let weapon = findWeapon(byName: activeWeapons[index]) {
+                                    if let weapon = findWeapon(byIdentifier: activeWeapons[index]) {
                                         selectedWeapon = weapon
                                     }
                                 }
@@ -300,7 +308,7 @@ internal struct InventoryManagementSheet: View {
                                 icon: "backpack.fill",
                                 iconColor: .orange,
                                 onInfo: {
-                                    if let weapon = findWeapon(byName: inactiveWeapons[index]) {
+                                    if let weapon = findWeapon(byIdentifier: inactiveWeapons[index]) {
                                         selectedWeapon = weapon
                                     }
                                 }
@@ -456,8 +464,13 @@ internal struct InventoryManagementSheet: View {
                 .foregroundStyle(iconColor)
                 .font(.caption)
 
-            Text(weapon)
-                .foregroundStyle(.primary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(weaponName(from: weapon))
+                    .foregroundStyle(.primary)
+                Text(weaponExpansion(from: weapon))
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
 
             Spacer()
 
@@ -470,6 +483,16 @@ internal struct InventoryManagementSheet: View {
             }
             .buttonStyle(.borderless)
         }
+    }
+
+    private func weaponName(from identifier: String) -> String {
+        let parts = identifier.split(separator: "|").map(String.init)
+        return parts.first ?? identifier
+    }
+
+    private func weaponExpansion(from identifier: String) -> String {
+        let parts = identifier.split(separator: "|").map(String.init)
+        return parts.count == 2 ? parts[1] : ""
     }
 
     private func moveToBackpack(from index: Int) {
@@ -494,8 +517,8 @@ internal struct InventoryManagementSheet: View {
         }
     }
 
-    private func discardWeapon(_ weaponName: String) {
-        if let weapon = WeaponRepository.shared.allWeapons.first(where: { $0.name == weaponName }) {
+    private func discardWeapon(_ weaponIdentifier: String) {
+        if let weapon = findWeapon(byIdentifier: weaponIdentifier) {
             weaponsManager.getDeck(weapon.deck).discardCard(weapon)
         }
     }
@@ -539,8 +562,13 @@ internal struct WeaponPickerSheet: View {
                         dismiss()
                     } label: {
                         HStack {
-                            Text(weapon)
-                                .foregroundStyle(.primary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(weaponName(from: weapon))
+                                    .foregroundStyle(.primary)
+                                Text(weaponExpansion(from: weapon))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
 
                             Spacer()
 
@@ -563,5 +591,15 @@ internal struct WeaponPickerSheet: View {
                 }
             }
         }
+    }
+
+    private func weaponName(from identifier: String) -> String {
+        let parts = identifier.split(separator: "|").map(String.init)
+        return parts.first ?? identifier
+    }
+
+    private func weaponExpansion(from identifier: String) -> String {
+        let parts = identifier.split(separator: "|").map(String.init)
+        return parts.count == 2 ? parts[1] : ""
     }
 }

@@ -224,7 +224,7 @@ public struct WeaponsScreen: View {
 
         // Check if there's space in active slots (hands) first
         if activeWeapons.count < 2 {
-            activeWeapons.append(weapon.name)
+            activeWeapons.append("\(weapon.name)|\(weapon.expansion)")
             session.activeWeapons = InventoryFormatter.join(activeWeapons)
             // Mark as handled
             handledCardIDs.insert(weapon.id)
@@ -238,7 +238,7 @@ public struct WeaponsScreen: View {
         // Check if there's space in backpack
         let maxInactive = 3 + session.extraInventorySlots
         if inactiveWeapons.count < maxInactive {
-            inactiveWeapons.append(weapon.name)
+            inactiveWeapons.append("\(weapon.name)|\(weapon.expansion)")
             session.inactiveWeapons = InventoryFormatter.join(inactiveWeapons)
             // Mark as handled
             handledCardIDs.insert(weapon.id)
