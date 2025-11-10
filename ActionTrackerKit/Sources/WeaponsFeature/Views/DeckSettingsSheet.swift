@@ -13,30 +13,21 @@ import DataLayer
 public struct DeckSettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var weaponsManager: WeaponsManager
+    @StateObject private var disabledCardsManager = DisabledCardsManager()
 
     @State private var selectedExpansions: Set<String> = []
     @State private var isCustomExpansionSelection = false
     @State private var selectedDeckForContents: DeckType?
+    @State private var selectedSetForCards: String?
     @State private var showResetConfirmation = false
 
     public init(weaponsManager: WeaponsManager) {
         self.weaponsManager = weaponsManager
     }
 
-    // Get all unique expansions from the repository
-    private var allExpansions: [String] {
-        let expansions = WeaponRepository.shared.expansions
-        var result: [String] = []
-
-        // Add "Core Set" for empty expansion strings
-        if expansions.contains("") {
-            result.append("Core Set")
-        }
-
-        // Add all named expansions
-        result.append(contentsOf: expansions.filter { !$0.isEmpty }.sorted())
-
-        return result
+    // Get all unique sets from the repository
+    private var allSets: [String] {
+        WeaponRepository.shared.expansions.sorted()
     }
 
     public var body: some View {
@@ -48,8 +39,11 @@ public struct DeckSettingsSheet: View {
                 // View Deck Contents
                 viewDeckContentsSection
 
-                // Expansion Filter
+                // Set Filter
                 expansionFilterSection
+
+                // Card Selection
+                cardSelectionSection
 
                 // Deck Management Options
                 deckManagementSection
@@ -65,6 +59,18 @@ public struct DeckSettingsSheet: View {
             }
             .sheet(item: $selectedDeckForContents) { deckType in
                 DeckContentsView(deckState: weaponsManager.getDeck(deckType))
+            }
+            .sheet(item: Binding(
+                get: { selectedSetForCards.map { IdentifiableString(value: $0) } },
+                set: { selectedSetForCards = $0?.value }
+            )) { identifiableSet in
+                CardSelectionSheet(
+                    setName: identifiableSet.value,
+                    disabledCardsManager: disabledCardsManager,
+                    onDismiss: {
+                        applyCardSelectionChanges()
+                    }
+                )
             }
             .alert("Reset All Decks?", isPresented: $showResetConfirmation) {
                 Button("Cancel", role: .cancel) {}
@@ -105,8 +111,8 @@ public struct DeckSettingsSheet: View {
         } header: {
             Text("Deck Statistics")
         } footer: {
-            if selectedExpansions.count < allExpansions.count {
-                Text("Showing counts for selected expansions only.")
+            if selectedExpansions.count < allSets.count {
+                Text("Showing counts for selected sets only.")
             }
         }
     }
@@ -139,45 +145,40 @@ public struct DeckSettingsSheet: View {
         }
     }
 
-    // MARK: - Expansion Filter Section
+    // MARK: - Set Filter Section
 
     private var expansionFilterSection: some View {
         Section {
-            ForEach(allExpansions, id: \.self) { expansion in
+            ForEach(allSets, id: \.self) { setName in
                 Toggle(isOn: Binding(
                     get: {
-                        // Map "Core Set" display name back to empty string for checking
-                        let actualExpansion = expansion == "Core Set" ? "" : expansion
-                        return selectedExpansions.contains(actualExpansion)
+                        selectedExpansions.contains(setName)
                     },
                     set: { isOn in
                         isCustomExpansionSelection = true
-                        // Map "Core Set" display name back to empty string for storage
-                        let actualExpansion = expansion == "Core Set" ? "" : expansion
                         if isOn {
-                            selectedExpansions.insert(actualExpansion)
+                            selectedExpansions.insert(setName)
                         } else {
-                            selectedExpansions.remove(actualExpansion)
+                            selectedExpansions.remove(setName)
                         }
                         saveExpansionFilter()
                     }
                 )) {
                     HStack {
-                        Text(expansion)
+                        Text(setName)
                         Spacer()
-                        Text("\(expansionWeaponCount(expansion))")
+                        Text("\(setWeaponCount(setName))")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                 }
             }
 
-            if allExpansions.count > 1 {
+            if allSets.count > 1 {
                 HStack {
                     Button("Select All") {
-                        // Map all expansion names back to their actual values (empty string for "Core Set")
                         isCustomExpansionSelection = false
-                        selectedExpansions = Set(allExpansions.map { $0 == "Core Set" ? "" : $0 })
+                        selectedExpansions = Set(allSets)
                         saveExpansionFilter()
                     }
                     .font(.subheadline)
@@ -193,9 +194,43 @@ public struct DeckSettingsSheet: View {
                 }
             }
         } header: {
-            Text("Expansions")
+            Text("Sets")
         } footer: {
-            Text("Select which expansions to include in your decks. Changes require a deck reset to take effect.")
+            Text("Select which sets to include in your decks. Tap a set name to customize card selection. Changes require a deck reset to take effect.")
+        }
+    }
+
+    // MARK: - Card Selection Section
+
+    private var cardSelectionSection: some View {
+        Section {
+            ForEach(allSets.filter { selectedExpansions.contains($0) }, id: \.self) { setName in
+                Button {
+                    selectedSetForCards = setName
+                } label: {
+                    HStack {
+                        Text(setName)
+                            .foregroundStyle(.primary)
+                        Spacer()
+
+                        // Show count of disabled cards if any
+                        let disabledCount = disabledCardsManager.getDisabledCards(for: setName).count
+                        if disabledCount > 0 {
+                            Text("\(disabledCount) disabled")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        }
+
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        } header: {
+            Text("Card Selection")
+        } footer: {
+            Text("Tap a set to enable or disable individual cards.")
         }
     }
 
@@ -232,21 +267,27 @@ public struct DeckSettingsSheet: View {
         return total
     }
 
-    private func expansionWeaponCount(_ expansion: String) -> Int {
-        // Map "Core Set" display name back to empty string for counting
-        let actualExpansion = expansion == "Core Set" ? "" : expansion
+    private func setWeaponCount(_ setName: String) -> Int {
         // Sum up the count property to get total cards (not just unique weapons)
         return WeaponRepository.shared.allWeapons
-            .filter { $0.expansion == actualExpansion }
+            .filter { $0.expansion == setName }
             .reduce(0) { $0 + $1.count }
     }
 
     private func getFilteredWeapons() -> [Weapon] {
-        if !isCustomExpansionSelection {
-            return WeaponRepository.shared.allWeapons
-        } else {
-            return WeaponRepository.shared.allWeapons.filter { selectedExpansions.contains($0.expansion) }
+        var weapons = WeaponRepository.shared.allWeapons
+
+        // Apply set/expansion filter
+        if isCustomExpansionSelection {
+            weapons = weapons.filter { selectedExpansions.contains($0.expansion) }
         }
+
+        // Apply card-level disabled filter
+        weapons = weapons.filter { weapon in
+            !disabledCardsManager.isCardDisabled(weapon.name, in: weapon.expansion)
+        }
+
+        return weapons
     }
 
     private func loadSelectedExpansions() {
@@ -278,4 +319,17 @@ public struct DeckSettingsSheet: View {
     private func resetAllDecks() {
         weaponsManager.resetAllDecks()
     }
+
+    private func applyCardSelectionChanges() {
+        // Apply the card selection changes by updating the weapons manager
+        weaponsManager.updateWeapons(getFilteredWeapons())
+    }
+}
+
+// MARK: - Helper Types
+
+/// Helper struct to make String identifiable for sheet presentation
+private struct IdentifiableString: Identifiable {
+    let id = UUID()
+    let value: String
 }
