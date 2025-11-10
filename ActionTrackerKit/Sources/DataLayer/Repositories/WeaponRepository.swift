@@ -146,15 +146,15 @@ class WeaponXMLParser: NSObject, XMLParserDelegate {
         guard let weapon = currentWeapon else { return }
 
         switch currentElement {
-        case "Name": weapon.name = value
-        case "Set": weapon.expansion = value
-        case "Deck": weapon.deck = value
+        case "Name": weapon.name += value
+        case "Set": weapon.expansion += value
+        case "Deck": weapon.deck += value
         case "Count": weapon.count = Int(value)
-        case "Category": weapon.category = value
+        case "Category": weapon.category += value
         case "Open_Door": weapon.openDoor = parseBool(value)
         case "Door_Noise": weapon.doorNoise = parseBool(value)
         case "Dual": weapon.dual = parseBool(value)
-        case "Special": weapon.special = value
+        case "Special": weapon.special += value
         default: break
         }
     }
@@ -177,7 +177,7 @@ class WeaponXMLParser: NSObject, XMLParserDelegate {
         guard let stats = currentRangedStats else { return }
 
         switch currentElement {
-        case "Ammo_Type": stats.ammoType = value
+        case "Ammo_Type": stats.ammoType += value
         case "Range_Min": stats.rangeMin = Int(value)
         case "Range_Max": stats.rangeMax = Int(value)
         case "Dice": stats.dice = Int(value)
@@ -277,7 +277,7 @@ class MeleeStatsBuilder {
 }
 
 class RangedStatsBuilder {
-    var ammoType: String?
+    var ammoType: String = ""
     var rangeMin: Int?
     var rangeMax: Int?
     var dice: Int?
