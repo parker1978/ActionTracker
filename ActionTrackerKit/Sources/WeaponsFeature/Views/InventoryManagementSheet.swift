@@ -65,15 +65,20 @@ public struct InventoryManagementSheet: View {
                 List {
                     if !activeWeapons.isEmpty {
                         Section {
-                            ForEach(Array(activeWeapons.enumerated()), id: \.offset) { _, weaponName in
+                            ForEach(Array(activeWeapons.enumerated()), id: \.offset) { _, weaponIdentifier in
                                 Button {
-                                    replaceWeapon(weaponName)
+                                    replaceWeapon(weaponIdentifier)
                                 } label: {
                                     HStack {
                                         Image(systemName: "hand.raised.fill")
                                             .foregroundStyle(.blue)
-                                        Text(weaponName)
-                                            .foregroundStyle(.primary)
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(weaponName(from: weaponIdentifier))
+                                                .foregroundStyle(.primary)
+                                            Text(weaponExpansion(from: weaponIdentifier))
+                                                .font(.caption2)
+                                                .foregroundStyle(.secondary)
+                                        }
                                         Spacer()
                                         Image(systemName: "arrow.left.arrow.right")
                                             .foregroundStyle(.orange)
@@ -87,15 +92,20 @@ public struct InventoryManagementSheet: View {
 
                     if !inactiveWeapons.isEmpty {
                         Section {
-                            ForEach(Array(inactiveWeapons.enumerated()), id: \.offset) { _, weaponName in
+                            ForEach(Array(inactiveWeapons.enumerated()), id: \.offset) { _, weaponIdentifier in
                                 Button {
-                                    replaceWeapon(weaponName)
+                                    replaceWeapon(weaponIdentifier)
                                 } label: {
                                     HStack {
                                         Image(systemName: "backpack.fill")
                                             .foregroundStyle(.green)
-                                        Text(weaponName)
-                                            .foregroundStyle(.primary)
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(weaponName(from: weaponIdentifier))
+                                                .foregroundStyle(.primary)
+                                            Text(weaponExpansion(from: weaponIdentifier))
+                                                .font(.caption2)
+                                                .foregroundStyle(.secondary)
+                                        }
                                         Spacer()
                                         Image(systemName: "arrow.left.arrow.right")
                                             .foregroundStyle(.orange)
@@ -120,9 +130,18 @@ public struct InventoryManagementSheet: View {
         }
     }
 
-    private func replaceWeapon(_ weaponName: String) {
+    private func replaceWeapon(_ weaponIdentifier: String) {
+        // Parse the identifier to get name and expansion
+        let parts = weaponIdentifier.split(separator: "|").map(String.init)
+        guard parts.count == 2 else {
+            dismiss()
+            return
+        }
+        let name = parts[0]
+        let expansion = parts[1]
+
         // Find the weapon object to discard
-        guard let weaponToDiscard = WeaponRepository.shared.allWeapons.first(where: { $0.name == weaponName }) else {
+        guard let weaponToDiscard = WeaponRepository.shared.allWeapons.first(where: { $0.name == name && $0.expansion == expansion }) else {
             dismiss()
             return
         }
@@ -131,16 +150,26 @@ public struct InventoryManagementSheet: View {
         var newActiveWeapons = activeWeapons
         var newInactiveWeapons = inactiveWeapons
 
-        if let activeIndex = newActiveWeapons.firstIndex(of: weaponName) {
-            newActiveWeapons[activeIndex] = weaponToAdd.name
+        if let activeIndex = newActiveWeapons.firstIndex(of: weaponIdentifier) {
+            newActiveWeapons[activeIndex] = "\(weaponToAdd.name)|\(weaponToAdd.expansion)"
             session.activeWeapons = InventoryFormatter.join(newActiveWeapons)
-        } else if let inactiveIndex = newInactiveWeapons.firstIndex(of: weaponName) {
-            newInactiveWeapons[inactiveIndex] = weaponToAdd.name
+        } else if let inactiveIndex = newInactiveWeapons.firstIndex(of: weaponIdentifier) {
+            newInactiveWeapons[inactiveIndex] = "\(weaponToAdd.name)|\(weaponToAdd.expansion)"
             session.inactiveWeapons = InventoryFormatter.join(newInactiveWeapons)
         }
 
         // Call the callback to discard the replaced weapon
         onReplace(weaponToDiscard)
         dismiss()
+    }
+
+    private func weaponName(from identifier: String) -> String {
+        let parts = identifier.split(separator: "|").map(String.init)
+        return parts.first ?? identifier
+    }
+
+    private func weaponExpansion(from identifier: String) -> String {
+        let parts = identifier.split(separator: "|").map(String.init)
+        return parts.count == 2 ? parts[1] : ""
     }
 }
