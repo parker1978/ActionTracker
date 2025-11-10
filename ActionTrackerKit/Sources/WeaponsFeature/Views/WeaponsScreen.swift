@@ -20,6 +20,7 @@ public struct WeaponsScreen: View {
     @State private var enableDrawTwo = false
     @State private var showDiscardPile = false
     @State private var showDeckSettings = false
+    @State private var selectedDeckForContents: DeckType?
     @State private var weaponToAdd: Weapon?
     @State private var handledCardIDs: Set<UUID> = [] // Track which cards have been added to inventory or discarded
 
@@ -164,6 +165,9 @@ public struct WeaponsScreen: View {
             }
             .sheet(isPresented: $showDiscardPile) {
                 WeaponDiscardView(deckState: currentDeck)
+            }
+            .sheet(item: $selectedDeckForContents) { deckType in
+                DeckContentsView(deckState: weaponsManager.getDeck(deckType))
             }
             .sheet(isPresented: $showDeckSettings) {
                 DeckSettingsSheet(weaponsManager: weaponsManager)
@@ -358,9 +362,13 @@ public struct WeaponsScreen: View {
                     .font(.headline)
 
                 HStack(spacing: 12) {
-                    Label("\(deck.remainingCount) cards", systemImage: "rectangle.stack")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                    Button(action: {
+                        selectedDeckForContents = deck.deckType
+                    }) {
+                        Label("\(deck.remainingCount) cards", systemImage: "rectangle.stack")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
 
                     Button(action: {
                         showDiscardPile = true
