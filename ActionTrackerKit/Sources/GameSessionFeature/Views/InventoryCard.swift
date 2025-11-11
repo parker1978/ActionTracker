@@ -178,23 +178,102 @@ struct InventoryCard: View {
                     .foregroundStyle(.blue)
             }
 
-            // Combat stats row
-            HStack(spacing: 8) {
-                if weapon.range != nil || weapon.rangeMin != nil {
-                    statLabel(icon: "arrow.right", text: weapon.rangeDisplay)
+            // Combat stats row - support both melee and ranged
+            if weapon.category == .dual {
+                // Show melee stats first
+                if let meleeStats = weapon.meleeStats {
+                    statsRow(for: meleeStats)
                 }
-                if let dice = weapon.dice {
-                    statLabel(icon: "dice", text: String(dice))
+                // Show ranged stats below
+                if let rangedStats = weapon.rangedStats {
+                    statsRow(for: rangedStats)
                 }
-                if let accuracy = weapon.accuracy {
-                    statLabel(icon: "target", text: accuracy)
-                }
-                if let damage = weapon.damage {
-                    statLabel(icon: "bolt.fill", text: String(damage))
-                }
+            } else if let meleeStats = weapon.meleeStats {
+                statsRow(for: meleeStats)
+            } else if let rangedStats = weapon.rangedStats {
+                statsRow(for: rangedStats)
             }
         }
         .padding(.vertical, 2)
+    }
+
+    @ViewBuilder
+    private func statsRow(for meleeStats: MeleeStats) -> some View {
+        let chips = buildMeleeStatChips(meleeStats)
+        if !chips.isEmpty {
+            HStack(spacing: 8) {
+                ForEach(chips) { chip in
+                    statLabel(icon: chip.icon, text: chip.value)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func statsRow(for rangedStats: RangedStats) -> some View {
+        let chips = buildRangedStatChips(rangedStats)
+        if !chips.isEmpty {
+            HStack(spacing: 8) {
+                ForEach(chips) { chip in
+                    statLabel(icon: chip.icon, text: chip.value)
+                }
+            }
+        }
+    }
+
+    private func buildMeleeStatChips(_ stats: MeleeStats) -> [StatChip] {
+        var chips: [StatChip] = []
+
+        // Range - always show
+        chips.append(StatChip(icon: "arrow.right", value: "\(stats.range)"))
+
+        // Dice - only if > 0
+        if stats.dice > 0 {
+            chips.append(StatChip(icon: "dice", value: "\(stats.dice)"))
+        }
+
+        // Overload - only if > 0
+        if stats.overload > 0 {
+            chips.append(StatChip(icon: "exclamationmark.triangle", value: "+\(stats.overload)"))
+        }
+
+        // Accuracy - always show
+        chips.append(StatChip(icon: "target", value: stats.accuracyDisplay))
+
+        // Damage - only if > 0
+        if stats.damage > 0 {
+            chips.append(StatChip(icon: "bolt.fill", value: "\(stats.damage)"))
+        }
+
+        return chips
+    }
+
+    private func buildRangedStatChips(_ stats: RangedStats) -> [StatChip] {
+        var chips: [StatChip] = []
+
+        // Range - always show
+        let rangeDisplay = stats.rangeMin == stats.rangeMax ? "\(stats.rangeMin)" : "\(stats.rangeMin)-\(stats.rangeMax)"
+        chips.append(StatChip(icon: "arrow.right", value: rangeDisplay))
+
+        // Dice - only if > 0
+        if stats.dice > 0 {
+            chips.append(StatChip(icon: "dice", value: "\(stats.dice)"))
+        }
+
+        // Overload - only if > 0
+        if stats.overload > 0 {
+            chips.append(StatChip(icon: "exclamationmark.triangle", value: "+\(stats.overload)"))
+        }
+
+        // Accuracy - always show
+        chips.append(StatChip(icon: "target", value: stats.accuracyDisplay))
+
+        // Damage - only if > 0
+        if stats.damage > 0 {
+            chips.append(StatChip(icon: "bolt.fill", value: "\(stats.damage)"))
+        }
+
+        return chips
     }
 
     @ViewBuilder
@@ -207,6 +286,15 @@ struct InventoryCard: View {
         }
         .foregroundStyle(.secondary)
     }
+}
+
+// MARK: - Helper Models
+
+/// Helper struct for building stat chips
+private struct StatChip: Identifiable {
+    let id = UUID()
+    let icon: String
+    let value: String
 }
 
 // MARK: - Inventory Management Sheet
