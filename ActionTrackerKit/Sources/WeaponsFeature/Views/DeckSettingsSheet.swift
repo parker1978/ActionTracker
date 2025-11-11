@@ -299,6 +299,9 @@ public struct DeckSettingsSheet: View {
             isCustomExpansionSelection = false
             selectedExpansions = Set(WeaponRepository.shared.expansions)
         }
+
+        // Apply the loaded filter to the weapons manager
+        weaponsManager.updateWeapons(getFilteredWeapons())
     }
 
     private func saveExpansionFilter() {
