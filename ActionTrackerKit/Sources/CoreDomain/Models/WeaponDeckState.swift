@@ -153,6 +153,13 @@ public class WeaponDeckState {
         }
     }
 
+    /// Remove a card from remaining deck (e.g., when adding to inventory)
+    public func removeFromRemaining(_ card: Weapon) {
+        if let index = remaining.firstIndex(where: { $0.id == card.id || ($0.name == card.name && $0.expansion == card.expansion) }) {
+            remaining.remove(at: index)
+        }
+    }
+
     // MARK: - Deck Reordering
 
     /// Move a card from remaining deck to the top

@@ -10,6 +10,7 @@ import SwiftData
 import CoreDomain
 import DataLayer
 import SharedUI
+import WeaponsFeature
 
 // NOTE: WeaponsManager is passed from main app until WeaponsFeature is extracted (Phase 8)
 // This maintains dependency rules while allowing functionality to work
@@ -225,13 +226,36 @@ internal struct InventoryManagementSheet: View {
     @State private var weaponDetailDetent: PresentationDetent = .fraction(0.75)
     @State private var showingCapacityAlert = false
     @State private var capacityAlertMessage = ""
+    @StateObject private var disabledCardsManager = DisabledCardsManager()
 
-    // Get all weapon identifiers (name|expansion) from repository, excluding zombie cards
+    // Get filtered weapon identifiers based on selected sets and disabled cards
     private var allWeaponNames: [String] {
-        Array(Set(WeaponRepository.shared.allWeapons
+        var weapons = WeaponRepository.shared.allWeapons
             .filter { !$0.isZombieCard }
-            .map { "\($0.name)|\($0.expansion)" }))
+
+        // Apply set/expansion filter
+        let selectedExpansions = getSelectedExpansions()
+        if !selectedExpansions.isEmpty {
+            weapons = weapons.filter { selectedExpansions.contains($0.expansion) }
+        }
+
+        // Apply card-level disabled filter
+        weapons = weapons.filter { weapon in
+            !disabledCardsManager.isCardDisabled(weapon.name, in: weapon.expansion)
+        }
+
+        return Array(Set(weapons.map { "\($0.name)|\($0.expansion)" }))
             .sorted()
+    }
+
+    // Read selected expansions from UserDefaults
+    private func getSelectedExpansions() -> Set<String> {
+        if let saved = UserDefaults.standard.array(forKey: "selectedExpansions") as? [String] {
+            return Set(saved)
+        } else {
+            // If no custom selection, return all expansions (no filtering)
+            return []
+        }
     }
 
     // Helper to find weapon by identifier (name|expansion)
@@ -420,14 +444,20 @@ internal struct InventoryManagementSheet: View {
                 WeaponPickerSheet(
                     allWeapons: allWeaponNames,
                     selectedWeapons: $activeWeapons,
-                    title: "Add Active Weapon"
+                    title: "Add Active Weapon",
+                    onAdd: { weaponIdentifier in
+                        removeWeaponFromDeck(weaponIdentifier)
+                    }
                 )
             }
             .sheet(isPresented: $showingAddInactiveWeapon) {
                 WeaponPickerSheet(
                     allWeapons: allWeaponNames,
                     selectedWeapons: $inactiveWeapons,
-                    title: "Add Inactive Weapon"
+                    title: "Add Inactive Weapon",
+                    onAdd: { weaponIdentifier in
+                        removeWeaponFromDeck(weaponIdentifier)
+                    }
                 )
             }
             .sheet(item: $selectedWeapon) { weapon in
@@ -523,6 +553,16 @@ internal struct InventoryManagementSheet: View {
         }
     }
 
+    private func removeWeaponFromDeck(_ weaponIdentifier: String) {
+        guard let weapon = findWeapon(byIdentifier: weaponIdentifier) else { return }
+        let deck = weaponsManager.getDeck(weapon.deck)
+
+        // Try to remove from remaining deck first
+        deck.removeFromRemaining(weapon)
+        // If not in remaining, try to remove from discard pile
+        deck.removeFromDiscard(weapon)
+    }
+
     private func loadInventory() {
         activeWeapons = InventoryFormatter.parse(session.activeWeapons)
         inactiveWeapons = InventoryFormatter.parse(session.inactiveWeapons)
@@ -542,6 +582,7 @@ internal struct WeaponPickerSheet: View {
     let allWeapons: [String]
     @Binding var selectedWeapons: [String]
     let title: String
+    var onAdd: ((String) -> Void)?
 
     @State private var searchText = ""
 
@@ -559,6 +600,7 @@ internal struct WeaponPickerSheet: View {
                 ForEach(filteredWeapons, id: \.self) { weapon in
                     Button {
                         selectedWeapons.append(weapon)
+                        onAdd?(weapon)
                         dismiss()
                     } label: {
                         HStack {
