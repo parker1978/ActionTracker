@@ -205,6 +205,17 @@ struct InventoryCard: View {
                 ForEach(chips) { chip in
                     statLabel(icon: chip.icon, text: chip.value)
                 }
+
+                Spacer()
+
+                // Melee label chip
+                Text("Melee")
+                    .font(.caption2)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.orange)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Capsule().fill(Color.orange.opacity(0.15)))
             }
         }
     }
@@ -217,6 +228,17 @@ struct InventoryCard: View {
                 ForEach(chips) { chip in
                     statLabel(icon: chip.icon, text: chip.value)
                 }
+
+                Spacer()
+
+                // Ranged label chip
+                Text("Ranged")
+                    .font(.caption2)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.purple)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Capsule().fill(Color.purple.opacity(0.15)))
             }
         }
     }
