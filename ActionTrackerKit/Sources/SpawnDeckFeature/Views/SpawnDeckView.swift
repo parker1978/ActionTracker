@@ -16,6 +16,8 @@ public struct SpawnDeckView: View {
     @State private var dragOffset: CGSize = .zero
     @State private var isAnimatingDiscard = false
     @State private var showCheckmark = false
+    @State private var shouldAutoScrollToFirstCard = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(deckManager: SpawnDeckManager) {
         self.deckManager = deckManager
@@ -23,36 +25,60 @@ public struct SpawnDeckView: View {
 
     public var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Stats Section
-                    SpawnStatsView(
-                        mode: $deckManager.mode,
-                        cardsRemaining: deckManager.cardsRemaining,
-                        cardsDiscarded: deckManager.cardsDiscarded,
-                        needsReshuffle: deckManager.needsReshuffle,
-                        discardPileEmpty: deckManager.discardPile.isEmpty,
-                        showCheckmark: showCheckmark,
-                        onModeChange: { oldValue, newValue in
-                            deckManager.switchMode(to: newValue)
-                            // Reset any animation states
-                            dragOffset = .zero
-                            isAnimatingDiscard = false
-                        },
-                        onDiscardPileTap: {
-                            showingDiscardPile = true
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // Stats Section
+                        SpawnStatsView(
+                            mode: $deckManager.mode,
+                            cardsRemaining: deckManager.cardsRemaining,
+                            cardsDiscarded: deckManager.cardsDiscarded,
+                            needsReshuffle: deckManager.needsReshuffle,
+                            discardPileEmpty: deckManager.discardPile.isEmpty,
+                            showCheckmark: showCheckmark,
+                            onModeChange: { oldValue, newValue in
+                                deckManager.switchMode(to: newValue)
+                                // Reset any animation states
+                                dragOffset = .zero
+                                isAnimatingDiscard = false
+                                shouldAutoScrollToFirstCard = false
+                            },
+                            onDiscardPileTap: {
+                                showingDiscardPile = true
+                            }
+                        )
+
+                        // Swipe/Tap hint - tappable to discard
+                        if deckManager.currentCard != nil {
+                            discardHint
                         }
-                    )
 
-                    // Swipe/Tap hint - tappable to discard
-                    if deckManager.currentCard != nil {
-                        discardHint
+                        // Main Card Display with Drag Gesture
+                        cardDisplayArea
+
+                        // Scroll anchor for auto-scroll feature
+                        Color.clear
+                            .frame(height: 0)
+                            .id("cardBottom")
+                            .padding(.bottom, 16)
                     }
-
-                    // Main Card Display with Drag Gesture
-                    cardDisplayArea
+                    .padding()
                 }
-                .padding()
+                .onChange(of: shouldAutoScrollToFirstCard) { _, shouldScroll in
+                    guard shouldScroll else { return }
+
+                    // Wait for card animation to complete before scrolling
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        if reduceMotion {
+                            proxy.scrollTo("cardBottom", anchor: .bottom)
+                        } else {
+                            withAnimation(.easeOut(duration: 0.4)) {
+                                proxy.scrollTo("cardBottom", anchor: .bottom)
+                            }
+                        }
+                        shouldAutoScrollToFirstCard = false
+                    }
+                }
             }
             .navigationTitle("Spawn Deck")
             .toolbar {
@@ -66,6 +92,12 @@ public struct SpawnDeckView: View {
             .onAppear {
                 if deckManager.drawPile.isEmpty && deckManager.currentCard == nil {
                     deckManager.loadDeck()
+                }
+            }
+            .onChange(of: deckManager.currentCard) { oldValue, newValue in
+                // Trigger auto-scroll when first card is drawn in a new deck cycle
+                if oldValue == nil && newValue != nil && deckManager.discardPile.isEmpty {
+                    shouldAutoScrollToFirstCard = true
                 }
             }
         }
@@ -148,6 +180,7 @@ public struct SpawnDeckView: View {
                     // Reset animation states
                     dragOffset = .zero
                     isAnimatingDiscard = false
+                    shouldAutoScrollToFirstCard = false
                 }
             } label: {
                 Label("Reset Deck", systemImage: "arrow.clockwise")
@@ -212,6 +245,7 @@ public struct SpawnDeckView: View {
                     // Reset animation states
                     dragOffset = .zero
                     isAnimatingDiscard = false
+                    shouldAutoScrollToFirstCard = false
                 }
             } label: {
                 Label("Shuffle", systemImage: "shuffle")
@@ -224,6 +258,7 @@ public struct SpawnDeckView: View {
                     // Reset animation states
                     dragOffset = .zero
                     isAnimatingDiscard = false
+                    shouldAutoScrollToFirstCard = false
                 }
             } label: {
                 Label("Reset", systemImage: "arrow.clockwise")
