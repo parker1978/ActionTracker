@@ -53,7 +53,7 @@ struct ExperienceCard: View {
                     }
                 } label: {
                     Image(systemName: "minus.circle.fill")
-                        .font(.title2)
+                        .font(.title)
                         .foregroundStyle(session.currentExperience > 0 ? .orange : .gray)
                 }
                 .disabled(session.currentExperience <= 0)
@@ -91,7 +91,7 @@ struct ExperienceCard: View {
                     }
                 } label: {
                     Image(systemName: "plus.circle.fill")
-                        .font(.title2)
+                        .font(.title)
                         .foregroundStyle(.orange)
                 }
             }
