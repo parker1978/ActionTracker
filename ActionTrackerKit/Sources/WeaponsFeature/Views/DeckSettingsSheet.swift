@@ -177,7 +177,7 @@ public struct DeckSettingsSheet: View {
             if allSets.count > 1 {
                 HStack {
                     Button("Select All") {
-                        isCustomExpansionSelection = false
+                        isCustomExpansionSelection = true
                         selectedExpansions = Set(allSets)
                         saveExpansionFilter()
                     }
