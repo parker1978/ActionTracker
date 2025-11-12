@@ -146,5 +146,10 @@ let package = Package(
             name: "SharedUITests",
             dependencies: ["SharedUI", "CoreDomain"]
         ),
+
+        .testTarget(
+            name: "WeaponsFeatureTests",
+            dependencies: ["WeaponsFeature", "CoreDomain", "DataLayer"]
+        ),
     ]
 )

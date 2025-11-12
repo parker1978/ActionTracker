@@ -152,7 +152,9 @@ public struct DeckSettingsSheet: View {
             ForEach(allSets, id: \.self) { setName in
                 Toggle(isOn: Binding(
                     get: {
-                        !isCustomExpansionSelection || selectedExpansions.contains(setName)
+                        let result = !isCustomExpansionSelection || selectedExpansions.contains(setName)
+                        print("🟢 TOGGLE GET [\(setName)]: isCustom=\(isCustomExpansionSelection), contains=\(selectedExpansions.contains(setName)), result=\(result)")
+                        return result
                     },
                     set: { isOn in
                         isCustomExpansionSelection = true
@@ -177,9 +179,14 @@ public struct DeckSettingsSheet: View {
             if allSets.count > 1 {
                 HStack {
                     Button("Select All") {
+                        print("🔵 SELECT ALL: Before - isCustom=\(isCustomExpansionSelection), count=\(selectedExpansions.count)")
                         isCustomExpansionSelection = true
                         selectedExpansions = Set(allSets)
-                        saveExpansionFilter()
+                        print("🔵 SELECT ALL: After - isCustom=\(isCustomExpansionSelection), count=\(selectedExpansions.count)")
+                        print("🔵 SELECT ALL: allSets = \(allSets)")
+                        print("🔵 SELECT ALL: selectedExpansions = \(selectedExpansions)")
+                        saveExpansionFilterAsync()
+                        print("🔵 SELECT ALL: After saveExpansionFilterAsync()")
                     }
                     .font(.subheadline)
 
@@ -305,19 +312,49 @@ public struct DeckSettingsSheet: View {
     }
 
     private func saveExpansionFilter() {
+        print("🟡 saveExpansionFilter: START - isCustom=\(isCustomExpansionSelection), count=\(selectedExpansions.count)")
         let allExpansionsSet = Set(WeaponRepository.shared.expansions)
 
         if !isCustomExpansionSelection {
             // Default state: all expansions enabled, no custom filter
             selectedExpansions = allExpansionsSet
             UserDefaults.standard.removeObject(forKey: "selectedExpansions")
+            print("🟡 saveExpansionFilter: Default state branch")
         } else {
             // Custom selection: always persist, even if all sets are selected
             UserDefaults.standard.set(Array(selectedExpansions), forKey: "selectedExpansions")
+            print("🟡 saveExpansionFilter: Custom selection branch")
         }
 
+        print("🟡 saveExpansionFilter: Before updateWeapons")
         // Update the weapons manager with filtered weapons
         weaponsManager.updateWeapons(getFilteredWeapons())
+        print("🟡 saveExpansionFilter: After updateWeapons")
+    }
+
+    private func saveExpansionFilterAsync() {
+        print("🟣 saveExpansionFilterAsync: START - isCustom=\(isCustomExpansionSelection), count=\(selectedExpansions.count)")
+        let allExpansionsSet = Set(WeaponRepository.shared.expansions)
+
+        if !isCustomExpansionSelection {
+            // Default state: all expansions enabled, no custom filter
+            selectedExpansions = allExpansionsSet
+            UserDefaults.standard.removeObject(forKey: "selectedExpansions")
+            print("🟣 saveExpansionFilterAsync: Default state branch")
+        } else {
+            // Custom selection: always persist, even if all sets are selected
+            UserDefaults.standard.set(Array(selectedExpansions), forKey: "selectedExpansions")
+            print("🟣 saveExpansionFilterAsync: Custom selection branch")
+        }
+
+        // Delay weapon update to allow SwiftUI to process @State changes first
+        Task { @MainActor in
+            print("🟣 saveExpansionFilterAsync: In Task, before sleep")
+            try? await Task.sleep(nanoseconds: 10_000_000) // 10ms delay
+            print("🟣 saveExpansionFilterAsync: In Task, after sleep, before updateWeapons")
+            weaponsManager.updateWeapons(getFilteredWeapons())
+            print("🟣 saveExpansionFilterAsync: In Task, after updateWeapons")
+        }
     }
 
     private func resetAllDecks() {
