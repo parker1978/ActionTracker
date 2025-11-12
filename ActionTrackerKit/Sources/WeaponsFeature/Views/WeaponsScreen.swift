@@ -202,11 +202,36 @@ public struct WeaponsScreen: View {
                 // Load the saved expansion filter on first appearance
                 // This ensures the deck counts are correct from the start
                 if !hasLoadedFilter {
-                    weaponsManager.loadSavedExpansionFilter()
+                    loadSavedExpansionFilter()
                     hasLoadedFilter = true
                 }
             }
         }
+    }
+
+    // MARK: - Filter Loading
+
+    /// Load saved expansion filter from UserDefaults and apply it to weapons manager
+    /// This ensures the deck counts are correct from the start
+    private func loadSavedExpansionFilter() {
+        let disabledCardsManager = DisabledCardsManager()
+        var weapons = WeaponRepository.shared.allWeapons
+
+        // Load saved expansion selection from UserDefaults
+        if let saved = UserDefaults.standard.array(forKey: "selectedExpansions") as? [String] {
+            // Custom expansion selection is active
+            let selectedExpansions = Set(saved)
+            weapons = weapons.filter { selectedExpansions.contains($0.expansion) }
+        }
+        // If no saved selection, use all expansions (default)
+
+        // Apply card-level disabled filter
+        weapons = weapons.filter { weapon in
+            !disabledCardsManager.isCardDisabled(weapon.name, in: weapon.expansion)
+        }
+
+        // Update all decks with the filtered weapons
+        weaponsManager.updateWeapons(weapons)
     }
 
     // MARK: - Card Management
