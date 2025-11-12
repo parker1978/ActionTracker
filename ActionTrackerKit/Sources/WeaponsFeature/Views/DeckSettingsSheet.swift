@@ -186,8 +186,13 @@ public struct DeckSettingsSheet: View {
             if allSets.count > 1 {
                 HStack {
                     Button("Select All") {
+                        print("🔵 SELECT ALL: Button tapped - before guard")
+                        guard !isUpdatingProgrammatically else {
+                            print("🔵 SELECT ALL: Already updating, ignoring tap")
+                            return
+                        }
                         print("🔵 SELECT ALL: Before - isCustom=\(isCustomExpansionSelection), count=\(selectedExpansions.count)")
-                        isUpdatingProgrammatically = true  // Prevent Toggle setters from running
+                        isUpdatingProgrammatically = true  // Prevent Toggle setters AND other button from running
                         isCustomExpansionSelection = true
                         selectedExpansions = Set(allSets)
                         print("🔵 SELECT ALL: After - isCustom=\(isCustomExpansionSelection), count=\(selectedExpansions.count)")
@@ -203,12 +208,18 @@ public struct DeckSettingsSheet: View {
                         }
                     }
                     .font(.subheadline)
+                    .disabled(isUpdatingProgrammatically)
 
                     Spacer()
 
                     Button("Deselect All") {
+                        print("🔴 DESELECT ALL: Button tapped - before guard")
+                        guard !isUpdatingProgrammatically else {
+                            print("🔴 DESELECT ALL: Already updating, ignoring tap")
+                            return
+                        }
                         print("🔴 DESELECT ALL: Before - count=\(selectedExpansions.count)")
-                        isUpdatingProgrammatically = true  // Prevent Toggle setters from running
+                        isUpdatingProgrammatically = true  // Prevent Toggle setters AND other button from running
                         isCustomExpansionSelection = true
                         selectedExpansions.removeAll()
                         print("🔴 DESELECT ALL: After - count=\(selectedExpansions.count)")
@@ -221,6 +232,7 @@ public struct DeckSettingsSheet: View {
                         }
                     }
                     .font(.subheadline)
+                    .disabled(isUpdatingProgrammatically)
                 }
             }
         } header: {
