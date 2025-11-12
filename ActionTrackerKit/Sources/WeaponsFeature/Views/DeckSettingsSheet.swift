@@ -307,11 +307,12 @@ public struct DeckSettingsSheet: View {
     private func saveExpansionFilter() {
         let allExpansionsSet = Set(WeaponRepository.shared.expansions)
 
-        if !isCustomExpansionSelection || selectedExpansions == allExpansionsSet {
-            isCustomExpansionSelection = false
+        if !isCustomExpansionSelection {
+            // Default state: all expansions enabled, no custom filter
             selectedExpansions = allExpansionsSet
             UserDefaults.standard.removeObject(forKey: "selectedExpansions")
         } else {
+            // Custom selection: always persist, even if all sets are selected
             UserDefaults.standard.set(Array(selectedExpansions), forKey: "selectedExpansions")
         }
 
