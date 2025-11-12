@@ -17,6 +17,7 @@ public struct DeckSettingsSheet: View {
 
     @State private var selectedExpansions: Set<String> = []
     @State private var isCustomExpansionSelection = false
+    @State private var isUpdatingProgrammatically = false  // Flag to prevent Toggle setter during bulk updates
     @State private var selectedDeckForContents: DeckType?
     @State private var selectedSetForCards: String?
     @State private var showResetConfirmation = false
@@ -157,6 +158,12 @@ public struct DeckSettingsSheet: View {
                         return result
                     },
                     set: { isOn in
+                        // Ignore setter calls during programmatic bulk updates
+                        guard !isUpdatingProgrammatically else {
+                            print("🚫 TOGGLE SET [\(setName)]: Ignoring during programmatic update")
+                            return
+                        }
+                        print("✅ TOGGLE SET [\(setName)]: isOn=\(isOn)")
                         isCustomExpansionSelection = true
                         if isOn {
                             selectedExpansions.insert(setName)
@@ -180,6 +187,7 @@ public struct DeckSettingsSheet: View {
                 HStack {
                     Button("Select All") {
                         print("🔵 SELECT ALL: Before - isCustom=\(isCustomExpansionSelection), count=\(selectedExpansions.count)")
+                        isUpdatingProgrammatically = true  // Prevent Toggle setters from running
                         isCustomExpansionSelection = true
                         selectedExpansions = Set(allSets)
                         print("🔵 SELECT ALL: After - isCustom=\(isCustomExpansionSelection), count=\(selectedExpansions.count)")
@@ -187,15 +195,30 @@ public struct DeckSettingsSheet: View {
                         print("🔵 SELECT ALL: selectedExpansions = \(selectedExpansions)")
                         saveExpansionFilterAsync()
                         print("🔵 SELECT ALL: After saveExpansionFilterAsync()")
+                        // Clear flag after a brief delay to ensure SwiftUI processed the update
+                        Task { @MainActor in
+                            try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
+                            isUpdatingProgrammatically = false
+                            print("🔵 SELECT ALL: Cleared programmatic update flag")
+                        }
                     }
                     .font(.subheadline)
 
                     Spacer()
 
                     Button("Deselect All") {
+                        print("🔴 DESELECT ALL: Before - count=\(selectedExpansions.count)")
+                        isUpdatingProgrammatically = true  // Prevent Toggle setters from running
                         isCustomExpansionSelection = true
                         selectedExpansions.removeAll()
+                        print("🔴 DESELECT ALL: After - count=\(selectedExpansions.count)")
                         saveExpansionFilter()
+                        // Clear flag after a brief delay
+                        Task { @MainActor in
+                            try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
+                            isUpdatingProgrammatically = false
+                            print("🔴 DESELECT ALL: Cleared programmatic update flag")
+                        }
                     }
                     .font(.subheadline)
                 }
