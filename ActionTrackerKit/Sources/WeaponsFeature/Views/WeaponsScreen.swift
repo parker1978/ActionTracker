@@ -23,6 +23,7 @@ public struct WeaponsScreen: View {
     @State private var selectedDeckForContents: DeckType?
     @State private var weaponToAdd: Weapon?
     @State private var handledCardIDs: Set<UUID> = [] // Track which cards have been added to inventory or discarded
+    @State private var hasLoadedFilter = false // Track whether we've loaded the expansion filter
 
     // Access to active game session for inventory management
     @Environment(\.modelContext) private var modelContext
@@ -195,6 +196,14 @@ public struct WeaponsScreen: View {
                     } description: {
                         Text("Start a game session to add weapons to inventory")
                     }
+                }
+            }
+            .onAppear {
+                // Load the saved expansion filter on first appearance
+                // This ensures the deck counts are correct from the start
+                if !hasLoadedFilter {
+                    weaponsManager.loadSavedExpansionFilter()
+                    hasLoadedFilter = true
                 }
             }
         }
