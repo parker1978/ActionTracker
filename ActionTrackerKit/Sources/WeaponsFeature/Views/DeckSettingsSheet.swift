@@ -152,7 +152,7 @@ public struct DeckSettingsSheet: View {
             ForEach(allSets, id: \.self) { setName in
                 Toggle(isOn: Binding(
                     get: {
-                        selectedExpansions.contains(setName)
+                        !isCustomExpansionSelection || selectedExpansions.contains(setName)
                     },
                     set: { isOn in
                         isCustomExpansionSelection = true
