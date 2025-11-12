@@ -17,6 +17,7 @@ public struct DeckSettingsSheet: View {
 
     @State private var selectedExpansions: Set<String> = []
     @State private var isCustomExpansionSelection = false
+    @State private var isUpdatingProgrammatically = false  // Flag to prevent Toggle setter during bulk updates
     @State private var selectedDeckForContents: DeckType?
     @State private var selectedSetForCards: String?
     @State private var showResetConfirmation = false
@@ -152,9 +153,12 @@ public struct DeckSettingsSheet: View {
             ForEach(allSets, id: \.self) { setName in
                 Toggle(isOn: Binding(
                     get: {
-                        selectedExpansions.contains(setName)
+                        !isCustomExpansionSelection || selectedExpansions.contains(setName)
                     },
                     set: { isOn in
+                        // Ignore setter calls during programmatic bulk updates
+                        guard !isUpdatingProgrammatically else { return }
+
                         isCustomExpansionSelection = true
                         if isOn {
                             selectedExpansions.insert(setName)
@@ -175,22 +179,46 @@ public struct DeckSettingsSheet: View {
             }
 
             if allSets.count > 1 {
-                HStack {
+                HStack(spacing: 20) {
                     Button("Select All") {
-                        isCustomExpansionSelection = false
+                        guard !isUpdatingProgrammatically else { return }
+
+                        isUpdatingProgrammatically = true
+                        isCustomExpansionSelection = true
                         selectedExpansions = Set(allSets)
-                        saveExpansionFilter()
+                        saveExpansionFilterAsync()
+
+                        // Clear flag after a delay to ensure SwiftUI fully processed the update
+                        Task { @MainActor in
+                            try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+                            isUpdatingProgrammatically = false
+                        }
                     }
                     .font(.subheadline)
+                    .buttonStyle(.plain)
+                    .id("selectAllButton")
+                    .disabled(isUpdatingProgrammatically)
 
-                    Spacer()
+                    Spacer(minLength: 40)
 
                     Button("Deselect All") {
+                        guard !isUpdatingProgrammatically else { return }
+
+                        isUpdatingProgrammatically = true
                         isCustomExpansionSelection = true
                         selectedExpansions.removeAll()
                         saveExpansionFilter()
+
+                        // Clear flag after a delay
+                        Task { @MainActor in
+                            try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+                            isUpdatingProgrammatically = false
+                        }
                     }
                     .font(.subheadline)
+                    .buttonStyle(.plain)
+                    .id("deselectAllButton")
+                    .disabled(isUpdatingProgrammatically)
                 }
             }
         } header: {
@@ -307,16 +335,36 @@ public struct DeckSettingsSheet: View {
     private func saveExpansionFilter() {
         let allExpansionsSet = Set(WeaponRepository.shared.expansions)
 
-        if !isCustomExpansionSelection || selectedExpansions == allExpansionsSet {
-            isCustomExpansionSelection = false
+        if !isCustomExpansionSelection {
+            // Default state: all expansions enabled, no custom filter
             selectedExpansions = allExpansionsSet
             UserDefaults.standard.removeObject(forKey: "selectedExpansions")
         } else {
+            // Custom selection: always persist, even if all sets are selected
             UserDefaults.standard.set(Array(selectedExpansions), forKey: "selectedExpansions")
         }
 
         // Update the weapons manager with filtered weapons
         weaponsManager.updateWeapons(getFilteredWeapons())
+    }
+
+    private func saveExpansionFilterAsync() {
+        let allExpansionsSet = Set(WeaponRepository.shared.expansions)
+
+        if !isCustomExpansionSelection {
+            // Default state: all expansions enabled, no custom filter
+            selectedExpansions = allExpansionsSet
+            UserDefaults.standard.removeObject(forKey: "selectedExpansions")
+        } else {
+            // Custom selection: always persist, even if all sets are selected
+            UserDefaults.standard.set(Array(selectedExpansions), forKey: "selectedExpansions")
+        }
+
+        // Delay weapon update to allow SwiftUI to process @State changes first
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 10_000_000) // 10ms delay
+            weaponsManager.updateWeapons(getFilteredWeapons())
+        }
     }
 
     private func resetAllDecks() {
