@@ -184,7 +184,7 @@ public struct DeckSettingsSheet: View {
             }
 
             if allSets.count > 1 {
-                HStack {
+                HStack(spacing: 20) {
                     Button("Select All") {
                         print("🔵 SELECT ALL: Button tapped - before guard")
                         guard !isUpdatingProgrammatically else {
@@ -200,17 +200,19 @@ public struct DeckSettingsSheet: View {
                         print("🔵 SELECT ALL: selectedExpansions = \(selectedExpansions)")
                         saveExpansionFilterAsync()
                         print("🔵 SELECT ALL: After saveExpansionFilterAsync()")
-                        // Clear flag after a brief delay to ensure SwiftUI processed the update
+                        // Clear flag after a longer delay to ensure SwiftUI fully processed the update
                         Task { @MainActor in
-                            try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
+                            try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
                             isUpdatingProgrammatically = false
                             print("🔵 SELECT ALL: Cleared programmatic update flag")
                         }
                     }
                     .font(.subheadline)
+                    .buttonStyle(.plain)
+                    .id("selectAllButton")
                     .disabled(isUpdatingProgrammatically)
 
-                    Spacer()
+                    Spacer(minLength: 40)
 
                     Button("Deselect All") {
                         print("🔴 DESELECT ALL: Button tapped - before guard")
@@ -224,14 +226,16 @@ public struct DeckSettingsSheet: View {
                         selectedExpansions.removeAll()
                         print("🔴 DESELECT ALL: After - count=\(selectedExpansions.count)")
                         saveExpansionFilter()
-                        // Clear flag after a brief delay
+                        // Clear flag after a longer delay
                         Task { @MainActor in
-                            try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
+                            try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
                             isUpdatingProgrammatically = false
                             print("🔴 DESELECT ALL: Cleared programmatic update flag")
                         }
                     }
                     .font(.subheadline)
+                    .buttonStyle(.plain)
+                    .id("deselectAllButton")
                     .disabled(isUpdatingProgrammatically)
                 }
             }
