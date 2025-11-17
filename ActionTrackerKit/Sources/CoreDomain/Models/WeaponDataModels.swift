@@ -11,43 +11,43 @@ import Foundation
 // MARK: - WeaponDefinition
 
 @Model
-final class WeaponDefinition {
-    @Attribute(.unique) var id: String
-    var name: String
-    var set: String  // Expansion/set name
-    var deckType: String  // "Starting", "Regular", "Ultrared"
-    var category: String  // "Melee", "Ranged", "Firearm", "Dual"
-    var defaultCount: Int  // How many copies in default deck
+public final class WeaponDefinition {
+    @Attribute(.unique) public var id: String
+    public var name: String
+    public var set: String  // Expansion/set name
+    public var deckType: String  // "Starting", "Regular", "Ultrared"
+    public var category: String  // "Melee", "Ranged", "Firearm", "Dual"
+    public var defaultCount: Int  // How many copies in default deck
 
     // Combat stats (stored as JSON for flexibility)
-    @Attribute var meleeStatsJSON: Data?
-    @Attribute var rangedStatsJSON: Data?
+    @Attribute public var meleeStatsJSON: Data?
+    @Attribute public var rangedStatsJSON: Data?
 
     // Legacy stats (for backward compatibility)
-    var dice: Int?
-    var accuracy: Int?
-    var damage: Int?
-    var rangeValue: Int?
-    var rangeMin: Int?
-    var rangeMax: Int?
+    public var dice: Int?
+    public var accuracy: Int?
+    public var damage: Int?
+    public var rangeValue: Int?
+    public var rangeMin: Int?
+    public var rangeMax: Int?
 
     // Abilities
-    var canOpenDoor: Bool
-    var doorNoise: Bool
-    var killNoise: Bool
-    var isDual: Bool
-    var hasOverload: Bool
-    var special: String?
+    public var canOpenDoor: Bool
+    public var doorNoise: Bool
+    public var killNoise: Bool
+    public var isDual: Bool
+    public var hasOverload: Bool
+    public var special: String?
 
     // Metadata
-    var metadataVersion: String  // Track when this definition was imported
-    var lastUpdated: Date
+    public var metadataVersion: String  // Track when this definition was imported
+    public var lastUpdated: Date
 
     // Relationships
     @Relationship(deleteRule: .cascade, inverse: \WeaponCardInstance.definition)
-    var cardInstances: [WeaponCardInstance] = []
+    public var cardInstances: [WeaponCardInstance] = []
 
-    init(name: String, set: String, deckType: String, category: String, defaultCount: Int) {
+    public init(name: String, set: String, deckType: String, category: String, defaultCount: Int) {
         // Deterministic ID for stable relationships
         self.id = "\(deckType):\(name):\(set)"
         self.name = name
@@ -68,15 +68,15 @@ final class WeaponDefinition {
 // MARK: - WeaponCardInstance
 
 @Model
-final class WeaponCardInstance {
-    @Attribute(.unique) var id: UUID
-    var copyIndex: Int  // Which copy (1, 2, 3, etc.)
-    var serial: String  // "Starting:Pistol:Core:1"
+public final class WeaponCardInstance {
+    @Attribute(.unique) public var id: UUID
+    public var copyIndex: Int  // Which copy (1, 2, 3, etc.)
+    public var serial: String  // "Starting:Pistol:Core:1"
 
     // Relationships
-    var definition: WeaponDefinition?
+    public var definition: WeaponDefinition?
 
-    init(definition: WeaponDefinition, copyIndex: Int) {
+    public init(definition: WeaponDefinition, copyIndex: Int) {
         self.id = UUID()
         self.definition = definition
         self.copyIndex = copyIndex
@@ -87,18 +87,18 @@ final class WeaponCardInstance {
 // MARK: - WeaponInventoryItem
 
 @Model
-final class WeaponInventoryItem {
-    @Attribute(.unique) var id: UUID
-    var slotType: String  // "active" or "backpack"
-    var slotIndex: Int
-    var isEquipped: Bool
-    var addedAt: Date
+public final class WeaponInventoryItem {
+    @Attribute(.unique) public var id: UUID
+    public var slotType: String  // "active" or "backpack"
+    public var slotIndex: Int
+    public var isEquipped: Bool
+    public var addedAt: Date
 
     // Relationships
-    var session: GameSession?
-    var cardInstance: WeaponCardInstance?
+    public var session: GameSession?
+    public var cardInstance: WeaponCardInstance?
 
-    init(slotType: String, slotIndex: Int, cardInstance: WeaponCardInstance) {
+    public init(slotType: String, slotIndex: Int, cardInstance: WeaponCardInstance) {
         self.id = UUID()
         self.slotType = slotType
         self.slotIndex = slotIndex
@@ -111,18 +111,18 @@ final class WeaponInventoryItem {
 // MARK: - DeckCustomization
 
 @Model
-final class DeckCustomization {
-    @Attribute(.unique) var id: UUID
-    var isEnabled: Bool
-    var customCount: Int?  // nil = use default
-    var priority: Int  // For ordering
-    var notes: String?
+public final class DeckCustomization {
+    @Attribute(.unique) public var id: UUID
+    public var isEnabled: Bool
+    public var customCount: Int?  // nil = use default
+    public var priority: Int  // For ordering
+    public var notes: String?
 
     // Relationships
-    var definition: WeaponDefinition?
-    var ownerPreset: DeckPreset?  // nil = global default
+    public var definition: WeaponDefinition?
+    public var ownerPreset: DeckPreset?  // nil = global default
 
-    init(definition: WeaponDefinition, isEnabled: Bool = true) {
+    public init(definition: WeaponDefinition, isEnabled: Bool = true) {
         self.id = UUID()
         self.definition = definition
         self.isEnabled = isEnabled
@@ -133,19 +133,19 @@ final class DeckCustomization {
 // MARK: - DeckPreset
 
 @Model
-final class DeckPreset {
-    @Attribute(.unique) var id: UUID
-    var name: String
-    var presetDescription: String
-    var isDefault: Bool
-    var createdAt: Date
-    var lastUsed: Date?
+public final class DeckPreset {
+    @Attribute(.unique) public var id: UUID
+    public var name: String
+    public var presetDescription: String
+    public var isDefault: Bool
+    public var createdAt: Date
+    public var lastUsed: Date?
 
     // Relationships
     @Relationship(deleteRule: .cascade)
-    var customizations: [DeckCustomization] = []
+    public var customizations: [DeckCustomization] = []
 
-    init(name: String, description: String, isDefault: Bool = false) {
+    public init(name: String, description: String, isDefault: Bool = false) {
         self.id = UUID()
         self.name = name
         self.presetDescription = description
@@ -157,12 +157,12 @@ final class DeckPreset {
 // MARK: - WeaponDataVersion
 
 @Model
-final class WeaponDataVersion {
-    @Attribute(.unique) var id: String  // Singleton: always "singleton"
-    var latestImported: String
-    var lastChecked: Date
+public final class WeaponDataVersion {
+    @Attribute(.unique) public var id: String  // Singleton: always "singleton"
+    public var latestImported: String
+    public var lastChecked: Date
 
-    init(version: String) {
+    public init(version: String) {
         self.id = "singleton"
         self.latestImported = version
         self.lastChecked = Date()
@@ -171,22 +171,42 @@ final class WeaponDataVersion {
 
 // MARK: - Supporting Structs for JSON Stats
 
-struct MeleeStatsData: Codable {
-    var range: Int
-    var dice: Int
-    var accuracy: Int
-    var damage: Int
-    var overload: Int?
-    var killNoise: Bool
+public struct MeleeStatsData: Codable {
+    public var range: Int
+    public var dice: Int
+    public var accuracy: Int
+    public var damage: Int
+    public var overload: Int?
+    public var killNoise: Bool
+
+    public init(range: Int, dice: Int, accuracy: Int, damage: Int, overload: Int?, killNoise: Bool) {
+        self.range = range
+        self.dice = dice
+        self.accuracy = accuracy
+        self.damage = damage
+        self.overload = overload
+        self.killNoise = killNoise
+    }
 }
 
-struct RangedStatsData: Codable {
-    var rangeMin: Int
-    var rangeMax: Int
-    var dice: Int
-    var accuracy: Int
-    var damage: Int
-    var overload: Int?
-    var killNoise: Bool
-    var ammoType: String?
+public struct RangedStatsData: Codable {
+    public var rangeMin: Int
+    public var rangeMax: Int
+    public var dice: Int
+    public var accuracy: Int
+    public var damage: Int
+    public var overload: Int?
+    public var killNoise: Bool
+    public var ammoType: String?
+
+    public init(rangeMin: Int, rangeMax: Int, dice: Int, accuracy: Int, damage: Int, overload: Int?, killNoise: Bool, ammoType: String?) {
+        self.rangeMin = rangeMin
+        self.rangeMax = rangeMax
+        self.dice = dice
+        self.accuracy = accuracy
+        self.damage = damage
+        self.overload = overload
+        self.killNoise = killNoise
+        self.ammoType = ammoType
+    }
 }

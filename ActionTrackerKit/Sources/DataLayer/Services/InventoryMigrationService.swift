@@ -119,9 +119,13 @@ public class InventoryMigrationService {
     /// Finds or creates a WeaponCardInstance for the given weapon
     private func findOrCreateCardInstance(_ weaponId: (name: String, set: String)) throws -> WeaponCardInstance? {
         // Find matching WeaponDefinition
+        // Extract values for predicate (tuples don't work in predicates)
+        let weaponName = weaponId.name
+        let weaponSet = weaponId.set
+
         let descriptor = FetchDescriptor<WeaponDefinition>(
             predicate: #Predicate { def in
-                def.name == weaponId.name && def.set == weaponId.set
+                def.name == weaponName && def.set == weaponSet
             }
         )
 
@@ -186,6 +190,7 @@ public class InventoryMigrationService {
             }
             guard instance.definition != nil else {
                 errors.append("CardInstance \(instance.serial) missing definition")
+                continue
             }
         }
 
