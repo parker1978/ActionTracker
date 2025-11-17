@@ -59,6 +59,17 @@ struct ZombiTrackApp: App {
             let context = ModelContext(container)
             DataSeeder.seedIfNeeded(context: context)
 
+            // Phase 0: Import weapons from XML into SwiftData
+            Task { @MainActor in
+                do {
+                    let importService = WeaponImportService(context: context)
+                    try await importService.importWeaponsIfNeeded()
+                    try importService.validateImport()
+                } catch {
+                    print("⚠️ Weapons import failed: \(error)")
+                }
+            }
+
             // Run spawn deck tests (can be commented out after verification)
 //            #if DEBUG
 //            SpawnDeckManager.runTests()
