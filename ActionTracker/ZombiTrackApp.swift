@@ -33,10 +33,18 @@ struct ZombiTrackApp: App {
         purgeLegacyStoreIfNeeded()
 
         let schema = Schema([
+            // Core models
             CoreDomain.Character.self,
             CoreDomain.Skill.self,
             CoreDomain.GameSession.self,
             CoreDomain.ActionInstance.self,
+            // Phase 0: Weapon models
+            CoreDomain.WeaponDefinition.self,
+            CoreDomain.WeaponCardInstance.self,
+            CoreDomain.WeaponInventoryItem.self,
+            CoreDomain.DeckCustomization.self,
+            CoreDomain.DeckPreset.self,
+            CoreDomain.WeaponDataVersion.self,
         ])
         let modelConfiguration = ModelConfiguration(
             storeName,

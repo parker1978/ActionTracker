@@ -56,6 +56,10 @@ public final class GameSession {
     /// All action instances (tokens) for this session
     @Relationship(deleteRule: .cascade) public var actions: [ActionInstance] = []
 
+    /// Phase 0: SwiftData inventory items (replaces string-based inventory)
+    /// Legacy activeWeapons/inactiveWeapons strings kept for Phase 5 removal
+    @Relationship(deleteRule: .cascade) public var inventoryItems: [WeaponInventoryItem] = []
+
     // MARK: - Initializer
 
     public init(
