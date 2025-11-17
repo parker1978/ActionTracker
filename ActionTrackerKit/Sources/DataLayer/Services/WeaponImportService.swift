@@ -111,6 +111,12 @@ public class WeaponImportService {
             definitionCount += 1
 
             // Create card instances for each copy
+            // Skip weapons with count <= 0 (shouldn't happen, but be defensive)
+            guard weapon.count > 0 else {
+                print("⚠️ Skipping card instances for \(weapon.name) (count: \(weapon.count))")
+                continue
+            }
+
             for copyIndex in 1...weapon.count {
                 let instance = WeaponCardInstance(
                     definition: definition,
