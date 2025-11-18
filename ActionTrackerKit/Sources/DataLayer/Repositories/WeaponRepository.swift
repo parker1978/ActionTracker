@@ -16,9 +16,10 @@ public class WeaponRepository {
     public static let shared = WeaponRepository()
 
     /// Version of the weapons data (for debugging and sync verification)
-    public static let WEAPONS_DATA_VERSION = "2.2.0"
+    public static let WEAPONS_DATA_VERSION = "2.3.0"
 
     public private(set) var allWeapons: [Weapon] = []
+    public private(set) var xmlVersion: String = "unknown"
 
     private init() {
         loadWeapons()
@@ -37,8 +38,9 @@ public class WeaponRepository {
             let data = try Data(contentsOf: url)
             let parser = WeaponXMLParser()
             allWeapons = parser.parse(data: data)
+            xmlVersion = parser.getVersion()
 
-            print("✅ Loaded \(allWeapons.count) weapons (v\(Self.WEAPONS_DATA_VERSION))")
+            print("✅ Loaded \(allWeapons.count) weapons (XML v\(xmlVersion))")
         } catch {
             print("❌ Failed to load weapons: \(error)")
         }
@@ -68,6 +70,7 @@ public class WeaponRepository {
 /// Parses weapons from XML data
 class WeaponXMLParser: NSObject, XMLParserDelegate {
     private var weapons: [Weapon] = []
+    private var xmlVersion: String = "unknown"
     private var currentElement = ""
     private var currentWeapon: WeaponBuilder?
     private var currentMeleeStats: MeleeStatsBuilder?
@@ -77,10 +80,16 @@ class WeaponXMLParser: NSObject, XMLParserDelegate {
 
     func parse(data: Data) -> [Weapon] {
         weapons = []
+        xmlVersion = "unknown"
         let parser = XMLParser(data: data)
         parser.delegate = self
         parser.parse()
         return weapons
+    }
+
+    /// Returns the version attribute from the XML root element
+    func getVersion() -> String {
+        return xmlVersion
     }
 
     // MARK: - XMLParserDelegate
@@ -89,6 +98,11 @@ class WeaponXMLParser: NSObject, XMLParserDelegate {
         currentElement = elementName
 
         switch elementName {
+        case "Weapons":
+            // Extract version attribute from root element
+            if let version = attributeDict["version"] {
+                xmlVersion = version
+            }
         case "Weapon":
             currentWeapon = WeaponBuilder()
         case "Melee":
