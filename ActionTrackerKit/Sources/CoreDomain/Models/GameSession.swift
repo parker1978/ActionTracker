@@ -60,6 +60,12 @@ public final class GameSession {
     /// Legacy activeWeapons/inactiveWeapons strings kept for Phase 5 removal
     @Relationship(deleteRule: .cascade) public var inventoryItems: [WeaponInventoryItem] = []
 
+    /// Phase 2: Deck runtime states for persistent deck state (one per deck type)
+    @Relationship(deleteRule: .cascade, inverse: \DeckRuntimeState.session) public var deckStates: [DeckRuntimeState] = []
+
+    /// Phase 2: Inventory event history for audit trail
+    @Relationship(deleteRule: .cascade, inverse: \InventoryEvent.session) public var inventoryEvents: [InventoryEvent] = []
+
     // MARK: - Initializer
 
     public init(

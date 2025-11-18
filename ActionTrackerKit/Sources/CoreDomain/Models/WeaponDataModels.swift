@@ -171,6 +171,57 @@ public final class WeaponDataVersion {
     }
 }
 
+// MARK: - DeckRuntimeState
+
+/// Persists deck state (remaining cards, discard pile) for a specific deck type in a game session
+@Model
+public final class DeckRuntimeState {
+    @Attribute(.unique) public var id: UUID
+    public var deckType: String  // "Starting", "Regular", "Ultrared"
+    public var lastShuffled: Date?
+    public var lastDrawn: Date?
+
+    // Store UUIDs of card instances for persistence
+    // These reference WeaponCardInstance.id
+    public var remainingCardIDs: [UUID] = []  // Cards still in deck
+    public var discardCardIDs: [UUID] = []    // Cards in discard pile
+    public var recentDrawIDs: [UUID] = []     // Last 3 drawn cards (for UI)
+
+    // Relationships
+    public var session: GameSession?
+
+    public init(deckType: String) {
+        self.id = UUID()
+        self.deckType = deckType
+    }
+}
+
+// MARK: - InventoryEvent
+
+/// Tracks history of inventory operations for audit trail and undo capability
+@Model
+public final class InventoryEvent {
+    @Attribute(.unique) public var id: UUID
+    public var eventType: String  // "add", "remove", "move", "replace"
+    public var timestamp: Date
+    public var slotType: String?  // "active" or "backpack" (nil for remove)
+    public var slotIndex: Int?    // Slot position
+    public var fromSlotType: String?  // For move operations
+    public var fromSlotIndex: Int?     // For move operations
+
+    // Relationships
+    public var session: GameSession?
+    public var cardInstance: WeaponCardInstance?
+
+    public init(eventType: String, slotType: String? = nil, slotIndex: Int? = nil) {
+        self.id = UUID()
+        self.eventType = eventType
+        self.timestamp = Date()
+        self.slotType = slotType
+        self.slotIndex = slotIndex
+    }
+}
+
 // MARK: - Supporting Structs for JSON Stats
 
 public struct MeleeStatsData: Codable {
