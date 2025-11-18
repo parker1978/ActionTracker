@@ -280,4 +280,228 @@ final class WeaponImportServiceTests: XCTestCase {
         XCTAssertTrue(categories.contains("Melee"), "Should have Melee weapons")
         XCTAssertGreaterThan(categories.count, 1, "Should have multiple weapon categories")
     }
+
+    // MARK: - Phase 1: Version Comparison Tests
+
+    func testVersionComparisonGreater() {
+        XCTAssertEqual(compareVersions("2.3.0", "2.2.0"), .greater)
+        XCTAssertEqual(compareVersions("3.0.0", "2.9.9"), .greater)
+        XCTAssertEqual(compareVersions("2.2.1", "2.2.0"), .greater)
+    }
+
+    func testVersionComparisonEqual() {
+        XCTAssertEqual(compareVersions("2.3.0", "2.3.0"), .equal)
+        XCTAssertEqual(compareVersions("1.0.0", "1.0.0"), .equal)
+    }
+
+    func testVersionComparisonLess() {
+        XCTAssertEqual(compareVersions("2.2.0", "2.3.0"), .less)
+        XCTAssertEqual(compareVersions("1.9.9", "2.0.0"), .less)
+        XCTAssertEqual(compareVersions("2.2.0", "2.2.1"), .less)
+    }
+
+    func testVersionComparisonHandlesMissingComponents() {
+        // "2.3" should be treated as "2.3.0"
+        XCTAssertEqual(compareVersions("2.3", "2.3.0"), .equal)
+        XCTAssertEqual(compareVersions("2.3.1", "2.3"), .greater)
+    }
+
+    // MARK: - Phase 1: Version Gating Tests
+
+    func testImportSkipsWhenVersionUnchanged() async throws {
+        // First import with version 2.3.0
+        let firstImport = try await importService.importWeaponsIfNeeded()
+        XCTAssertTrue(firstImport, "First import should be performed")
+
+        // Verify version is set
+        let versionDescriptor = FetchDescriptor<WeaponDataVersion>()
+        guard let version = try context.fetch(versionDescriptor).first else {
+            XCTFail("Version should be set after import")
+            return
+        }
+        XCTAssertEqual(version.latestImported, "2.3.0")
+
+        // Second import should be skipped (same version)
+        let secondImport = try await importService.importWeaponsIfNeeded()
+        XCTAssertFalse(secondImport, "Second import should be skipped when version unchanged")
+    }
+
+    func testImportSkipsWhenVersionOlder() async throws {
+        // Manually create an older version record (simulating downgrade scenario)
+        let futureVersion = WeaponDataVersion(version: "3.0.0")
+        context.insert(futureVersion)
+        try context.save()
+
+        // Import should be skipped (XML is 2.3.0, which is older than 3.0.0)
+        let wasImported = try await importService.importWeaponsIfNeeded()
+        XCTAssertFalse(wasImported, "Import should be skipped when XML version is older")
+    }
+
+    // MARK: - Phase 1: Incremental Update Tests
+
+    func testIncrementalUpdateUpdatesExistingWeapons() async throws {
+        // First import
+        try await importService.importWeaponsIfNeeded()
+
+        // Get initial count and find a weapon to verify update
+        let initialDescriptor = FetchDescriptor<WeaponDefinition>()
+        let initialDefinitions = try context.fetch(initialDescriptor)
+        let initialCount = initialDefinitions.count
+
+        guard let pistol = initialDefinitions.first(where: { $0.name == "Pistol" && $0.set == "Core" }) else {
+            XCTFail("Should have Pistol weapon")
+            return
+        }
+
+        let pistolID = pistol.id
+        let pistolLastUpdated = pistol.lastUpdated
+
+        // Simulate XML update to version 2.4.0 by manually updating version
+        // (In real scenario, XML would have changed, but we're testing the update mechanism)
+        let versionDescriptor = FetchDescriptor<WeaponDataVersion>()
+        guard let version = try context.fetch(versionDescriptor).first else {
+            XCTFail("Version should exist")
+            return
+        }
+        version.latestImported = "2.2.0"  // Simulate older version
+        try context.save()
+
+        // Trigger incremental update (will load from XML 2.3.0)
+        let wasUpdated = try await importService.importWeaponsIfNeeded()
+        XCTAssertTrue(wasUpdated, "Incremental update should be performed")
+
+        // Verify definition count unchanged (no new weapons in this test)
+        let updatedDescriptor = FetchDescriptor<WeaponDefinition>()
+        let updatedDefinitions = try context.fetch(updatedDescriptor)
+        XCTAssertEqual(updatedDefinitions.count, initialCount, "Definition count should be unchanged")
+
+        // Verify pistol was updated (same ID, but lastUpdated changed)
+        guard let updatedPistol = updatedDefinitions.first(where: { $0.id == pistolID }) else {
+            XCTFail("Pistol should still exist")
+            return
+        }
+        XCTAssertGreaterThan(updatedPistol.lastUpdated, pistolLastUpdated, "Pistol should have updated timestamp")
+        XCTAssertEqual(updatedPistol.metadataVersion, "2.3.0", "Pistol should have new version")
+    }
+
+    func testIncrementalUpdateMarksRemovedWeaponsAsDeprecated() async throws {
+        // First import
+        try await importService.importWeaponsIfNeeded()
+
+        // Manually create a fake weapon that won't be in XML
+        let fakeWeapon = WeaponDefinition(
+            name: "FakeWeapon",
+            set: "TestSet",
+            deckType: "Regular",
+            category: "Melee",
+            defaultCount: 1
+        )
+        fakeWeapon.metadataVersion = "2.3.0"
+        context.insert(fakeWeapon)
+        try context.save()
+
+        XCTAssertFalse(fakeWeapon.isDeprecated, "Fake weapon should not be deprecated initially")
+
+        // Simulate older version to trigger update
+        let versionDescriptor = FetchDescriptor<WeaponDataVersion>()
+        guard let version = try context.fetch(versionDescriptor).first else {
+            XCTFail("Version should exist")
+            return
+        }
+        version.latestImported = "2.2.0"
+        try context.save()
+
+        // Trigger incremental update
+        try await importService.importWeaponsIfNeeded()
+
+        // Verify fake weapon is now deprecated
+        let descriptor = FetchDescriptor<WeaponDefinition>(
+            predicate: #Predicate { $0.name == "FakeWeapon" }
+        )
+        guard let updatedFakeWeapon = try context.fetch(descriptor).first else {
+            XCTFail("Fake weapon should still exist")
+            return
+        }
+        XCTAssertTrue(updatedFakeWeapon.isDeprecated, "Fake weapon should be marked as deprecated")
+    }
+
+    func testIncrementalUpdateHandlesCountChanges() async throws {
+        // First import
+        try await importService.importWeaponsIfNeeded()
+
+        // Find a weapon and manually change its count
+        let descriptor = FetchDescriptor<WeaponDefinition>()
+        let definitions = try context.fetch(descriptor)
+
+        guard let weapon = definitions.first else {
+            XCTFail("Should have at least one weapon")
+            return
+        }
+
+        let originalCount = weapon.defaultCount
+        let originalInstanceCount = weapon.cardInstances.count
+
+        // Manually change count to test instance adjustment
+        weapon.defaultCount = originalCount + 2
+
+        // Add 2 new instances manually
+        for i in 1...2 {
+            let newInstance = WeaponCardInstance(
+                definition: weapon,
+                copyIndex: originalInstanceCount + i
+            )
+            context.insert(newInstance)
+        }
+        try context.save()
+
+        XCTAssertEqual(weapon.cardInstances.count, originalCount + 2, "Should have added instances")
+
+        // Simulate older version to trigger update (which will restore original count)
+        let versionDescriptor = FetchDescriptor<WeaponDataVersion>()
+        guard let version = try context.fetch(versionDescriptor).first else {
+            XCTFail("Version should exist")
+            return
+        }
+        version.latestImported = "2.2.0"
+        try context.save()
+
+        // Trigger incremental update (will restore count from XML)
+        try await importService.importWeaponsIfNeeded()
+
+        // Verify count was restored to original from XML
+        let updatedDescriptor = FetchDescriptor<WeaponDefinition>(
+            predicate: #Predicate { $0.id == weapon.id }
+        )
+        guard let updatedWeapon = try context.fetch(updatedDescriptor).first else {
+            XCTFail("Weapon should still exist")
+            return
+        }
+        XCTAssertEqual(updatedWeapon.defaultCount, originalCount, "Count should be restored from XML")
+        XCTAssertEqual(updatedWeapon.cardInstances.count, originalCount, "Instance count should match")
+    }
+
+    func testXMLVersionIsParsedCorrectly() {
+        // Verify the XML parser extracts version
+        let xmlVersion = WeaponRepository.shared.xmlVersion
+        XCTAssertEqual(xmlVersion, "2.3.0", "XML version should be 2.3.0")
+    }
+
+    func testVersionIsStoredAfterImport() async throws {
+        // Perform import
+        try await importService.importWeaponsIfNeeded()
+
+        // Verify version singleton was created
+        let versionDescriptor = FetchDescriptor<WeaponDataVersion>()
+        let versions = try context.fetch(versionDescriptor)
+
+        XCTAssertEqual(versions.count, 1, "Should have exactly one version record")
+
+        guard let version = versions.first else {
+            XCTFail("Version should exist")
+            return
+        }
+
+        XCTAssertEqual(version.id, "singleton", "Version ID should be 'singleton'")
+        XCTAssertEqual(version.latestImported, "2.3.0", "Should store XML version")
+    }
 }

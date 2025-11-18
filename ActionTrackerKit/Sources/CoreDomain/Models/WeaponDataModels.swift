@@ -42,6 +42,7 @@ public final class WeaponDefinition {
     // Metadata
     public var metadataVersion: String  // Track when this definition was imported
     public var lastUpdated: Date
+    public var isDeprecated: Bool  // True if removed from latest XML but kept for reference integrity
 
     // Relationships
     @Relationship(deleteRule: .cascade, inverse: \WeaponCardInstance.definition)
@@ -62,6 +63,7 @@ public final class WeaponDefinition {
         self.hasOverload = false
         self.metadataVersion = "2.2.0"
         self.lastUpdated = Date()
+        self.isDeprecated = false
     }
 }
 

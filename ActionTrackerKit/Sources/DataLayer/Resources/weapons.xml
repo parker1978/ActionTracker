@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<Weapons xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="weapons.xsd">
+<Weapons version="2.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="weapons.xsd">
   <Weapon>
     <Name>Crowbar</Name>
     <Set>Fort Hendrix</Set>
