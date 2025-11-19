@@ -14,8 +14,27 @@ import OSLog
 public class WeaponImportService {
     private let context: ModelContext
 
+    /// Version of the weapons data
+    private static let WEAPONS_DATA_VERSION = "2.3.0"
+
     public init(context: ModelContext) {
         self.context = context
+    }
+
+    // MARK: - XML Loading
+
+    /// Load weapons from bundled XML
+    private func loadWeaponsFromXML() throws -> (weapons: [Weapon], version: String) {
+        guard let url = Bundle.main.url(forResource: "weapons", withExtension: "xml") else {
+            throw ImportError.noWeaponsFound
+        }
+
+        let data = try Data(contentsOf: url)
+        let parser = WeaponXMLParser()
+        let weapons = parser.parse(data: data)
+        let version = parser.getVersion()
+
+        return (weapons, version)
     }
 
     // MARK: - Import
@@ -25,7 +44,7 @@ public class WeaponImportService {
     @discardableResult
     public func importWeaponsIfNeeded() async throws -> Bool {
         // Get XML version from bundled weapons
-        let xmlVersion = WeaponRepository.shared.xmlVersion
+        let (_, xmlVersion) = try loadWeaponsFromXML()
 
         // Check if already imported
         let versionDescriptor = FetchDescriptor<WeaponDataVersion>()
@@ -52,8 +71,8 @@ public class WeaponImportService {
         WeaponsLogger.importer.info("Starting initial weapons import from XML...")
         let startTime = Date()
 
-        // Load weapons from XML using existing WeaponRepository
-        let weapons = WeaponRepository.shared.allWeapons
+        // Load weapons from XML
+        let (weapons, _) = try loadWeaponsFromXML()
 
         guard !weapons.isEmpty else {
             throw ImportError.noWeaponsFound
@@ -147,7 +166,7 @@ public class WeaponImportService {
         }
 
         // Mark import as complete
-        let version = WeaponDataVersion(version: WeaponRepository.WEAPONS_DATA_VERSION)
+        let version = WeaponDataVersion(version: Self.WEAPONS_DATA_VERSION)
         context.insert(version)
 
         // Save in single transaction
@@ -168,7 +187,7 @@ public class WeaponImportService {
         let startTime = Date()
 
         // Load weapons from XML
-        let weapons = WeaponRepository.shared.allWeapons
+        let (weapons, _) = try loadWeaponsFromXML()
         guard !weapons.isEmpty else {
             throw ImportError.noWeaponsFound
         }
@@ -420,4 +439,269 @@ func compareVersions(_ v1: String, _ v2: String) -> VersionComparison {
     }
 
     return .equal
+}
+
+// MARK: - XML Parser
+
+/// Parses weapons from XML data
+class WeaponXMLParser: NSObject, XMLParserDelegate {
+    private var weapons: [Weapon] = []
+    private var xmlVersion: String = "unknown"
+    private var currentElement = ""
+    private var currentWeapon: WeaponBuilder?
+    private var currentMeleeStats: MeleeStatsBuilder?
+    private var currentRangedStats: RangedStatsBuilder?
+    private var isInMeleeSection = false
+    private var isInRangedSection = false
+
+    func parse(data: Data) -> [Weapon] {
+        weapons = []
+        xmlVersion = "unknown"
+        let parser = XMLParser(data: data)
+        parser.delegate = self
+        parser.parse()
+        return weapons
+    }
+
+    /// Returns the version attribute from the XML root element
+    func getVersion() -> String {
+        return xmlVersion
+    }
+
+    // MARK: - XMLParserDelegate
+
+    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String: String] = [:]) {
+        currentElement = elementName
+
+        switch elementName {
+        case "Weapons":
+            // Extract version attribute from root element
+            if let version = attributeDict["version"] {
+                xmlVersion = version
+            }
+        case "Weapon":
+            currentWeapon = WeaponBuilder()
+        case "Melee":
+            isInMeleeSection = true
+            currentMeleeStats = MeleeStatsBuilder()
+        case "Ranged":
+            isInRangedSection = true
+            currentRangedStats = RangedStatsBuilder()
+        default:
+            break
+        }
+    }
+
+    func parser(_ parser: XMLParser, foundCharacters string: String) {
+        let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        if isInMeleeSection {
+            parseMeleeElement(trimmed)
+        } else if isInRangedSection {
+            parseRangedElement(trimmed)
+        } else {
+            parseWeaponElement(trimmed)
+        }
+    }
+
+    func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+        switch elementName {
+        case "Weapon":
+            if let weapon = currentWeapon?.build() {
+                weapons.append(weapon)
+            }
+            currentWeapon = nil
+        case "Melee":
+            if let stats = currentMeleeStats?.build() {
+                currentWeapon?.meleeStats = stats
+            }
+            currentMeleeStats = nil
+            isInMeleeSection = false
+        case "Ranged":
+            if let stats = currentRangedStats?.build() {
+                currentWeapon?.rangedStats = stats
+            }
+            currentRangedStats = nil
+            isInRangedSection = false
+        default:
+            break
+        }
+        currentElement = ""
+    }
+
+    // MARK: - Element Parsing
+
+    private func parseWeaponElement(_ value: String) {
+        guard let weapon = currentWeapon else { return }
+
+        switch currentElement {
+        case "Name": weapon.name += value
+        case "Set": weapon.expansion += value
+        case "Deck": weapon.deck += value
+        case "Count": weapon.count = Int(value)
+        case "Category": weapon.category += value
+        case "Open_Door": weapon.openDoor = parseBool(value)
+        case "Door_Noise": weapon.doorNoise = parseBool(value)
+        case "Dual": weapon.dual = parseBool(value)
+        case "Special": weapon.special += value
+        default: break
+        }
+    }
+
+    private func parseMeleeElement(_ value: String) {
+        guard let stats = currentMeleeStats else { return }
+
+        switch currentElement {
+        case "Range": stats.range = Int(value)
+        case "Dice": stats.dice = Int(value)
+        case "Accuracy": stats.accuracy = Int(value)
+        case "Damage": stats.damage = Int(value)
+        case "Overload": stats.overload = Int(value) ?? 0
+        case "Kill_Noise": stats.killNoise = parseBool(value)
+        default: break
+        }
+    }
+
+    private func parseRangedElement(_ value: String) {
+        guard let stats = currentRangedStats else { return }
+
+        switch currentElement {
+        case "Ammo_Type": stats.ammoType += value
+        case "Range_Min": stats.rangeMin = Int(value)
+        case "Range_Max": stats.rangeMax = Int(value)
+        case "Dice": stats.dice = Int(value)
+        case "Accuracy": stats.accuracy = Int(value)
+        case "Damage": stats.damage = Int(value)
+        case "Overload": stats.overload = Int(value) ?? 0
+        case "Kill_Noise": stats.killNoise = parseBool(value)
+        default: break
+        }
+    }
+
+    private func parseBool(_ value: String) -> Bool {
+        value.uppercased() == "TRUE"
+    }
+}
+
+// MARK: - Builder Classes
+
+class WeaponBuilder {
+    var name: String = ""
+    var expansion: String = ""
+    var deck: String = ""
+    var count: Int?
+    var category: String = ""
+    var meleeStats: MeleeStats?
+    var rangedStats: RangedStats?
+    var openDoor: Bool = false
+    var doorNoise: Bool = false
+    var dual: Bool = false
+    var special: String = ""
+
+    func build() -> Weapon? {
+        guard !name.isEmpty else { return nil }
+
+        let weaponCategory: WeaponCategory = {
+            switch category {
+            case "Melee": return .melee
+            case "Ranged": return .ranged
+            case "Dual": return .dual
+            case "Bonus": return .bonus
+            case "Zombie": return .zombie
+            default: return .melee
+            }
+        }()
+
+        let deckType: DeckType = {
+            switch deck {
+            case "Starting": return .starting
+            case "Regular": return .regular
+            case "Ultrared": return .ultrared
+            default: return .regular
+            }
+        }()
+
+        return Weapon(
+            name: name,
+            expansion: expansion,
+            deck: deckType,
+            count: count ?? 1,
+            category: weaponCategory,
+            meleeStats: meleeStats,
+            rangedStats: rangedStats,
+            openDoor: openDoor,
+            doorNoise: doorNoise,
+            killNoise: false,
+            dual: dual,
+            special: special
+        )
+    }
+}
+
+class MeleeStatsBuilder {
+    var range: Int?
+    var dice: Int?
+    var accuracy: Int?
+    var damage: Int?
+    var overload: Int = 0
+    var killNoise: Bool = false
+
+    func build() -> MeleeStats? {
+        guard let range = range,
+              let dice = dice,
+              let accuracy = accuracy,
+              let damage = damage else {
+            return nil
+        }
+
+        return MeleeStats(
+            range: range,
+            dice: dice,
+            accuracy: accuracy,
+            damage: damage,
+            overload: overload,
+            killNoise: killNoise
+        )
+    }
+}
+
+class RangedStatsBuilder {
+    var ammoType: String = ""
+    var rangeMin: Int?
+    var rangeMax: Int?
+    var dice: Int?
+    var accuracy: Int?
+    var damage: Int?
+    var overload: Int = 0
+    var killNoise: Bool = false
+
+    func build() -> RangedStats? {
+        guard let rangeMin = rangeMin,
+              let rangeMax = rangeMax,
+              let dice = dice,
+              let accuracy = accuracy,
+              let damage = damage else {
+            return nil
+        }
+
+        let ammo: AmmoType = {
+            switch ammoType {
+            case "Bullets": return .bullets
+            case "Shells": return .shells
+            default: return .none
+            }
+        }()
+
+        return RangedStats(
+            ammoType: ammo,
+            rangeMin: rangeMin,
+            rangeMax: rangeMax,
+            dice: dice,
+            accuracy: accuracy,
+            damage: damage,
+            overload: overload,
+            killNoise: killNoise
+        )
+    }
 }
