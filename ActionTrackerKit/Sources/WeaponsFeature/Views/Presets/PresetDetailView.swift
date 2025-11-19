@@ -78,10 +78,16 @@ public struct PresetDetailView: View {
                 // Customizations Summary
                 Section {
                     NavigationLink {
+                        DeckCustomizationEditor(preset: preset)
+                    } label: {
+                        Label("Customize Weapons", systemImage: "slider.horizontal.3")
+                    }
+
+                    NavigationLink {
                         CustomizationDiffView(diffs: diffs)
                     } label: {
-                        LabeledContent("Customizations") {
-                            Text("\(preset.customizations.count)")
+                        LabeledContent("View Changes") {
+                            Text("\(diffs.count)")
                                 .foregroundStyle(.secondary)
                         }
                     }
