@@ -325,6 +325,15 @@ public class CustomizationService {
             case disabled
             case enabled
         }
+
+        public init(weaponName: String, weaponSet: String, type: DiffType, defaultCount: Int, customCount: Int?, isEnabled: Bool) {
+            self.weaponName = weaponName
+            self.weaponSet = weaponSet
+            self.type = type
+            self.defaultCount = defaultCount
+            self.customCount = customCount
+            self.isEnabled = isEnabled
+        }
     }
 
     /// Calculate diffs from default configuration
