@@ -8,6 +8,7 @@
 
 import SwiftData
 import Foundation
+import OSLog
 
 /// Service for managing weapon deck runtime state and operations
 /// Builds decks from SwiftData models and persists state for game resume
@@ -65,6 +66,8 @@ public class WeaponsDeckService {
         context.insert(deckState)
         try context.save()
 
+        WeaponsLogger.deck.notice("Built \(deckType) deck with \(cardInstanceIDs.count) cards for session \(session.id)")
+
         return deckState
     }
 
@@ -94,6 +97,7 @@ public class WeaponsDeckService {
     /// CRITICAL: This is a direct port - prevents back-to-back duplicates
     /// DO NOT MODIFY - proven to work without infinite loops
     public func shuffleDeck(state: DeckRuntimeState) async throws {
+        let startTime = Date()
         var remaining = state.remainingCardIDs
 
         // Need at least 2 cards to check for duplicates
@@ -102,6 +106,7 @@ public class WeaponsDeckService {
             state.remainingCardIDs = remaining
             state.lastShuffled = Date()
             try context.save()
+            WeaponsLogger.deck.info("Shuffled \(state.deckType) deck (\(remaining.count) cards)")
             return
         }
 
@@ -154,6 +159,10 @@ public class WeaponsDeckService {
         state.remainingCardIDs = remaining
         state.lastShuffled = Date()
         try context.save()
+
+        let duration = Date().timeIntervalSince(startTime)
+        WeaponsLogger.deck.info("Shuffled \(state.deckType) deck (\(remaining.count) cards)")
+        WeaponsLogger.performance.debug("Shuffle completed in \(String(format: "%.3f", duration * 1000))ms")
     }
 
     // MARK: - Drawing Cards
@@ -182,7 +191,11 @@ public class WeaponsDeckService {
         let descriptor = FetchDescriptor<WeaponCardInstance>(
             predicate: #Predicate { $0.id == cardID }
         )
-        return try context.fetch(descriptor).first
+        let card = try context.fetch(descriptor).first
+        if let card = card {
+            WeaponsLogger.deck.debug("Drew card from \(state.deckType) deck: \(card.definition?.name ?? "unknown") (\(state.remainingCardIDs.count) remaining)")
+        }
+        return card
     }
 
     /// Draw two cards (for Flashlight ability)
@@ -206,6 +219,7 @@ public class WeaponsDeckService {
     public func discard(_ instance: WeaponCardInstance, to state: DeckRuntimeState) async throws {
         state.discardCardIDs.insert(instance.id, at: 0) // Newest first
         try context.save()
+        WeaponsLogger.deck.debug("Discarded \(instance.definition?.name ?? "unknown") to \(state.deckType) discard pile (\(state.discardCardIDs.count) total)")
     }
 
     /// Return a card from discard to top of deck

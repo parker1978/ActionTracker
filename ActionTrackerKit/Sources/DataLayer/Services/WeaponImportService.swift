@@ -8,6 +8,7 @@
 import SwiftData
 import Foundation
 import CoreDomain
+import OSLog
 
 @MainActor
 public class WeaponImportService {
@@ -34,17 +35,21 @@ public class WeaponImportService {
 
             switch comparison {
             case .greater:
-                print("🔄 XML version (\(xmlVersion)) is newer than imported version (\(existing.latestImported))")
-                print("⏳ Starting incremental update...")
-                return try await updateWeaponsIncrementally(from: existing.latestImported, to: xmlVersion)
+                WeaponsLogger.importer.notice("XML version (\(xmlVersion)) is newer than imported version (\(existing.latestImported))")
+                WeaponsLogger.importer.info("Starting incremental weapon update...")
+                let startTime = Date()
+                let updated = try await updateWeaponsIncrementally(from: existing.latestImported, to: xmlVersion)
+                let duration = Date().timeIntervalSince(startTime)
+                WeaponsLogger.performance.info("Incremental weapon update completed in \(String(format: "%.2f", duration))s")
+                return updated
 
             case .equal, .less:
-                print("✅ Weapons already up to date (v\(existing.latestImported)) at \(existing.lastChecked)")
+                WeaponsLogger.importer.info("Weapons already up to date (v\(existing.latestImported)) at \(existing.lastChecked)")
                 return false
             }
         }
 
-        print("⏳ Starting initial weapons import from XML...")
+        WeaponsLogger.importer.info("Starting initial weapons import from XML...")
         let startTime = Date()
 
         // Load weapons from XML using existing WeaponRepository
@@ -127,7 +132,7 @@ public class WeaponImportService {
             // Create card instances for each copy
             // Skip weapons with count <= 0 (shouldn't happen, but be defensive)
             guard weapon.count > 0 else {
-                print("⚠️ Skipping card instances for \(weapon.name) (count: \(weapon.count))")
+                WeaponsLogger.importer.warning("Skipping card instances for \(weapon.name) (count: \(weapon.count))")
                 continue
             }
 
@@ -149,7 +154,8 @@ public class WeaponImportService {
         try context.save()
 
         let duration = Date().timeIntervalSince(startTime)
-        print("✅ Imported \(definitionCount) weapons (\(instanceCount) card instances) in \(String(format: "%.2f", duration))s")
+        WeaponsLogger.importer.notice("Imported \(definitionCount) weapons (\(instanceCount) card instances)")
+        WeaponsLogger.performance.info("Weapon import completed in \(String(format: "%.2f", duration))s")
 
         return true
     }
@@ -261,10 +267,8 @@ public class WeaponImportService {
         try context.save()
 
         let duration = Date().timeIntervalSince(startTime)
-        print("✅ Incremental update complete in \(String(format: "%.2f", duration))s")
-        print("   • Updated: \(updatedCount) definitions")
-        print("   • Added: \(addedCount) definitions (\(addedInstanceCount) instances)")
-        print("   • Deprecated: \(deprecatedCount) definitions")
+        WeaponsLogger.importer.notice("Incremental update complete: \(updatedCount) updated, \(addedCount) added (\(addedInstanceCount) instances), \(deprecatedCount) deprecated")
+        WeaponsLogger.performance.info("Incremental update completed in \(String(format: "%.2f", duration))s")
 
         return true
     }
@@ -368,7 +372,7 @@ public class WeaponImportService {
             throw ImportError.validationFailed("Instance count mismatch: \(instances.count) != \(expectedCount)")
         }
 
-        print("✅ Import validation passed: \(definitions.count) definitions, \(instances.count) instances")
+        WeaponsLogger.importer.info("Import validation passed: \(definitions.count) definitions, \(instances.count) instances")
     }
 }
 

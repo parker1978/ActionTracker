@@ -14,7 +14,6 @@ import SpawnDeckFeature
 /// Main screen for the Actions tab
 /// Displays either a "start game" view or the active game session
 public struct ActionsScreen: View {
-    public var weaponsManager: WeaponsManager
     public var spawnDeckManager: SpawnDeckManager
     @Environment(\.modelContext) private var modelContext
 
@@ -25,8 +24,7 @@ public struct ActionsScreen: View {
     @Query private var allCharacters: [CoreDomain.Character]
     @State private var showingCharacterPicker = false
 
-    public init(weaponsManager: WeaponsManager, spawnDeckManager: SpawnDeckManager) {
-        self.weaponsManager = weaponsManager
+    public init(spawnDeckManager: SpawnDeckManager) {
         self.spawnDeckManager = spawnDeckManager
     }
 
@@ -34,7 +32,7 @@ public struct ActionsScreen: View {
         NavigationStack {
             if let session = activeSessions.first {
                 // Show active game
-                ActiveGameView(session: session, weaponsManager: weaponsManager)
+                ActiveGameView(session: session)
             } else {
                 // Show "start game" view
                 StartGameView(showingCharacterPicker: $showingCharacterPicker)
@@ -43,7 +41,6 @@ public struct ActionsScreen: View {
         .sheet(isPresented: $showingCharacterPicker) {
             CharacterPickerSheet(
                 isPresented: $showingCharacterPicker,
-                weaponsManager: weaponsManager,
                 spawnDeckManager: spawnDeckManager
             )
         }

@@ -8,6 +8,7 @@
 
 import SwiftData
 import Foundation
+import OSLog
 
 /// Service for managing weapon inventory operations
 /// Enforces slot limits, tracks history, and coordinates with deck service
@@ -98,6 +99,7 @@ public class InventoryService {
         )
 
         try context.save()
+        WeaponsLogger.inventory.notice("Added \(instance.definition?.name ?? "weapon") to active slot \(nextIndex)")
         return nil  // Success
     }
 
@@ -143,6 +145,7 @@ public class InventoryService {
         )
 
         try context.save()
+        WeaponsLogger.inventory.notice("Added \(instance.definition?.name ?? "weapon") to backpack slot \(nextIndex)")
         return nil  // Success
     }
 
