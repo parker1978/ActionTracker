@@ -15,7 +15,6 @@ import DataLayer
 public struct ActiveGameView: View {
     @Environment(\.modelContext) private var modelContext
     @Bindable var session: GameSession
-    var weaponsManager: WeaponsManager
 
     // Timer state
     @State private var gameTimer: GameTimer
@@ -23,9 +22,8 @@ public struct ActiveGameView: View {
     // UI state
     @State private var showingEndConfirmation = false
 
-    public init(session: GameSession, weaponsManager: WeaponsManager) {
+    public init(session: GameSession) {
         self.session = session
-        self.weaponsManager = weaponsManager
         _gameTimer = State(wrappedValue: GameTimer(session: session))
     }
 
@@ -42,7 +40,7 @@ public struct ActiveGameView: View {
                 ActionsCard(session: session)
 
                 // Inventory card (weapons)
-                InventoryCard(session: session, weaponsManager: weaponsManager)
+                InventoryCardNew(session: session, context: modelContext)
 
                 // Experience and skill tracking card
                 ExperienceCard(session: session)

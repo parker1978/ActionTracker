@@ -16,7 +16,6 @@ internal struct CharacterPickerSheet: View {
     @Query private var allCharacters: [CoreDomain.Character]
     @Binding var isPresented: Bool
 
-    var weaponsManager: WeaponsManager
     var spawnDeckManager: SpawnDeckManager
 
     /// Characters sorted with favorites first, then alphabetically
@@ -54,8 +53,8 @@ internal struct CharacterPickerSheet: View {
 
     /// Creates and starts a new game session with the selected character
     private func startGame(with character: CoreDomain.Character) {
-        // Reset all weapon decks at current difficulty
-        weaponsManager.resetAllDecks()
+        // Note: Weapon decks are now created per-session in SwiftData
+        // and will be built fresh when WeaponsScreenNew initializes
 
         // Reset spawn deck at current mode and difficulty
         spawnDeckManager.loadDeck()
