@@ -24,10 +24,7 @@ public final class GameSession {
     public var elapsedSeconds: Int  // Game duration in seconds
 
     // MARK: - Inventory
-    // Weapons stored as JSON-encoded array of weapon names
-    // Players self-manage inventory; no strict enforcement
-    public var activeWeapons: String = ""  // 2 active slots (hands)
-    public var inactiveWeapons: String = ""  // 3+ inactive slots (backpack)
+    // Inventory managed via SwiftData relationships (see inventoryItems below)
     public var extraInventorySlots: Int = 0  // Bonus slots from skills/items
     public var allInventoryActive: Bool = false  // All weapons count as active
 
@@ -56,8 +53,7 @@ public final class GameSession {
     /// All action instances (tokens) for this session
     @Relationship(deleteRule: .cascade) public var actions: [ActionInstance] = []
 
-    /// Phase 0: SwiftData inventory items (replaces string-based inventory)
-    /// Legacy activeWeapons/inactiveWeapons strings kept for Phase 5 removal
+    /// Weapon inventory items stored in SwiftData
     @Relationship(deleteRule: .cascade) public var inventoryItems: [WeaponInventoryItem] = []
 
     /// Phase 2: Deck runtime states for persistent deck state (one per deck type)
