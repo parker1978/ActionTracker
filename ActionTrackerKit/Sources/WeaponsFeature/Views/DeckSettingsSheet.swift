@@ -21,6 +21,7 @@ public struct DeckSettingsSheet: View {
     @State private var selectedDeckForContents: DeckType?
     @State private var selectedSetForCards: String?
     @State private var showResetConfirmation = false
+    @State private var showPresetManager = false
 
     public init(weaponsManager: WeaponsManager) {
         self.weaponsManager = weaponsManager
@@ -72,6 +73,9 @@ public struct DeckSettingsSheet: View {
                         applyCardSelectionChanges()
                     }
                 )
+            }
+            .sheet(isPresented: $showPresetManager) {
+                PresetListView()
             }
             .alert("Reset All Decks?", isPresented: $showResetConfirmation) {
                 Button("Cancel", role: .cancel) {}
@@ -266,6 +270,13 @@ public struct DeckSettingsSheet: View {
 
     private var deckManagementSection: some View {
         Section {
+            Button {
+                showPresetManager = true
+            } label: {
+                Label("Manage Presets", systemImage: "folder.badge.gearshape")
+                    .foregroundStyle(.primary)
+            }
+
             Button(role: .destructive) {
                 showResetConfirmation = true
             } label: {

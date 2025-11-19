@@ -107,56 +107,101 @@ public class CustomizationService {
         try context.save()
     }
 
-    // MARK: - Customization Application
+    // MARK: - Session Override Management
 
-    /// Get effective count for a weapon (considers customizations)
-    public func getEffectiveCount(
-        for definition: WeaponDefinition,
-        preset: DeckPreset?
-    ) -> Int {
-        guard let preset = preset else {
-            return definition.defaultCount
+    /// Create or get session override for a game session
+    public func getOrCreateSessionOverride(for session: GameSession) throws -> SessionDeckOverride {
+        if let existing = session.sessionDeckOverride {
+            return existing
         }
 
-        // Find customization for this weapon in the preset
-        if let customization = preset.customizations.first(where: { $0.definition?.id == definition.id }) {
+        let override = SessionDeckOverride()
+        context.insert(override)
+        session.sessionDeckOverride = override
+        try context.save()
+
+        return override
+    }
+
+    /// Clear session override from a game session
+    public func clearSessionOverride(for session: GameSession) throws {
+        guard let override = session.sessionDeckOverride else { return }
+
+        context.delete(override)
+        session.sessionDeckOverride = nil
+        try context.save()
+    }
+
+    /// Check if session has any overrides active
+    public func hasSessionOverrides(for session: GameSession) -> Bool {
+        guard let override = session.sessionDeckOverride else { return false }
+        return !override.customizations.isEmpty
+    }
+
+    // MARK: - Customization Application
+
+    /// Get effective count for a weapon (considers preset + session override)
+    /// Session override takes precedence over preset
+    public func getEffectiveCount(
+        for definition: WeaponDefinition,
+        preset: DeckPreset?,
+        sessionOverride: SessionDeckOverride? = nil
+    ) -> Int {
+        // Check session override first (highest priority)
+        if let sessionOverride = sessionOverride,
+           let customization = sessionOverride.customizations.first(where: { $0.definition?.id == definition.id }) {
             return customization.customCount ?? definition.defaultCount
         }
 
+        // Check preset next
+        if let preset = preset,
+           let customization = preset.customizations.first(where: { $0.definition?.id == definition.id }) {
+            return customization.customCount ?? definition.defaultCount
+        }
+
+        // Default
         return definition.defaultCount
     }
 
-    /// Check if weapon is enabled (considers customizations)
+    /// Check if weapon is enabled (considers preset + session override)
+    /// Session override takes precedence over preset
     public func isEnabled(
         definition: WeaponDefinition,
-        in preset: DeckPreset?
+        in preset: DeckPreset?,
+        sessionOverride: SessionDeckOverride? = nil
     ) -> Bool {
-        guard let preset = preset else {
-            return true  // No preset = all enabled by default
-        }
-
-        // Find customization for this weapon
-        if let customization = preset.customizations.first(where: { $0.definition?.id == definition.id }) {
+        // Check session override first (highest priority)
+        if let sessionOverride = sessionOverride,
+           let customization = sessionOverride.customizations.first(where: { $0.definition?.id == definition.id }) {
             return customization.isEnabled
         }
 
-        return true  // Not customized = enabled by default
+        // Check preset next
+        if let preset = preset,
+           let customization = preset.customizations.first(where: { $0.definition?.id == definition.id }) {
+            return customization.isEnabled
+        }
+
+        // Default: enabled
+        return true
     }
 
     /// Apply customizations to filter and adjust weapon definitions
+    /// Supports both preset and session override (session override takes precedence)
     public func applyCustomizations(
         to definitions: [WeaponDefinition],
-        preset: DeckPreset?
+        preset: DeckPreset?,
+        sessionOverride: SessionDeckOverride? = nil
     ) -> [(definition: WeaponDefinition, effectiveCount: Int)] {
         return definitions.compactMap { definition in
             // Skip deprecated weapons
             guard !definition.isDeprecated else { return nil }
 
-            // Check if enabled
-            guard isEnabled(definition: definition, in: preset) else { return nil }
+            // Check if enabled (session override takes precedence)
+            guard isEnabled(definition: definition, in: preset, sessionOverride: sessionOverride) else { return nil }
 
-            // Get effective count
-            let count = getEffectiveCount(for: definition, preset: preset)
+            // Get effective count (session override takes precedence)
+            let count = getEffectiveCount(for: definition, preset: preset, sessionOverride: sessionOverride)
 
             // Skip if count is 0
             guard count > 0 else { return nil }
@@ -214,6 +259,56 @@ public class CustomizationService {
         }
     }
 
+    // MARK: - Session Override Customization CRUD
+
+    /// Create or update customization for a weapon in a session override
+    public func setSessionOverrideCustomization(
+        for definition: WeaponDefinition,
+        in sessionOverride: SessionDeckOverride,
+        isEnabled: Bool? = nil,
+        customCount: Int? = nil,
+        notes: String? = nil
+    ) async throws {
+        // Find existing customization
+        if let existing = sessionOverride.customizations.first(where: { $0.definition?.id == definition.id }) {
+            // Update existing
+            if let isEnabled = isEnabled {
+                existing.isEnabled = isEnabled
+            }
+            if let customCount = customCount {
+                existing.customCount = customCount
+            }
+            if let notes = notes {
+                existing.notes = notes
+            }
+        } else {
+            // Create new
+            let customization = DeckCustomization(
+                definition: definition,
+                isEnabled: isEnabled ?? true
+            )
+            customization.customCount = customCount
+            customization.notes = notes
+            customization.ownerPreset = nil  // Session override, not preset
+
+            context.insert(customization)
+            sessionOverride.customizations.append(customization)
+        }
+
+        try context.save()
+    }
+
+    /// Remove customization from session override (revert to preset/default)
+    public func removeSessionOverrideCustomization(
+        for definition: WeaponDefinition,
+        in sessionOverride: SessionDeckOverride
+    ) async throws {
+        if let customization = sessionOverride.customizations.first(where: { $0.definition?.id == definition.id }) {
+            context.delete(customization)
+            try context.save()
+        }
+    }
+
     // MARK: - Diffing
 
     /// Diff structure for preset comparison
@@ -229,6 +324,15 @@ public class CustomizationService {
             case countChanged
             case disabled
             case enabled
+        }
+
+        public init(weaponName: String, weaponSet: String, type: DiffType, defaultCount: Int, customCount: Int?, isEnabled: Bool) {
+            self.weaponName = weaponName
+            self.weaponSet = weaponSet
+            self.type = type
+            self.defaultCount = defaultCount
+            self.customCount = customCount
+            self.isEnabled = isEnabled
         }
     }
 
@@ -261,6 +365,51 @@ public class CustomizationService {
                     defaultCount: definition.defaultCount,
                     customCount: customization.customCount,
                     isEnabled: false
+                ))
+            }
+        }
+
+        return diffs.sorted { $0.weaponName < $1.weaponName }
+    }
+
+    /// Calculate diffs for session override from its base preset (or default if no preset)
+    public func sessionOverrideDiffs(
+        sessionOverride: SessionDeckOverride,
+        basePreset: DeckPreset?
+    ) throws -> [CustomizationDiff] {
+        var diffs: [CustomizationDiff] = []
+
+        for customization in sessionOverride.customizations {
+            guard let definition = customization.definition else { continue }
+
+            // Get what the preset says (or default)
+            let presetCount = basePreset?.customizations
+                .first(where: { $0.definition?.id == definition.id })?.customCount ?? definition.defaultCount
+            let presetEnabled = basePreset?.customizations
+                .first(where: { $0.definition?.id == definition.id })?.isEnabled ?? true
+
+            // Count changed from preset
+            if let customCount = customization.customCount,
+               customCount != presetCount {
+                diffs.append(CustomizationDiff(
+                    weaponName: definition.name,
+                    weaponSet: definition.set,
+                    type: .countChanged,
+                    defaultCount: presetCount,
+                    customCount: customCount,
+                    isEnabled: customization.isEnabled
+                ))
+            }
+
+            // Enabled/disabled state changed from preset
+            if customization.isEnabled != presetEnabled {
+                diffs.append(CustomizationDiff(
+                    weaponName: definition.name,
+                    weaponSet: definition.set,
+                    type: customization.isEnabled ? .enabled : .disabled,
+                    defaultCount: presetCount,
+                    customCount: customization.customCount,
+                    isEnabled: customization.isEnabled
                 ))
             }
         }

@@ -26,7 +26,8 @@ struct CustomizationServiceTests {
             DeckPreset.self,
             DeckCustomization.self,
             WeaponInventoryItem.self,
-            InventoryEvent.self
+            InventoryEvent.self,
+            SessionDeckOverride.self
         ])
 
         let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
@@ -675,5 +676,226 @@ struct CustomizationServiceTests {
             #expect(importedCustomization?.customCount == customization.customCount)
             #expect(importedCustomization?.notes == customization.notes)
         }
+    }
+
+    // MARK: - Session Override Tests
+
+    @Test func testGetOrCreateSessionOverride() async throws {
+        let container = createTestContainer()
+        let context = ModelContext(container)
+        let service = createTestService(container: container)
+
+        // Create test character and session
+        let character = Character(name: "Test Hero", occupation: "Medic", health: 8)
+        context.insert(character)
+        let session = GameSession(character: character)
+        context.insert(session)
+        try context.save()
+
+        #expect(session.sessionDeckOverride == nil)
+
+        let override = try service.getOrCreateSessionOverride(for: session)
+
+        #expect(session.sessionDeckOverride != nil)
+        #expect(override.id == session.sessionDeckOverride?.id)
+
+        // Calling again should return same override
+        let override2 = try service.getOrCreateSessionOverride(for: session)
+        #expect(override2.id == override.id)
+    }
+
+    @Test func testClearSessionOverride() async throws {
+        let container = createTestContainer()
+        let context = ModelContext(container)
+        let service = createTestService(container: container)
+
+        let character = Character(name: "Test Hero", occupation: "Medic", health: 8)
+        context.insert(character)
+        let session = GameSession(character: character)
+        context.insert(session)
+
+        let override = try service.getOrCreateSessionOverride(for: session)
+        #expect(session.sessionDeckOverride != nil)
+
+        try service.clearSessionOverride(for: session)
+        #expect(session.sessionDeckOverride == nil)
+    }
+
+    @Test func testHasSessionOverrides() async throws {
+        let container = createTestContainer()
+        let context = ModelContext(container)
+        let service = createTestService(container: container)
+
+        let character = Character(name: "Test Hero", occupation: "Medic", health: 8)
+        context.insert(character)
+        let session = GameSession(character: character)
+        context.insert(session)
+
+        let definitions = createTestWeaponDefinitions(context: context, count: 1)
+
+        #expect(!service.hasSessionOverrides(for: session))
+
+        let override = try service.getOrCreateSessionOverride(for: session)
+        #expect(!service.hasSessionOverrides(for: session), "Empty override should return false")
+
+        try await service.setSessionOverrideCustomization(
+            for: definitions[0],
+            in: override,
+            isEnabled: false
+        )
+
+        #expect(service.hasSessionOverrides(for: session), "Should have overrides now")
+    }
+
+    @Test func testSessionOverrideCustomization() async throws {
+        let container = createTestContainer()
+        let context = ModelContext(container)
+        let service = createTestService(container: container)
+
+        let character = Character(name: "Test Hero", occupation: "Medic", health: 8)
+        context.insert(character)
+        let session = GameSession(character: character)
+        context.insert(session)
+
+        let definitions = createTestWeaponDefinitions(context: context, count: 1)
+        let override = try service.getOrCreateSessionOverride(for: session)
+
+        try await service.setSessionOverrideCustomization(
+            for: definitions[0],
+            in: override,
+            isEnabled: false,
+            customCount: 7,
+            notes: "Session note"
+        )
+
+        #expect(override.customizations.count == 1)
+
+        let customization = override.customizations.first!
+        #expect(!customization.isEnabled)
+        #expect(customization.customCount == 7)
+        #expect(customization.notes == "Session note")
+        #expect(customization.ownerPreset == nil, "Session override customizations should not have preset owner")
+    }
+
+    @Test func testRemoveSessionOverrideCustomization() async throws {
+        let container = createTestContainer()
+        let context = ModelContext(container)
+        let service = createTestService(container: container)
+
+        let character = Character(name: "Test Hero", occupation: "Medic", health: 8)
+        context.insert(character)
+        let session = GameSession(character: character)
+        context.insert(session)
+
+        let definitions = createTestWeaponDefinitions(context: context, count: 1)
+        let override = try service.getOrCreateSessionOverride(for: session)
+
+        try await service.setSessionOverrideCustomization(
+            for: definitions[0],
+            in: override,
+            isEnabled: false
+        )
+
+        #expect(override.customizations.count == 1)
+
+        try await service.removeSessionOverrideCustomization(for: definitions[0], in: override)
+
+        #expect(override.customizations.isEmpty)
+    }
+
+    @Test func testSessionOverrideTakesPrecedenceOverPreset() async throws {
+        let container = createTestContainer()
+        let context = ModelContext(container)
+        let service = createTestService(container: container)
+
+        let character = Character(name: "Test Hero", occupation: "Medic", health: 8)
+        context.insert(character)
+        let session = GameSession(character: character)
+        context.insert(session)
+
+        let definitions = createTestWeaponDefinitions(context: context, count: 1)
+        let definition = definitions[0]
+
+        // Create preset that disables weapon
+        let preset = try await service.createPreset(name: "Test", description: "Test", isDefault: false)
+        try await service.setCustomization(for: definition, in: preset, isEnabled: false, customCount: 3)
+
+        // Create session override that enables weapon
+        let override = try service.getOrCreateSessionOverride(for: session)
+        try await service.setSessionOverrideCustomization(for: definition, in: override, isEnabled: true, customCount: 10)
+
+        // Session override should take precedence
+        let isEnabled = service.isEnabled(definition: definition, in: preset, sessionOverride: override)
+        let count = service.getEffectiveCount(for: definition, preset: preset, sessionOverride: override)
+
+        #expect(isEnabled, "Session override should enable weapon despite preset disabling it")
+        #expect(count == 10, "Session override count should take precedence")
+    }
+
+    @Test func testSessionOverrideDiffs() async throws {
+        let container = createTestContainer()
+        let context = ModelContext(container)
+        let service = createTestService(container: container)
+
+        let character = Character(name: "Test Hero", occupation: "Medic", health: 8)
+        context.insert(character)
+        let session = GameSession(character: character)
+        context.insert(session)
+
+        let definitions = createTestWeaponDefinitions(context: context, count: 2)
+
+        // Create preset that customizes first weapon
+        let preset = try await service.createPreset(name: "Base", description: "Base", isDefault: false)
+        try await service.setCustomization(for: definitions[0], in: preset, customCount: 5)
+
+        // Create session override that changes both weapons
+        let override = try service.getOrCreateSessionOverride(for: session)
+        try await service.setSessionOverrideCustomization(for: definitions[0], in: override, customCount: 10)
+        try await service.setSessionOverrideCustomization(for: definitions[1], in: override, isEnabled: false)
+
+        let diffs = try service.sessionOverrideDiffs(sessionOverride: override, basePreset: preset)
+
+        #expect(diffs.count == 2)
+
+        // First weapon: count changed from 5 to 10
+        let diff1 = diffs.first { $0.weaponName == "Weapon0" }
+        #expect(diff1?.type == .countChanged)
+        #expect(diff1?.defaultCount == 5, "Should show preset count as default")
+        #expect(diff1?.customCount == 10)
+
+        // Second weapon: disabled (wasn't in preset)
+        let diff2 = diffs.first { $0.weaponName == "Weapon1" }
+        #expect(diff2?.type == .disabled)
+        #expect(!diff2!.isEnabled)
+    }
+
+    @Test func testApplyCustomizationsWithSessionOverride() async throws {
+        let container = createTestContainer()
+        let context = ModelContext(container)
+        let service = createTestService(container: container)
+
+        let character = Character(name: "Test Hero", occupation: "Medic", health: 8)
+        context.insert(character)
+        let session = GameSession(character: character)
+        context.insert(session)
+
+        let definitions = createTestWeaponDefinitions(context: context, count: 3)
+
+        // Preset disables first weapon
+        let preset = try await service.createPreset(name: "Test", description: "Test", isDefault: false)
+        try await service.setCustomization(for: definitions[0], in: preset, isEnabled: false)
+
+        // Session override enables first weapon but disables second
+        let override = try service.getOrCreateSessionOverride(for: session)
+        try await service.setSessionOverrideCustomization(for: definitions[0], in: override, isEnabled: true)
+        try await service.setSessionOverrideCustomization(for: definitions[1], in: override, isEnabled: false)
+
+        let result = service.applyCustomizations(to: definitions, preset: preset, sessionOverride: override)
+
+        // Should have 2 weapons: first (enabled by override) and third (not customized)
+        #expect(result.count == 2)
+        #expect(result.contains { $0.definition.name == "Weapon0" }, "First weapon should be enabled by override")
+        #expect(result.contains { $0.definition.name == "Weapon2" }, "Third weapon should be enabled")
+        #expect(!result.contains { $0.definition.name == "Weapon1" }, "Second weapon should be disabled by override")
     }
 }

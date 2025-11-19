@@ -66,6 +66,9 @@ public final class GameSession {
     /// Phase 2: Inventory event history for audit trail
     @Relationship(deleteRule: .cascade, inverse: \InventoryEvent.session) public var inventoryEvents: [InventoryEvent] = []
 
+    /// Phase 3: Session-specific deck overrides (temporary customizations)
+    @Relationship(deleteRule: .cascade) public var sessionDeckOverride: SessionDeckOverride?
+
     // MARK: - Initializer
 
     public init(
