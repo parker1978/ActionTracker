@@ -45,6 +45,11 @@ struct ZombiTrackApp: App {
             CoreDomain.DeckCustomization.self,
             CoreDomain.DeckPreset.self,
             CoreDomain.WeaponDataVersion.self,
+            // Phase 2: Runtime state models
+            CoreDomain.DeckRuntimeState.self,
+            CoreDomain.InventoryEvent.self,
+            // Phase 3: Session override
+            CoreDomain.SessionDeckOverride.self,
         ])
         let modelConfiguration = ModelConfiguration(
             storeName,
@@ -67,6 +72,14 @@ struct ZombiTrackApp: App {
                     try importService.validateImport()
                 } catch {
                     print("⚠️ Weapons import failed: \(error)")
+                }
+
+                // Phase 3: Migrate UserDefaults customizations to presets
+                do {
+                    let migrationService = PresetMigrationService(context: context)
+                    try await migrationService.migrateIfNeeded()
+                } catch {
+                    print("⚠️ Preset migration failed: \(error)")
                 }
             }
 
