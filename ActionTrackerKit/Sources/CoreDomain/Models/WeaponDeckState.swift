@@ -45,9 +45,15 @@ public class WeaponDeckState {
     }
 
     /// Shuffle remaining cards in deck
-    /// Prevents back-to-back duplicates by swapping cards intelligently
+    /// Applies multiple constraints:
+    /// - Prevents back-to-back same-name weapons
+    /// - Never starts deck with Bonus or Zombie cards
+    /// - Keeps Zombie cards out of first 5 positions
+    /// - Prevents adjacent Zombie cards (hard constraint)
+    /// - Distributes Bonus cards evenly across deck
+    /// - Minimizes adjacent Bonus cards (best effort)
     public func shuffle() {
-        // Need at least 2 cards to check for duplicates
+        // Need at least 2 cards to apply constraints
         guard remaining.count > 1 else {
             remaining.shuffle()
             return
@@ -56,7 +62,52 @@ public class WeaponDeckState {
         // Initial shuffle
         remaining.shuffle()
 
-        // Fix duplicates in a single pass
+        // Priority 1: Fix position constraints
+        fixStartingPositionConstraints()
+
+        // Priority 2: Fix same-name adjacency (existing rule)
+        fixAdjacentSameNameWeapons()
+
+        // Priority 3: Fix zombie adjacency (hard constraint)
+        fixAdjacentZombieCards()
+
+        // Priority 4: Distribute bonus cards evenly
+        distributeBonusCardsEvenly()
+
+        // Priority 5: Minimize bonus adjacency (best effort)
+        minimizeAdjacentBonusCards()
+    }
+
+    // MARK: - Shuffle Helper Methods
+
+    /// Ensures no Bonus or Zombie cards at position 0, and Zombie cards not in first 5 positions
+    private func fixStartingPositionConstraints() {
+        guard remaining.count > 0 else { return }
+
+        // Fix position 0 - must not be Bonus or Zombie
+        if remaining[0].isBonus || remaining[0].isZombieCard {
+            // Find first card that's neither Bonus nor Zombie
+            if let swapIndex = remaining.firstIndex(where: { !$0.isBonus && !$0.isZombieCard }) {
+                remaining.swapAt(0, swapIndex)
+            }
+        }
+
+        // Move any Zombie cards from positions 0-4 to position 5 or later
+        let minZombiePosition = 5
+        if remaining.count > minZombiePosition {
+            for i in 0..<min(minZombiePosition, remaining.count) {
+                if remaining[i].isZombieCard {
+                    // Find a non-zombie card at position 5 or later to swap with
+                    if let swapIndex = remaining[minZombiePosition...].firstIndex(where: { !$0.isZombieCard }) {
+                        remaining.swapAt(i, swapIndex)
+                    }
+                }
+            }
+        }
+    }
+
+    /// Prevents back-to-back weapons with the same name
+    private func fixAdjacentSameNameWeapons() {
         var i = 0
         while i < remaining.count - 1 {
             if remaining[i].name == remaining[i + 1].name {
@@ -79,6 +130,99 @@ public class WeaponDeckState {
                     // Can't fix this duplicate (all cards are the same), move on
                     i += 1
                 }
+            } else {
+                i += 1
+            }
+        }
+    }
+
+    /// Prevents adjacent Zombie cards (hard constraint)
+    private func fixAdjacentZombieCards() {
+        var i = 0
+        while i < remaining.count - 1 {
+            if remaining[i].isZombieCard && remaining[i + 1].isZombieCard {
+                // Find next non-zombie card
+                var swapIndex = i + 2
+                while swapIndex < remaining.count && remaining[swapIndex].isZombieCard {
+                    swapIndex += 1
+                }
+
+                if swapIndex < remaining.count {
+                    // Found a non-zombie card, swap it with position i+1
+                    remaining.swapAt(i + 1, swapIndex)
+                    // Don't increment i - recheck this position
+                } else if i > 0 && !remaining[0].isZombieCard {
+                    // All remaining cards are zombies, wrap to start if position 0 is not zombie
+                    remaining.swapAt(i + 1, 0)
+                    // Don't increment i - recheck this position
+                } else {
+                    // Can't fix this (all cards are zombies), move on
+                    i += 1
+                }
+            } else {
+                i += 1
+            }
+        }
+    }
+
+    /// Distributes Bonus cards evenly across the deck
+    private func distributeBonusCardsEvenly() {
+        let bonusIndices = remaining.indices.filter { remaining[$0].isBonus }
+        guard bonusIndices.count > 1 else { return }
+
+        let deckSize = remaining.count
+        let bonusCount = bonusIndices.count
+        let spacing = Double(deckSize) / Double(bonusCount)
+
+        // Calculate ideal positions for bonus cards
+        var targetPositions: [Int] = []
+        for i in 0..<bonusCount {
+            let idealPosition = Int(spacing * Double(i) + spacing / 2)
+            targetPositions.append(min(idealPosition, deckSize - 1))
+        }
+
+        // Move bonus cards to target positions
+        var bonusCards = bonusIndices.map { remaining[$0] }
+
+        // Remove bonus cards from current positions (in reverse to maintain indices)
+        for index in bonusIndices.reversed() {
+            remaining.remove(at: index)
+        }
+
+        // Insert bonus cards at target positions
+        for (bonusCard, targetPos) in zip(bonusCards, targetPositions) {
+            let insertPos = min(targetPos, remaining.count)
+            remaining.insert(bonusCard, at: insertPos)
+        }
+    }
+
+    /// Best-effort attempt to minimize adjacent Bonus cards
+    private func minimizeAdjacentBonusCards() {
+        var i = 0
+        var attempts = 0
+        let maxAttempts = remaining.count // Prevent infinite loops
+
+        while i < remaining.count - 1 && attempts < maxAttempts {
+            if remaining[i].isBonus && remaining[i + 1].isBonus {
+                // Try to find a non-bonus card nearby to swap with position i+1
+                var swapIndex = i + 2
+                var foundSwap = false
+
+                // Look ahead for a non-bonus card (within reasonable distance)
+                while swapIndex < min(i + 10, remaining.count) {
+                    if !remaining[swapIndex].isBonus {
+                        remaining.swapAt(i + 1, swapIndex)
+                        foundSwap = true
+                        break
+                    }
+                    swapIndex += 1
+                }
+
+                if !foundSwap {
+                    // Couldn't find a nearby swap, just move on
+                    i += 1
+                }
+                attempts += 1
             } else {
                 i += 1
             }
