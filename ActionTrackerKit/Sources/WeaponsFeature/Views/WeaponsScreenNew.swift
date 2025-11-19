@@ -36,7 +36,7 @@ public struct WeaponsScreenNew: View {
     @State private var showDiscardPile = false
     @State private var showDeckSettings = false
     @State private var showPresetPicker = false
-    @State private var selectedDeckForContents: String?
+    @State private var showDeckContents = false
     @State private var handledCardIDs: Set<UUID> = []
     @State private var hasInitialized = false
 
@@ -170,8 +170,8 @@ public struct WeaponsScreenNew: View {
                     DiscardPileView(deckVM: currentDeckVM, session: session)
                 }
             }
-            .sheet(item: $selectedDeckForContents) { deckType in
-                DeckContentsViewNew(deckType: deckType, session: activeSession)
+            .sheet(isPresented: $showDeckContents) {
+                DeckContentsViewNew(deckType: selectedDeckType, session: activeSession)
             }
             .sheet(isPresented: $showDeckSettings) {
                 DeckSettingsSheetNew(customizationVM: customizationVM)
@@ -234,7 +234,7 @@ public struct WeaponsScreenNew: View {
                     remainingCount: currentDeckVM.remainingCount,
                     discardCount: currentDeckVM.discardCount,
                     onTapRemaining: {
-                        selectedDeckForContents = selectedDeckType
+                        showDeckContents = true
                     },
                     onTapDiscard: {
                         showDiscardPile = true
