@@ -156,6 +156,27 @@ public final class DeckPreset {
     }
 }
 
+// MARK: - SessionDeckOverride
+
+/// Temporary deck customizations for a specific game session
+/// Automatically deleted when the session ends
+@Model
+public final class SessionDeckOverride {
+    @Attribute(.unique) public var id: UUID
+    public var createdAt: Date
+    public var notes: String?  // Optional description of why overrides were applied
+
+    // Relationships
+    @Relationship(deleteRule: .cascade)
+    public var customizations: [DeckCustomization] = []
+
+    public init(notes: String? = nil) {
+        self.id = UUID()
+        self.createdAt = Date()
+        self.notes = notes
+    }
+}
+
 // MARK: - WeaponDataVersion
 
 @Model
